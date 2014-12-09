@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ccMonitor.Api.OpenHardwareMonitor.Hardware;
+using Newtonsoft.Json;
 
 namespace ccMonitor
 {
@@ -29,8 +30,15 @@ namespace ccMonitor
         private void InitOpenHardwareMonitor()
         {
             _computer = new Computer();
-            _computer.Open();
             _computer.GPUEnabled = true;
+            _computer.Close();
+            _computer.Open();
+            
+        }
+
+        private void tabRawLogs_Click(object sender, EventArgs e)
+        {
+            txtRawLogs.Text = JsonConvert.SerializeObject(_controller, Formatting.Indented);
         }
     }
 }

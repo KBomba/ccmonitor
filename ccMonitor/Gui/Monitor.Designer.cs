@@ -30,24 +30,26 @@
         {
             this.tbcMonitor = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
-            this.tabRigStats = new System.Windows.Forms.TabPage();
-            this.tabRawLogs = new System.Windows.Forms.TabPage();
-            this.tabReadMe = new System.Windows.Forms.TabPage();
-            this.tabSettings = new System.Windows.Forms.TabPage();
-            this.txtRawLogs = new System.Windows.Forms.TextBox();
-            this.txtReadMe = new System.Windows.Forms.TextBox();
             this.scGeneral = new System.Windows.Forms.SplitContainer();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.tabRigStats = new System.Windows.Forms.TabPage();
+            this.tabSettings = new System.Windows.Forms.TabPage();
+            this.tabRawLogs = new System.Windows.Forms.TabPage();
+            this.txtRawLogs = new System.Windows.Forms.TextBox();
+            this.tabReadMe = new System.Windows.Forms.TabPage();
+            this.txtReadMe = new System.Windows.Forms.TextBox();
+            this.tbcRigStats = new System.Windows.Forms.TabControl();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
-            this.tabRawLogs.SuspendLayout();
-            this.tabReadMe.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
             this.scGeneral.Panel1.SuspendLayout();
             this.scGeneral.Panel2.SuspendLayout();
             this.scGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.tabRigStats.SuspendLayout();
+            this.tabRawLogs.SuspendLayout();
+            this.tabReadMe.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcMonitor
@@ -73,65 +75,6 @@
             this.tabGeneral.Size = new System.Drawing.Size(1233, 481);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
-            // 
-            // tabRigStats
-            // 
-            this.tabRigStats.Location = new System.Drawing.Point(4, 22);
-            this.tabRigStats.Name = "tabRigStats";
-            this.tabRigStats.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRigStats.Size = new System.Drawing.Size(1233, 481);
-            this.tabRigStats.TabIndex = 1;
-            this.tabRigStats.Text = "Rig Stats";
-            // 
-            // tabRawLogs
-            // 
-            this.tabRawLogs.Controls.Add(this.txtRawLogs);
-            this.tabRawLogs.Location = new System.Drawing.Point(4, 22);
-            this.tabRawLogs.Name = "tabRawLogs";
-            this.tabRawLogs.Size = new System.Drawing.Size(1233, 481);
-            this.tabRawLogs.TabIndex = 2;
-            this.tabRawLogs.Text = "Raw Logs";
-            // 
-            // tabReadMe
-            // 
-            this.tabReadMe.Controls.Add(this.txtReadMe);
-            this.tabReadMe.Location = new System.Drawing.Point(4, 22);
-            this.tabReadMe.Name = "tabReadMe";
-            this.tabReadMe.Size = new System.Drawing.Size(1233, 481);
-            this.tabReadMe.TabIndex = 3;
-            this.tabReadMe.Text = "Read Me";
-            // 
-            // tabSettings
-            // 
-            this.tabSettings.Location = new System.Drawing.Point(4, 22);
-            this.tabSettings.Name = "tabSettings";
-            this.tabSettings.Size = new System.Drawing.Size(1233, 481);
-            this.tabSettings.TabIndex = 4;
-            this.tabSettings.Text = "Settings";
-            // 
-            // txtRawLogs
-            // 
-            this.txtRawLogs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtRawLogs.Location = new System.Drawing.Point(0, 0);
-            this.txtRawLogs.Multiline = true;
-            this.txtRawLogs.Name = "txtRawLogs";
-            this.txtRawLogs.ReadOnly = true;
-            this.txtRawLogs.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtRawLogs.Size = new System.Drawing.Size(1233, 481);
-            this.txtRawLogs.TabIndex = 0;
-            // 
-            // txtReadMe
-            // 
-            this.txtReadMe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtReadMe.Location = new System.Drawing.Point(0, 0);
-            this.txtReadMe.Multiline = true;
-            this.txtReadMe.Name = "txtReadMe";
-            this.txtReadMe.ReadOnly = true;
-            this.txtReadMe.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtReadMe.Size = new System.Drawing.Size(1233, 481);
-            this.txtReadMe.TabIndex = 1;
-            this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
-    "6SPqX8NJumFBvSjSpry8hpzr4 ";
             // 
             // scGeneral
             // 
@@ -169,6 +112,76 @@
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             // 
+            // tabRigStats
+            // 
+            this.tabRigStats.Controls.Add(this.tbcRigStats);
+            this.tabRigStats.Location = new System.Drawing.Point(4, 22);
+            this.tabRigStats.Name = "tabRigStats";
+            this.tabRigStats.Padding = new System.Windows.Forms.Padding(3);
+            this.tabRigStats.Size = new System.Drawing.Size(1233, 481);
+            this.tabRigStats.TabIndex = 1;
+            this.tabRigStats.Text = "Rig Stats";
+            // 
+            // tabSettings
+            // 
+            this.tabSettings.Location = new System.Drawing.Point(4, 22);
+            this.tabSettings.Name = "tabSettings";
+            this.tabSettings.Size = new System.Drawing.Size(1233, 481);
+            this.tabSettings.TabIndex = 4;
+            this.tabSettings.Text = "Settings";
+            // 
+            // tabRawLogs
+            // 
+            this.tabRawLogs.Controls.Add(this.txtRawLogs);
+            this.tabRawLogs.Location = new System.Drawing.Point(4, 22);
+            this.tabRawLogs.Name = "tabRawLogs";
+            this.tabRawLogs.Size = new System.Drawing.Size(1233, 481);
+            this.tabRawLogs.TabIndex = 2;
+            this.tabRawLogs.Text = "Raw Logs";
+            this.tabRawLogs.Click += new System.EventHandler(this.tabRawLogs_Click);
+            // 
+            // txtRawLogs
+            // 
+            this.txtRawLogs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtRawLogs.Location = new System.Drawing.Point(0, 0);
+            this.txtRawLogs.Multiline = true;
+            this.txtRawLogs.Name = "txtRawLogs";
+            this.txtRawLogs.ReadOnly = true;
+            this.txtRawLogs.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtRawLogs.Size = new System.Drawing.Size(1233, 481);
+            this.txtRawLogs.TabIndex = 0;
+            // 
+            // tabReadMe
+            // 
+            this.tabReadMe.Controls.Add(this.txtReadMe);
+            this.tabReadMe.Location = new System.Drawing.Point(4, 22);
+            this.tabReadMe.Name = "tabReadMe";
+            this.tabReadMe.Size = new System.Drawing.Size(1233, 481);
+            this.tabReadMe.TabIndex = 3;
+            this.tabReadMe.Text = "Read Me";
+            // 
+            // txtReadMe
+            // 
+            this.txtReadMe.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtReadMe.Location = new System.Drawing.Point(0, 0);
+            this.txtReadMe.Multiline = true;
+            this.txtReadMe.Name = "txtReadMe";
+            this.txtReadMe.ReadOnly = true;
+            this.txtReadMe.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtReadMe.Size = new System.Drawing.Size(1233, 481);
+            this.txtReadMe.TabIndex = 1;
+            this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
+    "6SPqX8NJumFBvSjSpry8hpzr4 ";
+            // 
+            // tbcRigStats
+            // 
+            this.tbcRigStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbcRigStats.Location = new System.Drawing.Point(3, 3);
+            this.tbcRigStats.Name = "tbcRigStats";
+            this.tbcRigStats.SelectedIndex = 0;
+            this.tbcRigStats.Size = new System.Drawing.Size(1227, 475);
+            this.tbcRigStats.TabIndex = 0;
+            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -179,15 +192,16 @@
             this.Text = "Monitor";
             this.tbcMonitor.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
-            this.tabRawLogs.ResumeLayout(false);
-            this.tabRawLogs.PerformLayout();
-            this.tabReadMe.ResumeLayout(false);
-            this.tabReadMe.PerformLayout();
             this.scGeneral.Panel1.ResumeLayout(false);
             this.scGeneral.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).EndInit();
             this.scGeneral.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.tabRigStats.ResumeLayout(false);
+            this.tabRawLogs.ResumeLayout(false);
+            this.tabRawLogs.PerformLayout();
+            this.tabReadMe.ResumeLayout(false);
+            this.tabReadMe.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -205,5 +219,6 @@
         private System.Windows.Forms.SplitContainer scGeneral;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.TabControl tbcRigStats;
     }
 }
