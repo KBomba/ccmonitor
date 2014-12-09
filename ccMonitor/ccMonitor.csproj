@@ -53,30 +53,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\Chip.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\F718XX.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\ISuperIO.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\IT87XX.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\LMSensors.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\LPCIO.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\NCT677X.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\W836XX.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Api\PruvotApi.cs" />
     <Compile Include="Api\JsonControl.cs" />
     <Compile Include="Gui\GpuTab.cs">
@@ -86,40 +62,6 @@
       <DependentUpon>GpuTab.cs</DependentUpon>
     </Compile>
     <Compile Include="GpuLogger.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Collections\IReadOnlyArray.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Collections\ListSet.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Collections\Pair.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Collections\ReadOnlyArray.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Collections\RingCollection.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Computer.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Control.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\FirmwareTable.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Hardware.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\HexStringArray.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IComputer.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IControl.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Identifier.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IElement.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IGroup.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IHardware.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IOControlCode.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IParameter.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\ISensor.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\ISettings.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\IVisitor.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\KernelDriver.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NVAPI.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NvidiaGPU.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NvidiaGroup.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Opcode.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\OperatingSystem.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Parameter.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\PInvokeDelegateFactory.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Ring0.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\Sensor.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\SensorVisitor.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\SMBIOS.cs" />
-    <Compile Include="Api\OpenHardwareMonitor\Hardware\ThreadAffinity.cs" />
     <Compile Include="Gui\Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -153,8 +95,6 @@
     <EmbeddedResource Include="Gui\RigTab.resx">
       <DependentUpon>RigTab.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="Api\OpenHardwareMonitor\Hardware\WinRing0.sys" />
-    <None Include="Api\OpenHardwareMonitor\Hardware\WinRing0x64.sys" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

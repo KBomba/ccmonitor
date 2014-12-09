@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using ccMonitor.Api;
-using ccMonitor.Api.OpenHardwareMonitor.Hardware;
-using ccMonitor.Api.OpenHardwareMonitor.Hardware.Nvidia;
 
 namespace ccMonitor
 {
     public class GpuLogger
     {
         // Contains the control for local nvidia hardware
-        internal NvidiaGPU NvGpu { get; set; }
 
         // Contains all the info we want to know about a certain GPU
         public GpuInfo Info { get; set; }
@@ -144,11 +141,8 @@ namespace ccMonitor
 
             public double Temperature{ get; set; }
             public double FanPercentage { get; set; }
-            public double FanTachSpeed { get; set; }
-
             public double CoreClockFrequency { get; set; }
             public double MemoryClockFrequency { get; set; }
-            public double CoreLoadPercentage { get; set; }
 
             public int ShareAnswerPing { get; set; } // Ping from rig to stratum
             public int MiningUrlPing { get; set; } // Ping from this PC to stratum
@@ -235,17 +229,6 @@ namespace ccMonitor
 
         private void UpdateSensors(Dictionary<string, string> hwInfo, int[] pingTimes)
         {
-            // When the GPUs are local, there should be an entry from openhardwaremonitor
-            // This gives more information with their NvGpu implementation
-            SensorValues sensorValues = NvGpu != null
-                ? UpdateLocalSensors(pingTimes)
-                : UpdateApiSensors(hwInfo, pingTimes);
-
-            CurrentBenchmark.SensorLog.Add(sensorValues);
-        }
-
-        private SensorValues UpdateApiSensors(Dictionary<string, string> hwInfo, int[] pingTimes)
-        {
             SensorValues sensorValues = new SensorValues
             {
                 TimeStamp = UnixTimeStamp(),
@@ -258,42 +241,7 @@ namespace ccMonitor
                 NetworkRigPing = pingTimes[2]
             };
 
-            return sensorValues;
-        }
-
-        private SensorValues UpdateLocalSensors(int[] pingTimes)
-        {
-            Dictionary<string, ISensor> sensorDict =
-                NvGpu.Sensors.ToDictionary(sensor => sensor.Name + "+" + sensor.SensorType);
-
-            SensorValues sensorValues = new SensorValues
-            {
-                TimeStamp = UnixTimeStamp(),
-                Temperature = GetSensorValue(sensorDict, "GPU Core+Temperature"),
-                FanPercentage = GetSensorValue(sensorDict, "GPU Fan+Control"),
-                FanTachSpeed = GetSensorValue(sensorDict, "GPU+Fan"),
-                CoreClockFrequency = GetSensorValue(sensorDict, "GPU Core+Clock"),
-                MemoryClockFrequency = GetSensorValue(sensorDict, "GPU Memory+Clock"),
-                CoreLoadPercentage = GetSensorValue(sensorDict, "GPU Core+Load"),
-                ShareAnswerPing = pingTimes[0],
-                MiningUrlPing = pingTimes[1],
-                NetworkRigPing = pingTimes[2]
-            };
-
-
-            return sensorValues;
-        }
-
-        private static double GetSensorValue(Dictionary<string, ISensor> sensorDict, string sensorKey)
-        {
-            ISensor sensor;
-            if (sensorDict.TryGetValue(sensorKey, out sensor))
-            {
-                sensor.Hardware.Update();
-                return sensor.Value ?? 0;
-            }
-
-            return 0;
+            CurrentBenchmark.SensorLog.Add(sensorValues);
         }
 
         private void UpdateHashLog(Dictionary<string, string>[] history)

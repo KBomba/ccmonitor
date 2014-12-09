@@ -4,8 +4,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using ccMonitor.Api;
-using ccMonitor.Api.OpenHardwareMonitor.Hardware;
-using ccMonitor.Api.OpenHardwareMonitor.Hardware.Nvidia;
 
 namespace ccMonitor
 {
@@ -17,7 +15,6 @@ namespace ccMonitor
             public string Name { get; set; }
             public string IpAddress { get; set; }
             public int Port { get; set; }
-            public bool Local { get; set; }
 
             public string UserFriendlyName { get; set; }
 
@@ -45,20 +42,10 @@ namespace ccMonitor
             }
         }
         
-        private Computer _comp;
 
         public RigController(BindingList<RigInfo> rigLogs)
         {
-            InitOpenHardwareMonitor();
             RigLogs = rigLogs;
-
-            foreach (RigInfo rig in RigLogs)
-            {
-                if (rig.Local)
-                {
-                    LinkLocalGpus(rig);
-                }
-            }
 
             Update();
         }
@@ -67,54 +54,22 @@ namespace ccMonitor
         // This will get all local nvidia cards and load them in
         public RigController()
         {
-            InitOpenHardwareMonitor();
-
-            InitLocalRig();
+            InitDefaultRig();
 
             Update();
         }
 
-        private void LinkLocalGpus(RigInfo rig)
-        {
-            foreach (IHardware hardware in _comp.Hardware)
-            {
-                NvidiaGPU nvGpu = hardware as NvidiaGPU;
-                if (nvGpu == null) break;
-
-                string nvIdentifier = nvGpu.Identifier.ToString();
-                int nvapiId = (int) char.GetNumericValue(nvIdentifier[nvIdentifier.Length - 1]);
-
-                foreach (GpuLogger gpu in rig.GpuLogs)
-                {
-                    if(gpu.NvGpu == null && gpu.Info.NvapiId == nvapiId)
-                    {
-                        gpu.NvGpu = nvGpu;
-                    }
-                }
-            }
-        }
-
-        private void InitLocalRig()
+        private void InitDefaultRig()
         {
             RigInfo localRig = new RigInfo
             {
                 Name = "Local rig",
                 IpAddress = "127.0.0.1",
                 Port = 4068, 
-                Local = true,
                 GpuLogs = new List<GpuLogger>(),
             };
 
             RigLogs = new BindingList<RigInfo> {localRig};
-
-            LinkLocalGpus(localRig);
-        }
-
-        private void InitOpenHardwareMonitor()
-        {
-            _comp = new Computer();
-            _comp.Open();
-            _comp.GPUEnabled = true;
         }
 
         public void Update()
@@ -127,7 +82,6 @@ namespace ccMonitor
                 StringBuilder sb = new StringBuilder();
                 sb.Append("Rig #").Append(index + 1).Append(", ").Append(rig.Name)
                     .Append(": ").Append(rig.IpAddress).Append(":").Append(rig.Port);
-                if (rig.Local && rig.GpuLogs.Count > 0 && rig.GpuLogs[0].NvGpu != null) sb.Append(" (Local)");
                 rig.UserFriendlyName = sb.ToString();
                 
                 //Gets all API information here first and passes it on
@@ -154,12 +108,6 @@ namespace ccMonitor
 
                     foreach (GpuLogger gpu in rig.GpuLogs)
                     {
-                        // Makes sure all local rigs are linked with NVAPI
-                        if (rig.Local && gpu.NvGpu == null)
-                        {
-                            LinkLocalGpus(rig);
-                        }
-
                         allApiResults[3] = gpu.Info.MinerMap != -1
                             ? PruvotApi.GetHistory(rig.IpAddress, rig.Port, gpu.Info.MinerMap)
                             : new Dictionary<string, string>[0];
@@ -239,7 +187,6 @@ namespace ccMonitor
                                     Available = true
                                 },
                                 BenchLogs = new List<GpuLogger.Benchmark>(),
-                                NvGpu = null,
                             };
                             rig.GpuLogs.Add(gpu);
                         }

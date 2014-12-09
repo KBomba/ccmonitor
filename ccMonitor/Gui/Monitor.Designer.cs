@@ -34,12 +34,16 @@
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.listView1 = new System.Windows.Forms.ListView();
             this.tabRigStats = new System.Windows.Forms.TabPage();
+            this.tbcRigStats = new System.Windows.Forms.TabControl();
             this.tabSettings = new System.Windows.Forms.TabPage();
             this.tabRawLogs = new System.Windows.Forms.TabPage();
             this.txtRawLogs = new System.Windows.Forms.TextBox();
             this.tabReadMe = new System.Windows.Forms.TabPage();
             this.txtReadMe = new System.Windows.Forms.TextBox();
-            this.tbcRigStats = new System.Windows.Forms.TabControl();
+            this.Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IpAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Local = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -90,16 +94,21 @@
             // 
             this.scGeneral.Panel2.Controls.Add(this.listView1);
             this.scGeneral.Size = new System.Drawing.Size(1227, 475);
-            this.scGeneral.SplitterDistance = 266;
+            this.scGeneral.SplitterDistance = 346;
             this.scGeneral.TabIndex = 0;
             // 
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Name,
+            this.IpAddress,
+            this.Port,
+            this.Local});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(0, 0);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(266, 475);
+            this.dataGridView1.Size = new System.Drawing.Size(346, 475);
             this.dataGridView1.TabIndex = 0;
             // 
             // listView1
@@ -107,7 +116,7 @@
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(957, 475);
+            this.listView1.Size = new System.Drawing.Size(877, 475);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -121,6 +130,15 @@
             this.tabRigStats.Size = new System.Drawing.Size(1233, 481);
             this.tabRigStats.TabIndex = 1;
             this.tabRigStats.Text = "Rig Stats";
+            // 
+            // tbcRigStats
+            // 
+            this.tbcRigStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbcRigStats.Location = new System.Drawing.Point(3, 3);
+            this.tbcRigStats.Name = "tbcRigStats";
+            this.tbcRigStats.SelectedIndex = 0;
+            this.tbcRigStats.Size = new System.Drawing.Size(1227, 475);
+            this.tbcRigStats.TabIndex = 0;
             // 
             // tabSettings
             // 
@@ -173,14 +191,35 @@
             this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
     "6SPqX8NJumFBvSjSpry8hpzr4 ";
             // 
-            // tbcRigStats
+            // Name
             // 
-            this.tbcRigStats.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbcRigStats.Location = new System.Drawing.Point(3, 3);
-            this.tbcRigStats.Name = "tbcRigStats";
-            this.tbcRigStats.SelectedIndex = 0;
-            this.tbcRigStats.Size = new System.Drawing.Size(1227, 475);
-            this.tbcRigStats.TabIndex = 0;
+            this.Name.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Name.DataPropertyName = "Name";
+            this.Name.HeaderText = "Name";
+            this.Name.Name = "Name";
+            // 
+            // IpAddress
+            // 
+            this.IpAddress.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.IpAddress.DataPropertyName = "IpAddress";
+            this.IpAddress.HeaderText = "IP Address";
+            this.IpAddress.Name = "IpAddress";
+            // 
+            // Port
+            // 
+            this.Port.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Port.DataPropertyName = "Port";
+            this.Port.HeaderText = "Port";
+            this.Port.Name = "Port";
+            this.Port.Width = 51;
+            // 
+            // Local
+            // 
+            this.Local.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Local.DataPropertyName = "Local";
+            this.Local.HeaderText = "Local";
+            this.Local.Name = "Local";
+            this.Local.Width = 39;
             // 
             // Monitor
             // 
@@ -188,7 +227,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1241, 507);
             this.Controls.Add(this.tbcMonitor);
-            this.Name = "Monitor";
             this.Text = "Monitor";
             this.tbcMonitor.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
@@ -220,5 +258,9 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.TabControl tbcRigStats;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Name;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IpAddress;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Port;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn Local;
     }
 }
