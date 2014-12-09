@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{35A80F48-FF06-40FC-B048-DBBD911C2FA9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ccMonitor</RootNamespace>
+    <AssemblyName>ccMonitor</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\Chip.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\F718XX.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\ISuperIO.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\IT87XX.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\LMSensors.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\LPCIO.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\NCT677X.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\LPC\W836XX.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Api\PruvotApi.cs" />
+    <Compile Include="Api\JsonControl.cs" />
+    <Compile Include="Gui\GpuTab.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\GpuTab.Designer.cs">
+      <DependentUpon>GpuTab.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GpuLogger.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Collections\IReadOnlyArray.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Collections\ListSet.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Collections\Pair.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Collections\ReadOnlyArray.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Collections\RingCollection.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Computer.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Control.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\FirmwareTable.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Hardware.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\HexStringArray.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IComputer.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IControl.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Identifier.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IElement.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IGroup.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IHardware.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IOControlCode.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IParameter.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\ISensor.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\ISettings.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\IVisitor.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\KernelDriver.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NVAPI.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NvidiaGPU.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Nvidia\NvidiaGroup.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Opcode.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\OperatingSystem.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Parameter.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\PInvokeDelegateFactory.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Ring0.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\Sensor.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\SensorVisitor.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\SMBIOS.cs" />
+    <Compile Include="Api\OpenHardwareMonitor\Hardware\ThreadAffinity.cs" />
+    <Compile Include="Gui\Monitor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Gui\Monitor.Designer.cs">
+      <DependentUpon>Monitor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RigController.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Gui\RigTab.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\RigTab.Designer.cs">
+      <DependentUpon>RigTab.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Gui\GpuTab.resx">
+      <DependentUpon>GpuTab.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Monitor.resx">
+      <DependentUpon>Monitor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Gui\RigTab.resx">
+      <DependentUpon>RigTab.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Api\OpenHardwareMonitor\Hardware\WinRing0.sys" />
+    <None Include="Api\OpenHardwareMonitor\Hardware\WinRing0x64.sys" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
