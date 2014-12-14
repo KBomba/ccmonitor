@@ -20,9 +20,10 @@ namespace ccMonitor
 
             public List<GpuLogger> GpuLogs { get; set; }
 
-            public RigStat Statistic { get; set; }
+            public RigStat CurrentStatistic { get; set; }
             public class RigStat
             {
+                public string Algorithm { get; set; }
                 public double TotalHashCount { get; set; }
                 public double TotalHashRate { get; set; }
                 public double AverageHashRate { get; set; }
@@ -38,7 +39,7 @@ namespace ccMonitor
             public RigInfo()
             {
                 GpuLogs = new List<GpuLogger>();
-                Statistic = new RigStat();
+                CurrentStatistic = new RigStat();
             }
         }
         
@@ -99,10 +100,8 @@ namespace ccMonitor
                     CheckLiveGpus(allApiResults, rig);
 
                     // Prepping for total rig statistics
-                    double totalHashCount = 0,
-                        totalAverageHashRate = 0,
-                        totalMeanHashRate = 0,
-                        totalStandardDeviation = 0,
+                    double totalHashCount = 0,totalAverageHashRate = 0,
+                        totalMeanHashRate = 0,totalStandardDeviation = 0,
                         totalAverageTemperature = 0;
                     double[] totalGaussianPercentiles = {0.0, 0.0, 0.0, 0.0};
 
@@ -132,8 +131,9 @@ namespace ccMonitor
                         }
                     }
 
-                    rig.Statistic = new RigInfo.RigStat
+                    rig.CurrentStatistic = new RigInfo.RigStat
                     {
+                        Algorithm = rig.GpuLogs[rig.GpuLogs.Count -1].CurrentBenchmark.Algorithm,
                         TotalHashCount = totalHashCount,
                         TotalHashRate = totalAverageHashRate,
                         AverageHashRate = totalAverageHashRate/rig.GpuLogs.Count,
@@ -148,7 +148,7 @@ namespace ccMonitor
 
                     for (int i = 0; i < 4; i++)
                     {
-                        rig.Statistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i]/rig.GpuLogs.Count;
+                        rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i]/rig.GpuLogs.Count;
                     }
                 }
             }

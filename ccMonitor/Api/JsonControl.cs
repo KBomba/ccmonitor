@@ -22,12 +22,19 @@ namespace ccMonitor.Api
 
         public static T GetSerializedGzipFile<T>(string location) where T : new()
         {
-            using (JsonReader reader =
-                new JsonTextReader(new StreamReader(
-                        new GZipStream(new BufferedStream(
-                                File.Open(location, FileMode.Open)), CompressionMode.Decompress))))
+            try
             {
-                return new JsonSerializer().Deserialize<T>(reader);
+                using (JsonReader reader =
+                    new JsonTextReader(new StreamReader(
+                        new GZipStream(new BufferedStream(
+                            File.Open(location, FileMode.Open)), CompressionMode.Decompress))))
+                {
+                    return new JsonSerializer().Deserialize<T>(reader);
+                }
+            }
+            catch
+            {
+                return new T();
             }
         }
 

@@ -31,8 +31,18 @@
             this.tbcMonitor = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
             this.scGeneral = new System.Windows.Forms.SplitContainer();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.dgvRigs = new System.Windows.Forms.DataGridView();
+            this.lstGeneralOverview = new System.Windows.Forms.ListView();
+            this.clmNumber = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmAlgorithm = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmHashRate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmStandardDeviation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmHashCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmAccepts = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmRejects = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmTemperature = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmPingTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabRigStats = new System.Windows.Forms.TabPage();
             this.tbcRigStats = new System.Windows.Forms.TabControl();
             this.tabSettings = new System.Windows.Forms.TabPage();
@@ -40,17 +50,16 @@
             this.txtRawLogs = new System.Windows.Forms.TextBox();
             this.tabReadMe = new System.Windows.Forms.TabPage();
             this.txtReadMe = new System.Windows.Forms.TextBox();
-            this.Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RigName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IpAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Local = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
             this.scGeneral.Panel1.SuspendLayout();
             this.scGeneral.Panel2.SuspendLayout();
             this.scGeneral.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRigs)).BeginInit();
             this.tabRigStats.SuspendLayout();
             this.tabRawLogs.SuspendLayout();
             this.tabReadMe.SuspendLayout();
@@ -83,43 +92,107 @@
             // scGeneral
             // 
             this.scGeneral.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scGeneral.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.scGeneral.Location = new System.Drawing.Point(3, 3);
             this.scGeneral.Name = "scGeneral";
             // 
             // scGeneral.Panel1
             // 
-            this.scGeneral.Panel1.Controls.Add(this.dataGridView1);
+            this.scGeneral.Panel1.Controls.Add(this.dgvRigs);
             // 
             // scGeneral.Panel2
             // 
-            this.scGeneral.Panel2.Controls.Add(this.listView1);
+            this.scGeneral.Panel2.Controls.Add(this.lstGeneralOverview);
             this.scGeneral.Size = new System.Drawing.Size(1227, 475);
-            this.scGeneral.SplitterDistance = 346;
+            this.scGeneral.SplitterDistance = 299;
             this.scGeneral.TabIndex = 0;
             // 
-            // dataGridView1
+            // dgvRigs
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Name,
+            this.dgvRigs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvRigs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.RigName,
             this.IpAddress,
-            this.Port,
-            this.Local});
-            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(346, 475);
-            this.dataGridView1.TabIndex = 0;
+            this.Port});
+            this.dgvRigs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvRigs.Location = new System.Drawing.Point(0, 0);
+            this.dgvRigs.MultiSelect = false;
+            this.dgvRigs.Name = "dgvRigs";
+            this.dgvRigs.Size = new System.Drawing.Size(299, 475);
+            this.dgvRigs.TabIndex = 0;
             // 
-            // listView1
+            // lstGeneralOverview
             // 
-            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView1.Location = new System.Drawing.Point(0, 0);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(877, 475);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
+            this.lstGeneralOverview.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.clmNumber,
+            this.clmName,
+            this.clmAlgorithm,
+            this.clmHashRate,
+            this.clmStandardDeviation,
+            this.clmHashCount,
+            this.clmAccepts,
+            this.clmRejects,
+            this.clmTemperature,
+            this.clmPingTime});
+            this.lstGeneralOverview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lstGeneralOverview.FullRowSelect = true;
+            this.lstGeneralOverview.GridLines = true;
+            this.lstGeneralOverview.Location = new System.Drawing.Point(0, 0);
+            this.lstGeneralOverview.Name = "lstGeneralOverview";
+            this.lstGeneralOverview.Size = new System.Drawing.Size(924, 475);
+            this.lstGeneralOverview.TabIndex = 0;
+            this.lstGeneralOverview.UseCompatibleStateImageBehavior = false;
+            this.lstGeneralOverview.View = System.Windows.Forms.View.Details;
+            // 
+            // clmNumber
+            // 
+            this.clmNumber.Text = "#";
+            this.clmNumber.Width = 40;
+            // 
+            // clmName
+            // 
+            this.clmName.Text = "Name";
+            this.clmName.Width = 160;
+            // 
+            // clmAlgorithm
+            // 
+            this.clmAlgorithm.Text = "Algorithm";
+            this.clmAlgorithm.Width = 80;
+            // 
+            // clmHashRate
+            // 
+            this.clmHashRate.Text = "Hashrate";
+            this.clmHashRate.Width = 110;
+            // 
+            // clmStandardDeviation
+            // 
+            this.clmStandardDeviation.Text = "Standard Deviation";
+            this.clmStandardDeviation.Width = 110;
+            // 
+            // clmHashCount
+            // 
+            this.clmHashCount.Text = "Hash Count";
+            this.clmHashCount.Width = 100;
+            // 
+            // clmAccepts
+            // 
+            this.clmAccepts.Text = "Accepts";
+            this.clmAccepts.Width = 70;
+            // 
+            // clmRejects
+            // 
+            this.clmRejects.Text = "Rejects";
+            this.clmRejects.Width = 70;
+            // 
+            // clmTemperature
+            // 
+            this.clmTemperature.Text = "Temperature";
+            this.clmTemperature.Width = 80;
+            // 
+            // clmPingTime
+            // 
+            this.clmPingTime.Text = "Ping Time";
+            this.clmPingTime.Width = 80;
             // 
             // tabRigStats
             // 
@@ -156,7 +229,6 @@
             this.tabRawLogs.Size = new System.Drawing.Size(1233, 481);
             this.tabRawLogs.TabIndex = 2;
             this.tabRawLogs.Text = "Raw Logs";
-            this.tabRawLogs.Click += new System.EventHandler(this.tabRawLogs_Click);
             // 
             // txtRawLogs
             // 
@@ -191,12 +263,12 @@
             this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
     "6SPqX8NJumFBvSjSpry8hpzr4 ";
             // 
-            // Name
+            // RigName
             // 
-            this.Name.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Name.DataPropertyName = "Name";
-            this.Name.HeaderText = "Name";
-            this.Name.Name = "Name";
+            this.RigName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RigName.DataPropertyName = "Name";
+            this.RigName.HeaderText = "Name";
+            this.RigName.Name = "RigName";
             // 
             // IpAddress
             // 
@@ -213,28 +285,22 @@
             this.Port.Name = "Port";
             this.Port.Width = 51;
             // 
-            // Local
-            // 
-            this.Local.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Local.DataPropertyName = "Local";
-            this.Local.HeaderText = "Local";
-            this.Local.Name = "Local";
-            this.Local.Width = 39;
-            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1241, 507);
             this.Controls.Add(this.tbcMonitor);
+            this.Name = "Monitor";
             this.Text = "Monitor";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Monitor_FormClosing);
             this.tbcMonitor.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
             this.scGeneral.Panel1.ResumeLayout(false);
             this.scGeneral.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).EndInit();
             this.scGeneral.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRigs)).EndInit();
             this.tabRigStats.ResumeLayout(false);
             this.tabRawLogs.ResumeLayout(false);
             this.tabRawLogs.PerformLayout();
@@ -255,12 +321,21 @@
         private System.Windows.Forms.TabPage tabReadMe;
         private System.Windows.Forms.TextBox txtReadMe;
         private System.Windows.Forms.SplitContainer scGeneral;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.DataGridView dgvRigs;
+        private System.Windows.Forms.ListView lstGeneralOverview;
         private System.Windows.Forms.TabControl tbcRigStats;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Name;
+        private System.Windows.Forms.ColumnHeader clmNumber;
+        private System.Windows.Forms.ColumnHeader clmName;
+        private System.Windows.Forms.ColumnHeader clmAlgorithm;
+        private System.Windows.Forms.ColumnHeader clmHashRate;
+        private System.Windows.Forms.ColumnHeader clmStandardDeviation;
+        private System.Windows.Forms.ColumnHeader clmHashCount;
+        private System.Windows.Forms.ColumnHeader clmAccepts;
+        private System.Windows.Forms.ColumnHeader clmRejects;
+        private System.Windows.Forms.ColumnHeader clmTemperature;
+        private System.Windows.Forms.ColumnHeader clmPingTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn RigName;
         private System.Windows.Forms.DataGridViewTextBoxColumn IpAddress;
         private System.Windows.Forms.DataGridViewTextBoxColumn Port;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn Local;
     }
 }
