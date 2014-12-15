@@ -15,11 +15,14 @@ namespace ccMonitor
         {
             public string Name { get; set; }
             public int NvapiId { get; set; }
-            // NvapiId is used to control a local machine through nvapi
-            // Bus (+rig) is the unique identifier for a GPU, make sure to reload after hardware changes
             public int Bus { get; set; }
             public int MinerMap { get; set; }
             public bool Available { get; set; }
+
+            public override string ToString()
+            {
+                return "Bus #" + Bus;
+            }
         }
 
         public Benchmark CurrentBenchmark { get; set; }
@@ -79,12 +82,35 @@ namespace ccMonitor
 
         public class Setup
         {
+            protected bool Equals(Setup other)
+            {
+                return string.Equals(MinerName, other.MinerName) && string.Equals(MinerVersion, other.MinerVersion) && 
+                    string.Equals(ApiVersion, other.ApiVersion) && string.Equals(MiningUrl, other.MiningUrl) && 
+                    string.Equals(PerformanceState, other.PerformanceState) && string.Equals(BiosVersion, other.BiosVersion) && 
+                    string.Equals(DriverVersion, other.DriverVersion) && string.Equals(OperatingSystem, other.OperatingSystem);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hashCode = (MinerName != null ? MinerName.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (MinerVersion != null ? MinerVersion.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (ApiVersion != null ? ApiVersion.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (MiningUrl != null ? MiningUrl.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (PerformanceState != null ? PerformanceState.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (BiosVersion != null ? BiosVersion.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (DriverVersion != null ? DriverVersion.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (OperatingSystem != null ? OperatingSystem.GetHashCode() : 0);
+                    return hashCode;
+                }
+            }
+
             public string MinerName { get; set; }
             public string MinerVersion { get; set; }
-            public string ApiVersion { get; set; } // Not required for SetupEquals
+            public string ApiVersion { get; set; }
 
             public string MiningUrl { get; set; }
-            public string MiningUser { get; set; } // Not required for SetupEquals
 
             public string PerformanceState { get; set; }
             public string BiosVersion { get; set; }
@@ -96,30 +122,7 @@ namespace ccMonitor
                 if (ReferenceEquals(null, obj)) return false;
                 if (ReferenceEquals(this, obj)) return true;
                 if (obj.GetType() != this.GetType()) return false;
-                return Equals((Setup)obj);
-            }
-
-            protected bool Equals(Setup other)
-            {
-                return string.Equals(MinerName, other.MinerName) && string.Equals(MinerVersion, other.MinerVersion) &&
-                    string.Equals(MiningUrl, other.MiningUrl) && string.Equals(PerformanceState, other.PerformanceState) &&
-                    string.Equals(BiosVersion, other.BiosVersion) && string.Equals(DriverVersion, other.DriverVersion) &&
-                    string.Equals(OperatingSystem, other.OperatingSystem);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = (MinerName != null ? MinerName.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (MinerVersion != null ? MinerVersion.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (MiningUrl != null ? MiningUrl.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (PerformanceState != null ? PerformanceState.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (BiosVersion != null ? BiosVersion.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (DriverVersion != null ? DriverVersion.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (OperatingSystem != null ? OperatingSystem.GetHashCode() : 0);
-                    return hashCode;
-                }
+                return Equals((Setup) obj);
             }
         }
 
@@ -191,7 +194,6 @@ namespace ccMonitor
             {
                 CurrentBenchmark = currentBenchmark;
                 CurrentBenchmark.MinerSetup.ApiVersion = liveSetup.ApiVersion;
-                CurrentBenchmark.MinerSetup.MiningUser = liveSetup.MiningUser;
 
                 UpdateSensors(rightHwInfo, pingTimes);
                 // Updates the hardware sensors + "network sensors"
@@ -217,7 +219,6 @@ namespace ccMonitor
                 MinerVersion = PruvotApi.GetDictValue(summary[0], "VER"),
                 ApiVersion = PruvotApi.GetDictValue(summary[0], "API"),
                 MiningUrl = poolInfo.Length > 0 ? PruvotApi.GetDictValue(poolInfo[0], "URL"): string.Empty,
-                MiningUser = poolInfo.Length > 0 ? PruvotApi.GetDictValue(poolInfo[0], "USER"): string.Empty,
                 PerformanceState = PruvotApi.GetDictValue(hwInfo, "PST"),
                 BiosVersion = PruvotApi.GetDictValue(hwInfo, "BIOS"),
                 DriverVersion = PruvotApi.GetDictValue(setupInfo, "NVDRIVER"),

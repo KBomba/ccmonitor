@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ccMonitor.Api;
+using ccMonitor.Gui;
 using Newtonsoft.Json;
 
 namespace ccMonitor
@@ -32,9 +33,21 @@ namespace ccMonitor
 
             LoadSettings();
             LoadLogs();
+            LoadReadMe();
 
             InitTimers();
             InitGui();
+        }
+
+        private void LoadReadMe()
+        {
+            if (File.Exists("README.txt"))
+            {
+                using (TextReader tr = File.OpenText("README.txt"))
+                {
+                    txtReadMe.Text = tr.ReadToEnd();
+                }
+            }
         }
 
         private void InitGui()
@@ -53,38 +66,97 @@ namespace ccMonitor
             _updateTimer = new System.Threading.Timer(UpdateController, null, 0, Timeout.Infinite);
 
             _guiTimer = new System.Windows.Forms.Timer {Interval = 5000};
-            _guiTimer.Tick += UpdateGui;
+            _guiTimer.Tick += GuiTimerTick;
             _guiTimer.Start();
-            UpdateGeneralOverviewList();
+            UpdateGui();
         }
 
-        private void UpdateGui(object sender, EventArgs e)
+        private void GuiTimerTick(object sender, EventArgs e)
         {
-            UpdateGeneralOverviewList();
+            UpdateGui();
+            RemoveDeletedRigs();
         }
 
-        private void UpdateGeneralOverviewList()
+        private void RemoveDeletedRigs()
         {
-            int selectedIndex = 0;
-            if (lstGeneralOverview.SelectedIndices.Count > 0)
+            // Really complicated way to dynamically remove deleted rigs
+            // Need to find a better way
+            Dictionary<string, bool> rigExistence = new Dictionary<string, bool>();
+            foreach (TabPage tabPage in tbcRigStats.TabPages)
             {
-                selectedIndex = lstGeneralOverview.SelectedIndices[0];
+                rigExistence.Add(tabPage.Text, false);
             }
-
-            lstGeneralOverview.Items.Clear();
-            lstGeneralOverview.Groups.Clear();
-
-            ListViewGroup lvg;
-            ListViewItem lvi;
 
             foreach (RigController.RigInfo rig in _controller.RigLogs)
             {
-                lvg = new ListViewGroup(rig.UserFriendlyName);
+                if (rigExistence.ContainsKey(rig.UserFriendlyName))
+                {
+                    rigExistence[rig.UserFriendlyName] = true;
+                }
+            }
+
+            foreach (TabPage tabPage in tbcRigStats.TabPages)
+            {
+                if (rigExistence[tabPage.Text] == false)
+                {
+                    tbcRigStats.TabPages.Remove(tabPage);
+                }
+            }
+        }
+
+        private void UpdateGui()
+        {
+            // Grabs all the selected items in the General Overview List
+            int[] selectedIndexes = new int[lstGeneralOverview.SelectedIndices.Count];
+            if (selectedIndexes.Length > 0)
+            {
+                for (int i = 0; i < selectedIndexes.Length; i++)
+                {
+                    selectedIndexes[i] = lstGeneralOverview.SelectedIndices[i];
+                }
+            }
+
+            // Completely refresh the General Overview List
+            lstGeneralOverview.Items.Clear();
+            lstGeneralOverview.Groups.Clear();
+            
+            foreach (RigController.RigInfo rig in _controller.RigLogs)
+            {
+                // Makes sure all rigs that are in the logs are shown in RigStats
+                // And updates them
+                bool tabPageExists = false;
+                foreach (TabPage tabPage in tbcRigStats.TabPages)
+                {
+                    if (tabPage.Text == rig.UserFriendlyName)
+                    {
+                        tabPageExists = true;
+                    }
+
+                    foreach (RigTab rigTab in tabPage.Controls)
+                    {
+                        rigTab.UpdateGui();
+                    }
+                }                
+
+                if (!tabPageExists)
+                {
+                    // Makes new tabpage in rigstats
+                    TabPage tabPage = new TabPage(rig.UserFriendlyName);
+                    RigTab rigTab = new RigTab(rig) {Dock = DockStyle.Fill};
+                    rigTab.UpdateGui();
+                    tabPage.Controls.Add(rigTab);
+                    tbcRigStats.TabPages.Add(tabPage);
+                }
+                
+                // Adds the controller info to the listview
+                ListViewGroup lvg = new ListViewGroup(rig.UserFriendlyName);
                 lstGeneralOverview.Groups.Add(lvg);
 
+                ListViewItem lvi;
                 foreach (GpuLogger gpu in rig.GpuLogs)
                 {
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
+                    lvi.SubItems.Add(gpu.Info.Bus.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
                     lvi.SubItems.Add(GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate) + "H");
@@ -99,6 +171,7 @@ namespace ccMonitor
                 }
 
                 lvi = new ListViewItem(string.Empty, lvg);
+                lvi.SubItems.Add(string.Empty);
                 lvi.SubItems.Add(rig.Name + " total");
                 lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
                 lvi.SubItems.Add(GetRightMagnitude(rig.CurrentStatistic.TotalHashRate) + "H");
@@ -111,18 +184,22 @@ namespace ccMonitor
                 lstGeneralOverview.Items.Add(lvi);
             }
 
+            // Restores all the previously selected items in the General Overview List
             if (lstGeneralOverview.Items.Count > 0)
             {
-                lstGeneralOverview.Items[selectedIndex].Selected = true;
-                lstGeneralOverview.Select();
+                foreach (int selectedIndex in selectedIndexes)
+                {
+                    lstGeneralOverview.Items[selectedIndex].Selected = true;
+                    lstGeneralOverview.Select();
+                }
             }
         }
 
-        private string GetRightMagnitude(double rate)
+        private static string GetRightMagnitude(double rate)
         {
             string[] sizes = { "", "K", "M", "G", "T", "P", "E", "Z", "Y" };
             int order = 0;
-            while (rate >= 1000000 && order + 1 < sizes.Length)
+            while (rate >= 10000 && order + 1 < sizes.Length)
             {
                 order++;
                 rate = rate / 1000;

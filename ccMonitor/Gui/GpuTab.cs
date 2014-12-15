@@ -12,9 +12,17 @@ namespace ccMonitor.Gui
 {
     public partial class GpuTab : UserControl
     {
-        public GpuTab()
+        public GpuLogger Gpu { get; set; }
+
+        public GpuTab(GpuLogger gpu)
         {
+            Gpu = gpu;
             InitializeComponent();
+        }
+
+        public void UpdateGui()
+        {
+            
         }
     }
 }

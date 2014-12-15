@@ -53,6 +53,7 @@
             this.RigName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IpAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmBus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -125,6 +126,7 @@
             // 
             this.lstGeneralOverview.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.clmNumber,
+            this.clmBus,
             this.clmName,
             this.clmAlgorithm,
             this.clmHashRate,
@@ -147,7 +149,7 @@
             // clmNumber
             // 
             this.clmNumber.Text = "#";
-            this.clmNumber.Width = 40;
+            this.clmNumber.Width = 20;
             // 
             // clmName
             // 
@@ -232,6 +234,7 @@
             // 
             // txtRawLogs
             // 
+            this.txtRawLogs.BackColor = System.Drawing.SystemColors.Window;
             this.txtRawLogs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtRawLogs.Location = new System.Drawing.Point(0, 0);
             this.txtRawLogs.Multiline = true;
@@ -285,6 +288,11 @@
             this.Port.Name = "Port";
             this.Port.Width = 51;
             // 
+            // clmBus
+            // 
+            this.clmBus.Text = "Bus";
+            this.clmBus.Width = 30;
+            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -337,5 +345,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn RigName;
         private System.Windows.Forms.DataGridViewTextBoxColumn IpAddress;
         private System.Windows.Forms.DataGridViewTextBoxColumn Port;
+        private System.Windows.Forms.ColumnHeader clmBus;
     }
 }
