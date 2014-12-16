@@ -30,6 +30,8 @@ namespace ccMonitor
                 public double AverageMeanHashRate { get; set; }
                 public double AverageStandardDeviation { get; set; }
                 public double[] AverageGaussianPercentiles { get; set; }
+                public double AverageLowestHashRate { get; set; }
+                public double AverageHighestHashRate { get; set; }
                 public double Accepts { get; set; }
                 public double Rejects { get; set; }
                 public double AverageTemperature { get; set; }
@@ -100,8 +102,12 @@ namespace ccMonitor
                     CheckLiveGpus(allApiResults, rig);
 
                     // Prepping for total rig statistics
-                    double totalHashCount = 0,totalAverageHashRate = 0,
-                        totalMeanHashRate = 0,totalStandardDeviation = 0,
+                    double totalHashCount = 0,
+                        totalAverageHashRate = 0,
+                        totalMeanHashRate = 0,
+                        totalStandardDeviation = 0,
+                        totalLowestHashRate = 0,
+                        totalHighestHashRate = 0,
                         totalAverageTemperature = 0;
                     double[] totalGaussianPercentiles = {0.0, 0.0, 0.0, 0.0};
 
@@ -114,12 +120,14 @@ namespace ccMonitor
                         if (allApiResults[3] != null)
                         {
                             gpu.Update(allApiResults, pingTimes);
-
+                            
 
                             // While we're at it, calculate the total stats for the rig
                             totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
                             totalMeanHashRate += gpu.CurrentBenchmark.Statistic.MeanHashRate;
+                            totalLowestHashRate += gpu.CurrentBenchmark.Statistic.LowestHashRate;
+                            totalHighestHashRate += gpu.CurrentBenchmark.Statistic.HighestHashRate;
                             totalStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation;
                             totalAverageTemperature += gpu.CurrentBenchmark.Statistic.AverageTemperature;
 
@@ -139,6 +147,8 @@ namespace ccMonitor
                         AverageHashRate = totalAverageHashRate/rig.GpuLogs.Count,
                         AverageMeanHashRate = totalMeanHashRate/rig.GpuLogs.Count,
                         AverageStandardDeviation = totalStandardDeviation/rig.GpuLogs.Count,
+                        AverageLowestHashRate = totalLowestHashRate/rig.GpuLogs.Count,
+                        AverageHighestHashRate = totalHighestHashRate/rig.GpuLogs.Count,
                         Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
                         Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
                         AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,

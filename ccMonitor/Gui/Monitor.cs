@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics.Contracts;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using ccMonitor.Api;
-using ccMonitor.Gui;
 using Newtonsoft.Json;
 
-namespace ccMonitor
+namespace ccMonitor.Gui
 {
     public partial class Monitor : Form
     {
@@ -89,7 +81,7 @@ namespace ccMonitor
 
             foreach (RigController.RigInfo rig in _controller.RigLogs)
             {
-                if (rigExistence.ContainsKey(rig.UserFriendlyName))
+                if (rig.UserFriendlyName != null && rigExistence.ContainsKey(rig.UserFriendlyName))
                 {
                     rigExistence[rig.UserFriendlyName] = true;
                 }
@@ -146,6 +138,7 @@ namespace ccMonitor
                     rigTab.UpdateGui();
                     tabPage.Controls.Add(rigTab);
                     tbcRigStats.TabPages.Add(tabPage);
+                    tbcRigStats.Dock = DockStyle.Fill;
                 }
                 
                 // Adds the controller info to the listview
@@ -156,27 +149,25 @@ namespace ccMonitor
                 foreach (GpuLogger gpu in rig.GpuLogs)
                 {
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
-                    lvi.SubItems.Add(gpu.Info.Bus.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
-                    lvi.SubItems.Add(GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate) + "H");
-                    lvi.SubItems.Add(GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation) + "H");
-                    lvi.SubItems.Add(GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
-                    lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts + "");
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, 'H'));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, 'H'));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
+                    lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(string.Empty);
                     lvi.SubItems.Add(gpu.CurrentBenchmark.SensorLog[gpu.CurrentBenchmark.SensorLog.Count -1]
-                        .Temperature.ToString(CultureInfo.InvariantCulture));
+                        .Temperature.ToString(CultureInfo.InvariantCulture) + " °C");
                     lvi.SubItems.Add(string.Empty);
                     lstGeneralOverview.Items.Add(lvi);
                 }
 
                 lvi = new ListViewItem(string.Empty, lvg);
-                lvi.SubItems.Add(string.Empty);
-                lvi.SubItems.Add(rig.Name + " total");
+                lvi.SubItems.Add("Total");
                 lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
-                lvi.SubItems.Add(GetRightMagnitude(rig.CurrentStatistic.TotalHashRate) + "H");
-                lvi.SubItems.Add(GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation) + "H");
-                lvi.SubItems.Add(GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
+                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, 'H'));
+                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, 'H'));
+                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
                 lvi.SubItems.Add(rig.CurrentStatistic.Accepts.ToString(CultureInfo.InvariantCulture));
                 lvi.SubItems.Add(rig.CurrentStatistic.Rejects.ToString(CultureInfo.InvariantCulture));
                 lvi.SubItems.Add(string.Empty);
@@ -193,19 +184,6 @@ namespace ccMonitor
                     lstGeneralOverview.Select();
                 }
             }
-        }
-
-        private static string GetRightMagnitude(double rate)
-        {
-            string[] sizes = { "", "K", "M", "G", "T", "P", "E", "Z", "Y" };
-            int order = 0;
-            while (rate >= 10000 && order + 1 < sizes.Length)
-            {
-                order++;
-                rate = rate / 1000;
-            }
-
-            return String.Format("{0:0.##} {1}", rate, sizes[order]);
         }
 
         private void UpdateController(object o)
@@ -270,5 +248,41 @@ namespace ccMonitor
         {
             txtRawLogs.Text = JsonConvert.SerializeObject(_controller, Formatting.Indented);
         }
+
+        private void lstGeneralOverview_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lstGeneralOverview.SelectedItems.Count > 0)
+            {
+                tbcMonitor.SelectTab(tabRigStats);
+                ListViewItem listViewItem = lstGeneralOverview.SelectedItems[0];
+
+                foreach (TabPage rigPage in tbcRigStats.TabPages)
+                {
+                    if (rigPage.Text == listViewItem.Group.Header)
+                    {
+                        tbcRigStats.SelectTab(rigPage);
+                    }
+
+                    if (listViewItem.Text != string.Empty)
+                    {
+                        foreach (RigTab rigTab in rigPage.Controls)
+                        {
+                            foreach (TabPage gpuPage in rigTab.tbcRig.TabPages)
+                            {
+                                if (gpuPage.Text.EndsWith(listViewItem.Text, StringComparison.Ordinal))
+                                {
+                                    rigTab.tbcRig.SelectTab(gpuPage);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                
+               
+            }
+        }
+
+        
     }
 }

@@ -7,8 +7,6 @@ namespace ccMonitor
 {
     public class GpuLogger
     {
-        // Contains the control for local nvidia hardware
-
         // Contains all the info we want to know about a certain GPU
         public GpuInfo Info { get; set; }
         public class GpuInfo
@@ -21,11 +19,11 @@ namespace ccMonitor
 
             public override string ToString()
             {
-                return "Bus #" + Bus;
+                return "GPU #" + MinerMap;
             }
         }
 
-        public Benchmark CurrentBenchmark { get; set; }
+        public Benchmark CurrentBenchmark { get; set; } // Quick ref to latest benchmark
         public List<Benchmark> BenchLogs { get; set; }
         public class Benchmark
         {
@@ -109,7 +107,6 @@ namespace ccMonitor
             public string MinerName { get; set; }
             public string MinerVersion { get; set; }
             public string ApiVersion { get; set; }
-
             public string MiningUrl { get; set; }
 
             public string PerformanceState { get; set; }
@@ -133,6 +130,8 @@ namespace ccMonitor
             public double MeanHashRate { get; set; }
             public double StandardDeviation { get; set; }
             public double[] GaussianPercentiles { get; set; }
+            public double LowestHashRate { get; set; }
+            public double HighestHashRate { get; set; }
             public int Accepts { get; set; } // Taken from FOUND in hashentries
             public double AverageTemperature { get; set; }
             public double AverageShareAnswerPing { get; set; }
@@ -154,7 +153,6 @@ namespace ccMonitor
 
         public GpuLogger()
         {
-            
         }
 
         public void Update(Dictionary<string, string>[][] allApiResults, int[] pingTimes)
@@ -366,6 +364,8 @@ namespace ccMonitor
                 }
 
                 CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/(hashLogSize));
+                CurrentBenchmark.Statistic.LowestHashRate = rates[0];
+                CurrentBenchmark.Statistic.HighestHashRate = rates[rates.Length - 1];
             }
         }
 

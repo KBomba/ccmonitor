@@ -94,9 +94,9 @@
 
         #endregion
 
-        private System.Windows.Forms.TabControl tbcRig;
         private System.Windows.Forms.TabPage tabRigOverview;
         private System.Windows.Forms.TabPage tabRigDebug;
         private System.Windows.Forms.TextBox txtDebugConsole;
+        internal System.Windows.Forms.TabControl tbcRig;
     }
 }

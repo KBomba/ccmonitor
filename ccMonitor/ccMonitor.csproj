@@ -55,6 +55,12 @@
   <ItemGroup>
     <Compile Include="Api\PruvotApi.cs" />
     <Compile Include="Api\JsonControl.cs" />
+    <Compile Include="Gui\BenchmarkOverview.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\BenchmarkOverview.Designer.cs">
+      <DependentUpon>BenchmarkOverview.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\GpuTab.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -62,6 +68,7 @@
       <DependentUpon>GpuTab.cs</DependentUpon>
     </Compile>
     <Compile Include="GpuLogger.cs" />
+    <Compile Include="Gui\GuiHelper.cs" />
     <Compile Include="Gui\Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +84,9 @@
     <Compile Include="Gui\RigTab.Designer.cs">
       <DependentUpon>RigTab.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Gui\BenchmarkOverview.resx">
+      <DependentUpon>BenchmarkOverview.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\GpuTab.resx">
       <DependentUpon>GpuTab.cs</DependentUpon>
     </EmbeddedResource>

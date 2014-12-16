@@ -1,4 +1,4 @@
-﻿namespace ccMonitor
+﻿namespace ccMonitor.Gui
 {
     partial class Monitor
     {
@@ -32,6 +32,9 @@
             this.tabGeneral = new System.Windows.Forms.TabPage();
             this.scGeneral = new System.Windows.Forms.SplitContainer();
             this.dgvRigs = new System.Windows.Forms.DataGridView();
+            this.RigName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IpAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lstGeneralOverview = new System.Windows.Forms.ListView();
             this.clmNumber = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -50,10 +53,6 @@
             this.txtRawLogs = new System.Windows.Forms.TextBox();
             this.tabReadMe = new System.Windows.Forms.TabPage();
             this.txtReadMe = new System.Windows.Forms.TextBox();
-            this.RigName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IpAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Port = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clmBus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -122,11 +121,32 @@
             this.dgvRigs.Size = new System.Drawing.Size(299, 475);
             this.dgvRigs.TabIndex = 0;
             // 
+            // RigName
+            // 
+            this.RigName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.RigName.DataPropertyName = "Name";
+            this.RigName.HeaderText = "Name";
+            this.RigName.Name = "RigName";
+            // 
+            // IpAddress
+            // 
+            this.IpAddress.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.IpAddress.DataPropertyName = "IpAddress";
+            this.IpAddress.HeaderText = "IP Address";
+            this.IpAddress.Name = "IpAddress";
+            // 
+            // Port
+            // 
+            this.Port.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Port.DataPropertyName = "Port";
+            this.Port.HeaderText = "Port";
+            this.Port.Name = "Port";
+            this.Port.Width = 51;
+            // 
             // lstGeneralOverview
             // 
             this.lstGeneralOverview.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.clmNumber,
-            this.clmBus,
             this.clmName,
             this.clmAlgorithm,
             this.clmHashRate,
@@ -145,11 +165,12 @@
             this.lstGeneralOverview.TabIndex = 0;
             this.lstGeneralOverview.UseCompatibleStateImageBehavior = false;
             this.lstGeneralOverview.View = System.Windows.Forms.View.Details;
+            this.lstGeneralOverview.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstGeneralOverview_MouseDoubleClick);
             // 
             // clmNumber
             // 
             this.clmNumber.Text = "#";
-            this.clmNumber.Width = 20;
+            this.clmNumber.Width = 40;
             // 
             // clmName
             // 
@@ -266,33 +287,6 @@
             this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
     "6SPqX8NJumFBvSjSpry8hpzr4 ";
             // 
-            // RigName
-            // 
-            this.RigName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.RigName.DataPropertyName = "Name";
-            this.RigName.HeaderText = "Name";
-            this.RigName.Name = "RigName";
-            // 
-            // IpAddress
-            // 
-            this.IpAddress.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.IpAddress.DataPropertyName = "IpAddress";
-            this.IpAddress.HeaderText = "IP Address";
-            this.IpAddress.Name = "IpAddress";
-            // 
-            // Port
-            // 
-            this.Port.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.Port.DataPropertyName = "Port";
-            this.Port.HeaderText = "Port";
-            this.Port.Name = "Port";
-            this.Port.Width = 51;
-            // 
-            // clmBus
-            // 
-            this.clmBus.Text = "Bus";
-            this.clmBus.Width = 30;
-            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -345,6 +339,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn RigName;
         private System.Windows.Forms.DataGridViewTextBoxColumn IpAddress;
         private System.Windows.Forms.DataGridViewTextBoxColumn Port;
-        private System.Windows.Forms.ColumnHeader clmBus;
     }
 }
