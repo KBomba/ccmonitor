@@ -46,13 +46,15 @@
             this.clmRejects = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmTemperature = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmPingTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.tabRigStats = new System.Windows.Forms.TabPage();
-            this.tbcRigStats = new System.Windows.Forms.TabControl();
-            this.tabSettings = new System.Windows.Forms.TabPage();
-            this.tabRawLogs = new System.Windows.Forms.TabPage();
-            this.txtRawLogs = new System.Windows.Forms.TextBox();
-            this.tabReadMe = new System.Windows.Forms.TabPage();
-            this.txtReadMe = new System.Windows.Forms.TextBox();
+            this.menuGeneral = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showRawLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -60,23 +62,17 @@
             this.scGeneral.Panel2.SuspendLayout();
             this.scGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRigs)).BeginInit();
-            this.tabRigStats.SuspendLayout();
-            this.tabRawLogs.SuspendLayout();
-            this.tabReadMe.SuspendLayout();
+            this.menuGeneral.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcMonitor
             // 
             this.tbcMonitor.Controls.Add(this.tabGeneral);
-            this.tbcMonitor.Controls.Add(this.tabRigStats);
-            this.tbcMonitor.Controls.Add(this.tabSettings);
-            this.tbcMonitor.Controls.Add(this.tabRawLogs);
-            this.tbcMonitor.Controls.Add(this.tabReadMe);
             this.tbcMonitor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbcMonitor.Location = new System.Drawing.Point(0, 0);
+            this.tbcMonitor.Location = new System.Drawing.Point(0, 24);
             this.tbcMonitor.Name = "tbcMonitor";
             this.tbcMonitor.SelectedIndex = 0;
-            this.tbcMonitor.Size = new System.Drawing.Size(1241, 507);
+            this.tbcMonitor.Size = new System.Drawing.Size(1241, 483);
             this.tbcMonitor.TabIndex = 1;
             // 
             // tabGeneral
@@ -85,7 +81,7 @@
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(1233, 481);
+            this.tabGeneral.Size = new System.Drawing.Size(1233, 457);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
             // 
@@ -103,7 +99,7 @@
             // scGeneral.Panel2
             // 
             this.scGeneral.Panel2.Controls.Add(this.lstGeneralOverview);
-            this.scGeneral.Size = new System.Drawing.Size(1227, 475);
+            this.scGeneral.Size = new System.Drawing.Size(1227, 451);
             this.scGeneral.SplitterDistance = 299;
             this.scGeneral.TabIndex = 0;
             // 
@@ -118,8 +114,10 @@
             this.dgvRigs.Location = new System.Drawing.Point(0, 0);
             this.dgvRigs.MultiSelect = false;
             this.dgvRigs.Name = "dgvRigs";
-            this.dgvRigs.Size = new System.Drawing.Size(299, 475);
+            this.dgvRigs.Size = new System.Drawing.Size(299, 451);
             this.dgvRigs.TabIndex = 0;
+            this.dgvRigs.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgvRigs_CellBeginEdit);
+            this.dgvRigs.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRigs_CellEndEdit);
             // 
             // RigName
             // 
@@ -161,7 +159,7 @@
             this.lstGeneralOverview.GridLines = true;
             this.lstGeneralOverview.Location = new System.Drawing.Point(0, 0);
             this.lstGeneralOverview.Name = "lstGeneralOverview";
-            this.lstGeneralOverview.Size = new System.Drawing.Size(924, 475);
+            this.lstGeneralOverview.Size = new System.Drawing.Size(924, 451);
             this.lstGeneralOverview.TabIndex = 0;
             this.lstGeneralOverview.UseCompatibleStateImageBehavior = false;
             this.lstGeneralOverview.View = System.Windows.Forms.View.Details;
@@ -217,75 +215,78 @@
             this.clmPingTime.Text = "Ping Time";
             this.clmPingTime.Width = 80;
             // 
-            // tabRigStats
+            // menuGeneral
             // 
-            this.tabRigStats.Controls.Add(this.tbcRigStats);
-            this.tabRigStats.Location = new System.Drawing.Point(4, 22);
-            this.tabRigStats.Name = "tabRigStats";
-            this.tabRigStats.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRigStats.Size = new System.Drawing.Size(1233, 481);
-            this.tabRigStats.TabIndex = 1;
-            this.tabRigStats.Text = "Rig Stats";
+            this.menuGeneral.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
+            this.settingsToolStripMenuItem,
+            this.helpToolStripMenuItem});
+            this.menuGeneral.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.menuGeneral.Location = new System.Drawing.Point(0, 0);
+            this.menuGeneral.Name = "menuGeneral";
+            this.menuGeneral.Size = new System.Drawing.Size(1241, 24);
+            this.menuGeneral.TabIndex = 2;
+            this.menuGeneral.Text = "menuGeneral";
             // 
-            // tbcRigStats
+            // fileToolStripMenuItem
             // 
-            this.tbcRigStats.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbcRigStats.Location = new System.Drawing.Point(3, 3);
-            this.tbcRigStats.Name = "tbcRigStats";
-            this.tbcRigStats.SelectedIndex = 0;
-            this.tbcRigStats.Size = new System.Drawing.Size(1227, 475);
-            this.tbcRigStats.TabIndex = 0;
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.saveLogsToolStripMenuItem,
+            this.showRawLogsToolStripMenuItem,
+            this.exitToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "File";
             // 
-            // tabSettings
+            // settingsToolStripMenuItem
             // 
-            this.tabSettings.Location = new System.Drawing.Point(4, 22);
-            this.tabSettings.Name = "tabSettings";
-            this.tabSettings.Size = new System.Drawing.Size(1233, 481);
-            this.tabSettings.TabIndex = 4;
-            this.tabSettings.Text = "Settings";
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Text = "Settings";
             // 
-            // tabRawLogs
+            // helpToolStripMenuItem
             // 
-            this.tabRawLogs.Controls.Add(this.txtRawLogs);
-            this.tabRawLogs.Location = new System.Drawing.Point(4, 22);
-            this.tabRawLogs.Name = "tabRawLogs";
-            this.tabRawLogs.Size = new System.Drawing.Size(1233, 481);
-            this.tabRawLogs.TabIndex = 2;
-            this.tabRawLogs.Text = "Raw Logs";
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.readMeToolStripMenuItem,
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
             // 
-            // txtRawLogs
+            // saveLogsToolStripMenuItem
             // 
-            this.txtRawLogs.BackColor = System.Drawing.SystemColors.Window;
-            this.txtRawLogs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtRawLogs.Location = new System.Drawing.Point(0, 0);
-            this.txtRawLogs.Multiline = true;
-            this.txtRawLogs.Name = "txtRawLogs";
-            this.txtRawLogs.ReadOnly = true;
-            this.txtRawLogs.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtRawLogs.Size = new System.Drawing.Size(1233, 481);
-            this.txtRawLogs.TabIndex = 0;
+            this.saveLogsToolStripMenuItem.Name = "saveLogsToolStripMenuItem";
+            this.saveLogsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveLogsToolStripMenuItem.Text = "Save logs";
+            this.saveLogsToolStripMenuItem.Click += new System.EventHandler(this.saveLogsToolStripMenuItem_Click);
             // 
-            // tabReadMe
+            // exitToolStripMenuItem
             // 
-            this.tabReadMe.Controls.Add(this.txtReadMe);
-            this.tabReadMe.Location = new System.Drawing.Point(4, 22);
-            this.tabReadMe.Name = "tabReadMe";
-            this.tabReadMe.Size = new System.Drawing.Size(1233, 481);
-            this.tabReadMe.TabIndex = 3;
-            this.tabReadMe.Text = "Read Me";
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
-            // txtReadMe
+            // readMeToolStripMenuItem
             // 
-            this.txtReadMe.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtReadMe.Location = new System.Drawing.Point(0, 0);
-            this.txtReadMe.Multiline = true;
-            this.txtReadMe.Name = "txtReadMe";
-            this.txtReadMe.ReadOnly = true;
-            this.txtReadMe.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtReadMe.Size = new System.Drawing.Size(1233, 481);
-            this.txtReadMe.TabIndex = 1;
-            this.txtReadMe.Text = "Seems like README.txt is missing :) But you can still donate some BTC @ 1BombaWy4" +
-    "6SPqX8NJumFBvSjSpry8hpzr4 ";
+            this.readMeToolStripMenuItem.Name = "readMeToolStripMenuItem";
+            this.readMeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.readMeToolStripMenuItem.Text = "Read me";
+            this.readMeToolStripMenuItem.Click += new System.EventHandler(this.readMeToolStripMenuItem_Click);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
+            // showRawLogsToolStripMenuItem
+            // 
+            this.showRawLogsToolStripMenuItem.Name = "showRawLogsToolStripMenuItem";
+            this.showRawLogsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.showRawLogsToolStripMenuItem.Text = "Show raw logs";
+            this.showRawLogsToolStripMenuItem.Click += new System.EventHandler(this.showRawLogsToolStripMenuItem_Click);
             // 
             // Monitor
             // 
@@ -293,6 +294,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1241, 507);
             this.Controls.Add(this.tbcMonitor);
+            this.Controls.Add(this.menuGeneral);
+            this.MainMenuStrip = this.menuGeneral;
             this.Name = "Monitor";
             this.Text = "Monitor";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Monitor_FormClosing);
@@ -303,12 +306,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).EndInit();
             this.scGeneral.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvRigs)).EndInit();
-            this.tabRigStats.ResumeLayout(false);
-            this.tabRawLogs.ResumeLayout(false);
-            this.tabRawLogs.PerformLayout();
-            this.tabReadMe.ResumeLayout(false);
-            this.tabReadMe.PerformLayout();
+            this.menuGeneral.ResumeLayout(false);
+            this.menuGeneral.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -316,16 +317,9 @@
 
         private System.Windows.Forms.TabControl tbcMonitor;
         private System.Windows.Forms.TabPage tabGeneral;
-        private System.Windows.Forms.TabPage tabRigStats;
-        private System.Windows.Forms.TabPage tabSettings;
-        private System.Windows.Forms.TabPage tabRawLogs;
-        private System.Windows.Forms.TextBox txtRawLogs;
-        private System.Windows.Forms.TabPage tabReadMe;
-        private System.Windows.Forms.TextBox txtReadMe;
         private System.Windows.Forms.SplitContainer scGeneral;
         private System.Windows.Forms.DataGridView dgvRigs;
         private System.Windows.Forms.ListView lstGeneralOverview;
-        private System.Windows.Forms.TabControl tbcRigStats;
         private System.Windows.Forms.ColumnHeader clmNumber;
         private System.Windows.Forms.ColumnHeader clmName;
         private System.Windows.Forms.ColumnHeader clmAlgorithm;
@@ -339,5 +333,14 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn RigName;
         private System.Windows.Forms.DataGridViewTextBoxColumn IpAddress;
         private System.Windows.Forms.DataGridViewTextBoxColumn Port;
+        private System.Windows.Forms.MenuStrip menuGeneral;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveLogsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showRawLogsToolStripMenuItem;
     }
 }

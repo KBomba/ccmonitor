@@ -55,11 +55,23 @@
   <ItemGroup>
     <Compile Include="Api\PruvotApi.cs" />
     <Compile Include="Api\JsonControl.cs" />
+    <Compile Include="Gui\AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Gui\AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\BenchmarkOverview.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Gui\BenchmarkOverview.Designer.cs">
       <DependentUpon>BenchmarkOverview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\GpuDetails.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\GpuDetails.Designer.cs">
+      <DependentUpon>GpuDetails.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\GpuTab.cs">
       <SubType>UserControl</SubType>
@@ -69,11 +81,23 @@
     </Compile>
     <Compile Include="GpuLogger.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
+    <Compile Include="Gui\HashLogView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\HashLogView.Designer.cs">
+      <DependentUpon>HashLogView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\Monitor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Gui\Monitor.Designer.cs">
       <DependentUpon>Monitor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\SensorLogView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\SensorLogView.Designer.cs">
+      <DependentUpon>SensorLogView.cs</DependentUpon>
     </Compile>
     <Compile Include="RigController.cs" />
     <Compile Include="Program.cs" />
@@ -84,14 +108,26 @@
     <Compile Include="Gui\RigTab.Designer.cs">
       <DependentUpon>RigTab.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Gui\AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\BenchmarkOverview.resx">
       <DependentUpon>BenchmarkOverview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\GpuDetails.resx">
+      <DependentUpon>GpuDetails.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\GpuTab.resx">
       <DependentUpon>GpuTab.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Gui\HashLogView.resx">
+      <DependentUpon>HashLogView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\Monitor.resx">
       <DependentUpon>Monitor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\SensorLogView.resx">
+      <DependentUpon>SensorLogView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

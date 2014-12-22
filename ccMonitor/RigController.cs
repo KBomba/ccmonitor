@@ -29,6 +29,7 @@ namespace ccMonitor
                 public double AverageHashRate { get; set; }
                 public double AverageMeanHashRate { get; set; }
                 public double AverageStandardDeviation { get; set; }
+                public double AverageSpreadPercentage { get; set; }
                 public double[] AverageGaussianPercentiles { get; set; }
                 public double AverageLowestHashRate { get; set; }
                 public double AverageHighestHashRate { get; set; }
@@ -54,7 +55,6 @@ namespace ccMonitor
         }
 
         // No logs available? What a pity, must be a fresh start
-        // This will get all local nvidia cards and load them in
         public RigController()
         {
             InitDefaultRig();
@@ -106,6 +106,7 @@ namespace ccMonitor
                         totalAverageHashRate = 0,
                         totalMeanHashRate = 0,
                         totalStandardDeviation = 0,
+                        totalSpreadPercentage = 0,
                         totalLowestHashRate = 0,
                         totalHighestHashRate = 0,
                         totalAverageTemperature = 0;
@@ -129,6 +130,7 @@ namespace ccMonitor
                             totalLowestHashRate += gpu.CurrentBenchmark.Statistic.LowestHashRate;
                             totalHighestHashRate += gpu.CurrentBenchmark.Statistic.HighestHashRate;
                             totalStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation;
+                            totalSpreadPercentage += gpu.CurrentBenchmark.Statistic.SpreadPercentage;
                             totalAverageTemperature += gpu.CurrentBenchmark.Statistic.AverageTemperature;
 
                             for (int i = 0; i < 4; i++)
@@ -139,26 +141,30 @@ namespace ccMonitor
                         }
                     }
 
-                    rig.CurrentStatistic = new RigInfo.RigStat
+                    if (rig.GpuLogs.Count > 0)
                     {
-                        Algorithm = rig.GpuLogs[rig.GpuLogs.Count -1].CurrentBenchmark.Algorithm,
-                        TotalHashCount = totalHashCount,
-                        TotalHashRate = totalAverageHashRate,
-                        AverageHashRate = totalAverageHashRate/rig.GpuLogs.Count,
-                        AverageMeanHashRate = totalMeanHashRate/rig.GpuLogs.Count,
-                        AverageStandardDeviation = totalStandardDeviation/rig.GpuLogs.Count,
-                        AverageLowestHashRate = totalLowestHashRate/rig.GpuLogs.Count,
-                        AverageHighestHashRate = totalHighestHashRate/rig.GpuLogs.Count,
-                        Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
-                        Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
-                        AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,
-                        ShareAnswerPing = pingTimes[0],
-                        AverageGaussianPercentiles = new double[4]
-                    };
+                        rig.CurrentStatistic = new RigInfo.RigStat
+                        {
+                            Algorithm = rig.GpuLogs[rig.GpuLogs.Count - 1].CurrentBenchmark.Algorithm,
+                            TotalHashCount = totalHashCount,
+                            TotalHashRate = totalAverageHashRate,
+                            AverageHashRate = totalAverageHashRate/rig.GpuLogs.Count,
+                            AverageMeanHashRate = totalMeanHashRate/rig.GpuLogs.Count,
+                            AverageStandardDeviation = totalStandardDeviation/rig.GpuLogs.Count,
+                            AverageSpreadPercentage = totalSpreadPercentage/rig.GpuLogs.Count,
+                            AverageLowestHashRate = totalLowestHashRate/rig.GpuLogs.Count,
+                            AverageHighestHashRate = totalHighestHashRate/rig.GpuLogs.Count,
+                            Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
+                            Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
+                            AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,
+                            ShareAnswerPing = pingTimes[0],
+                            AverageGaussianPercentiles = new double[4]
+                        };
 
-                    for (int i = 0; i < 4; i++)
-                    {
-                        rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i]/rig.GpuLogs.Count;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i] / rig.GpuLogs.Count;
+                        }
                     }
                 }
             }

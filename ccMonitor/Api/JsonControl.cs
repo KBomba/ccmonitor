@@ -19,7 +19,6 @@ namespace ccMonitor.Api
             }
         }
 
-
         public static T GetSerializedGzipFile<T>(string location) where T : new()
         {
             try
@@ -27,7 +26,9 @@ namespace ccMonitor.Api
                 using (JsonReader reader =
                     new JsonTextReader(new StreamReader(
                         new GZipStream(new BufferedStream(
-                            File.Open(location, FileMode.Open)), CompressionMode.Decompress))))
+                            File.Open(location, FileMode.Open), 
+                            (int) new FileInfo(location).Length), 
+                            CompressionMode.Decompress))))
                 {
                     return new JsonSerializer().Deserialize<T>(reader);
                 }

@@ -129,6 +129,7 @@ namespace ccMonitor
             public double AverageHashRate { get; set; }
             public double MeanHashRate { get; set; }
             public double StandardDeviation { get; set; }
+            public double SpreadPercentage { get; set; }
             public double[] GaussianPercentiles { get; set; }
             public double LowestHashRate { get; set; }
             public double HighestHashRate { get; set; }
@@ -364,6 +365,8 @@ namespace ccMonitor
                 }
 
                 CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/(hashLogSize));
+                CurrentBenchmark.Statistic.SpreadPercentage = CurrentBenchmark.Statistic.StandardDeviation/
+                                                              CurrentBenchmark.Statistic.AverageHashRate;
                 CurrentBenchmark.Statistic.LowestHashRate = rates[0];
                 CurrentBenchmark.Statistic.HighestHashRate = rates[rates.Length - 1];
             }

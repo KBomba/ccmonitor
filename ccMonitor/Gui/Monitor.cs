@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -16,8 +17,6 @@ namespace ccMonitor.Gui
 
         private System.Threading.Timer _updateTimer; // Different thread
         private System.Windows.Forms.Timer _guiTimer; // Same thread
-
-        private bool _rawLogsGotFocus; // used for auto-selecting txtRawLogs
 
         public Monitor()
         {
@@ -37,7 +36,7 @@ namespace ccMonitor.Gui
             {
                 using (TextReader tr = File.OpenText("README.txt"))
                 {
-                    txtReadMe.Text = tr.ReadToEnd();
+                    //txtReadMe.Text = tr.ReadToEnd();
                 }
             }
         }
@@ -46,11 +45,6 @@ namespace ccMonitor.Gui
         {
             dgvRigs.AutoGenerateColumns = false;
             dgvRigs.DataSource = _controller.RigLogs;
-
-            tabRawLogs.Enter += tabRawLogs_Enter;
-            txtRawLogs.GotFocus += txtRawLogs_GotFocus;
-            txtRawLogs.MouseUp += txtRawLogs_MouseUp;
-            txtRawLogs.Leave += txtRawLogs_Leave;
         }
 
         private void InitTimers()
@@ -74,24 +68,27 @@ namespace ccMonitor.Gui
             // Really complicated way to dynamically remove deleted rigs
             // Need to find a better way
             Dictionary<string, bool> rigExistence = new Dictionary<string, bool>();
-            foreach (TabPage tabPage in tbcRigStats.TabPages)
+            foreach (TabPage tabPage in tbcMonitor.TabPages)
             {
-                rigExistence.Add(tabPage.Text, false);
+                // Adds all tabs to a dict with def value false, except if it's the tab already there
+                rigExistence.Add(tabPage.Text, tabPage == tabGeneral);
             }
 
             foreach (RigController.RigInfo rig in _controller.RigLogs)
             {
                 if (rig.UserFriendlyName != null && rigExistence.ContainsKey(rig.UserFriendlyName))
                 {
+                    // If it exists in both the controller logs and in the tabs, it's value should be made true 
                     rigExistence[rig.UserFriendlyName] = true;
                 }
             }
 
-            foreach (TabPage tabPage in tbcRigStats.TabPages)
+            foreach (TabPage tabPage in tbcMonitor.TabPages)
             {
                 if (rigExistence[tabPage.Text] == false)
                 {
-                    tbcRigStats.TabPages.Remove(tabPage);
+                    // Remove it if it's not in the controller logs anymore
+                    tbcMonitor.TabPages.Remove(tabPage);
                 }
             }
         }
@@ -117,16 +114,17 @@ namespace ccMonitor.Gui
                 // Makes sure all rigs that are in the logs are shown in RigStats
                 // And updates them
                 bool tabPageExists = false;
-                foreach (TabPage tabPage in tbcRigStats.TabPages)
+                foreach (TabPage tabPage in tbcMonitor.TabPages)
                 {
                     if (tabPage.Text == rig.UserFriendlyName)
                     {
                         tabPageExists = true;
                     }
 
-                    foreach (RigTab rigTab in tabPage.Controls)
+                    foreach (object control in tabPage.Controls)
                     {
-                        rigTab.UpdateGui();
+                        RigTab rigTab = control as RigTab;
+                        if (rigTab != null) rigTab.UpdateGui();
                     }
                 }                
 
@@ -137,8 +135,8 @@ namespace ccMonitor.Gui
                     RigTab rigTab = new RigTab(rig) {Dock = DockStyle.Fill};
                     rigTab.UpdateGui();
                     tabPage.Controls.Add(rigTab);
-                    tbcRigStats.TabPages.Add(tabPage);
-                    tbcRigStats.Dock = DockStyle.Fill;
+                    tabPage.Dock = DockStyle.Fill;
+                    tbcMonitor.TabPages.Add(tabPage);
                 }
                 
                 // Adds the controller info to the listview
@@ -151,8 +149,8 @@ namespace ccMonitor.Gui
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, 'H'));
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, 'H'));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, "H"));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
                     lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
                     lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(string.Empty);
@@ -165,8 +163,8 @@ namespace ccMonitor.Gui
                 lvi = new ListViewItem(string.Empty, lvg);
                 lvi.SubItems.Add("Total");
                 lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
-                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, 'H'));
-                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, 'H'));
+                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, "H"));
+                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, "H"));
                 lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
                 lvi.SubItems.Add(rig.CurrentStatistic.Accepts.ToString(CultureInfo.InvariantCulture));
                 lvi.SubItems.Add(rig.CurrentStatistic.Rejects.ToString(CultureInfo.InvariantCulture));
@@ -221,68 +219,121 @@ namespace ccMonitor.Gui
             
         }
 
-        private void txtRawLogs_Leave(object sender, EventArgs e)
-        {
-            _rawLogsGotFocus = false;
-        }
-
-        void txtRawLogs_GotFocus(object sender, EventArgs e)
-        {
-            if (MouseButtons == MouseButtons.None)
-            {
-                txtRawLogs.SelectAll();
-                _rawLogsGotFocus = true;
-            }
-        }
-
-        void txtRawLogs_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (!_rawLogsGotFocus && txtRawLogs.SelectionLength == 0)
-            {
-                _rawLogsGotFocus = true;
-                txtRawLogs.SelectAll();
-            }
-        }
-
-        private void tabRawLogs_Enter(object sender, EventArgs e)
-        {
-            txtRawLogs.Text = JsonConvert.SerializeObject(_controller, Formatting.Indented);
-        }
-
         private void lstGeneralOverview_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (lstGeneralOverview.SelectedItems.Count > 0)
             {
-                tbcMonitor.SelectTab(tabRigStats);
                 ListViewItem listViewItem = lstGeneralOverview.SelectedItems[0];
-
-                foreach (TabPage rigPage in tbcRigStats.TabPages)
+                foreach (TabPage rigPage in tbcMonitor.TabPages)
                 {
                     if (rigPage.Text == listViewItem.Group.Header)
                     {
-                        tbcRigStats.SelectTab(rigPage);
+                        tbcMonitor.SelectTab(rigPage);
                     }
 
                     if (listViewItem.Text != string.Empty)
                     {
-                        foreach (RigTab rigTab in rigPage.Controls)
+                        foreach (object control in rigPage.Controls)
                         {
-                            foreach (TabPage gpuPage in rigTab.tbcRig.TabPages)
+                            RigTab rigTab = control as RigTab;
+                            if (rigTab != null)
                             {
-                                if (gpuPage.Text.EndsWith(listViewItem.Text, StringComparison.Ordinal))
+                                foreach (TabPage gpuPage in rigTab.tbcRig.TabPages)
                                 {
-                                    rigTab.tbcRig.SelectTab(gpuPage);
+                                    if (gpuPage.Text.EndsWith(
+                                        listViewItem.Text, StringComparison.Ordinal))
+                                    {
+                                        rigTab.tbcRig.SelectTab(gpuPage);
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
-                
-               
             }
         }
 
-        
+        private void dgvRigs_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            _guiTimer.Start();
+        }
+
+        private void dgvRigs_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            _guiTimer.Start();
+        }
+
+        private void saveLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveLogs();
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void showRawLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (Form form = new Form())
+            {
+                form.Text = "Raw logs";
+                form.Size = new Size(this.Size.Width/2, this.Size.Height);
+
+
+                TextBox textBox = new TextBox
+                {
+                    Text = JsonConvert.SerializeObject(_controller.RigLogs, Formatting.Indented),
+                    Multiline = true,
+                    ScrollBars = ScrollBars.Both,
+                    Dock = DockStyle.Fill,
+                    ReadOnly = true
+                };
+
+                form.Controls.Add(textBox);
+                form.ShowDialog();
+
+                textBox.SelectAll();
+                textBox.Focus();
+            }
+        }
+
+        private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (Form form = new Form())
+            {
+                form.Text = "Read Me";
+                form.Size = new Size(this.Size.Width, this.Size.Height);
+
+                TextBox textBox = new TextBox
+                {
+                    Text = File.Exists("README.txt") ? File.ReadAllText("README.txt") : GetDefaultReadme(),
+                    Multiline = true,
+                    ScrollBars = ScrollBars.Both,
+                    Dock = DockStyle.Fill,
+                    ReadOnly = true
+                };
+
+                form.Controls.Add(textBox);
+                form.ShowDialog();
+            }
+        }
+
+        private string GetDefaultReadme()
+        {
+            return
+                "Oops, seems like README.txt is missing. " +
+                Environment.NewLine + "You can get a copy yourself at https://github.com/KBomba/ccmonitor . " +
+                Environment.NewLine + "Don't forget to share some love at (BTC) 1BombaWy46SPqX8NJumFBvSjSpry8hpzr4 :)";
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (AboutBox aboutBox = new AboutBox())
+            {
+                aboutBox.ShowDialog();
+            }
+        }
     }
 }
