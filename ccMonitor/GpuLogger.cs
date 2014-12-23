@@ -121,6 +121,11 @@ namespace ccMonitor
                 if (obj.GetType() != this.GetType()) return false;
                 return Equals((Setup) obj);
             }
+
+            public override string ToString()
+            {
+                return MinerName + " " + MinerVersion + " (APIv" + ApiVersion + ")";
+            }
         }
 
         public class Stat
@@ -309,6 +314,7 @@ namespace ccMonitor
             {
                 CurrentBenchmark.Statistic.TotalHashCount = sumOfWeights;
                 CurrentBenchmark.Statistic.AverageHashRate = sumOfWeightedRates/sumOfWeights;
+                CurrentBenchmark.Statistic.MeanHashRate = 0;
                 CurrentBenchmark.Statistic.GaussianPercentiles = new double[6];
                 double weightCounter = 0, sumOfSquaresOfDifferences = 0;
                 Array.Sort(rates, weights);
@@ -322,25 +328,25 @@ namespace ccMonitor
                     weightCounter += weights[i];
 
                     // -2σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[0] == 0 && weightCounter >= 0.045500263896358)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[0] == 0 && weightCounter > 0.045500263896357)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[0] = rates[i];
                     }
 
                     // -1.5σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[1] == 0 && weightCounter >= 0.133614402537716)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[1] == 0 && weightCounter > 0.133614402537715)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[1] = rates[i];
                     }
 
                     // -1σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[2] == 0 && weightCounter >= 0.317310507862914)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[2] == 0 && weightCounter > 0.317310507862913)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[2] = rates[i];
                     }
 
                     // 0σ
-                    if (CurrentBenchmark.Statistic.MeanHashRate == 0 && weightCounter >= 0.5)
+                    if (CurrentBenchmark.Statistic.MeanHashRate == 0 && weightCounter > 0.499999999999999)
                     {
                         CurrentBenchmark.Statistic.MeanHashRate = rates[i];
                     }
@@ -348,23 +354,23 @@ namespace ccMonitor
                     // +1σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[3] == 0 && weightCounter > 0.682689492137086)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[3] = i - 1 >= 0 ? rates[i - 1] : rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[3] = rates[i];
                     }
 
                     // +1.5σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[4] == 0 && weightCounter > 0.866385597462284)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[4] = i - 1 >= 0 ? rates[i - 1] : rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[4] = rates[i];
                     }
 
                     // +2σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[5] == 0 && weightCounter > 0.954499736103642)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[5] = i - 1 >= 0 ? rates[i - 1] : rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[5] = rates[i];
                     }
                 }
 
-                CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/(hashLogSize));
+                CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/hashLogSize);
                 CurrentBenchmark.Statistic.SpreadPercentage = CurrentBenchmark.Statistic.StandardDeviation/
                                                               CurrentBenchmark.Statistic.AverageHashRate;
                 CurrentBenchmark.Statistic.LowestHashRate = rates[0];

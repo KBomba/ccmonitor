@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -24,21 +25,9 @@ namespace ccMonitor.Gui
 
             LoadSettings();
             LoadLogs();
-            LoadReadMe();
 
             InitTimers();
             InitGui();
-        }
-
-        private void LoadReadMe()
-        {
-            if (File.Exists("README.txt"))
-            {
-                using (TextReader tr = File.OpenText("README.txt"))
-                {
-                    //txtReadMe.Text = tr.ReadToEnd();
-                }
-            }
         }
 
         private void InitGui()
@@ -256,12 +245,14 @@ namespace ccMonitor.Gui
 
         private void dgvRigs_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
+            _updateTimer.Change(0, Timeout.Infinite);
             _guiTimer.Start();
         }
 
         private void dgvRigs_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-            _guiTimer.Start();
+            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            _guiTimer.Stop();
         }
 
         private void saveLogsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -334,6 +325,40 @@ namespace ccMonitor.Gui
             {
                 aboutBox.ShowDialog();
             }
+        }
+
+        private void takeScreenshotToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Bitmap screenshot = new Bitmap(this.Width, this.Height);
+            this.DrawToBitmap(screenshot, new Rectangle(0, 0, screenshot.Width, screenshot.Height));
+            Image screenImage = screenshot;
+
+            ImageCodecInfo pngEncoder = null;
+            ImageCodecInfo[] codecInfos = ImageCodecInfo.GetImageEncoders();
+            foreach (ImageCodecInfo codecInfo in codecInfos)
+            {
+                if (codecInfo.MimeType == "image/png")
+                {
+                    pngEncoder = codecInfo;
+                    break;
+                }
+            }
+
+            if (pngEncoder != null)
+            {
+                EncoderParameter quality = new EncoderParameter(Encoder.Quality, 100);
+                EncoderParameter compression = new EncoderParameter(Encoder.Compression, 0);
+                EncoderParameters encoderParameters = new EncoderParameters(2);
+                encoderParameters.Param[0] = quality;
+                encoderParameters.Param[1] = compression;
+                
+                screenImage.Save(GuiHelper.GetCurrentUnixTimeStamp() + ".png", pngEncoder, encoderParameters);
+            }
+            else
+            {
+                screenImage.Save(GuiHelper.GetCurrentUnixTimeStamp() + ".png", ImageFormat.Png);
+            }
+            
         }
     }
 }

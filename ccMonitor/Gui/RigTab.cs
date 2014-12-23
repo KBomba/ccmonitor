@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Windows.Documents;
 using System.Windows.Forms;
+using System.Windows.Input;
 using ccMonitor.Api;
+using Newtonsoft.Json;
+using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
 
 namespace ccMonitor.Gui
 {
@@ -14,6 +17,8 @@ namespace ccMonitor.Gui
             Rig = rig;
             InitializeComponent();
         }
+
+        private bool hadRequestResult = false;
 
         public void UpdateGui()
         {
@@ -49,7 +54,30 @@ namespace ccMonitor.Gui
             }
 
 
-            
+        }
+
+        private void txtDebugConsole_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (hadRequestResult)
+            {
+                txtDebugConsole.Clear();
+                txtDebugConsole.AppendText(Environment.NewLine + ">  ");
+                hadRequestResult = false;
+            }
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                string[] splitStrings = txtDebugConsole.Text.Split('>');
+
+                Dictionary<string, string>[] request = PruvotApi.Request(Rig.IpAddress, Rig.Port, splitStrings[splitStrings.Length -1].Trim());
+                if (request != null)
+                {
+                    txtDebugConsole.AppendText(Environment.NewLine + ">  " + Environment.NewLine + 
+                                                JsonConvert.SerializeObject(request, Formatting.Indented));
+                }
+
+                hadRequestResult = true;
+            }
         }
     }
 }

@@ -53,8 +53,7 @@ namespace ccMonitor.Api
         {
             // Workaround for deepcopying 
             // Won't apply to items out of scope and can be slow
-            string s = JsonConvert.SerializeObject(obj);
-            return JsonConvert.DeserializeObject<T>(s);
+            return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(obj));
         }
     }
 }

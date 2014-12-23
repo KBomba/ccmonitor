@@ -48,13 +48,14 @@
             this.clmPingTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuGeneral = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showRawLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showRawLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.takeScreenshotToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -72,7 +73,7 @@
             this.tbcMonitor.Location = new System.Drawing.Point(0, 24);
             this.tbcMonitor.Name = "tbcMonitor";
             this.tbcMonitor.SelectedIndex = 0;
-            this.tbcMonitor.Size = new System.Drawing.Size(1241, 483);
+            this.tbcMonitor.Size = new System.Drawing.Size(1264, 538);
             this.tbcMonitor.TabIndex = 1;
             // 
             // tabGeneral
@@ -81,7 +82,7 @@
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(1233, 457);
+            this.tabGeneral.Size = new System.Drawing.Size(1256, 512);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
             // 
@@ -99,7 +100,7 @@
             // scGeneral.Panel2
             // 
             this.scGeneral.Panel2.Controls.Add(this.lstGeneralOverview);
-            this.scGeneral.Size = new System.Drawing.Size(1227, 451);
+            this.scGeneral.Size = new System.Drawing.Size(1250, 506);
             this.scGeneral.SplitterDistance = 299;
             this.scGeneral.TabIndex = 0;
             // 
@@ -114,7 +115,7 @@
             this.dgvRigs.Location = new System.Drawing.Point(0, 0);
             this.dgvRigs.MultiSelect = false;
             this.dgvRigs.Name = "dgvRigs";
-            this.dgvRigs.Size = new System.Drawing.Size(299, 451);
+            this.dgvRigs.Size = new System.Drawing.Size(299, 506);
             this.dgvRigs.TabIndex = 0;
             this.dgvRigs.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgvRigs_CellBeginEdit);
             this.dgvRigs.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvRigs_CellEndEdit);
@@ -159,7 +160,7 @@
             this.lstGeneralOverview.GridLines = true;
             this.lstGeneralOverview.Location = new System.Drawing.Point(0, 0);
             this.lstGeneralOverview.Name = "lstGeneralOverview";
-            this.lstGeneralOverview.Size = new System.Drawing.Size(924, 451);
+            this.lstGeneralOverview.Size = new System.Drawing.Size(947, 506);
             this.lstGeneralOverview.TabIndex = 0;
             this.lstGeneralOverview.UseCompatibleStateImageBehavior = false;
             this.lstGeneralOverview.View = System.Windows.Forms.View.Details;
@@ -224,19 +225,41 @@
             this.menuGeneral.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.menuGeneral.Location = new System.Drawing.Point(0, 0);
             this.menuGeneral.Name = "menuGeneral";
-            this.menuGeneral.Size = new System.Drawing.Size(1241, 24);
+            this.menuGeneral.Size = new System.Drawing.Size(1264, 24);
             this.menuGeneral.TabIndex = 2;
             this.menuGeneral.Text = "menuGeneral";
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.takeScreenshotToolStripMenuItem,
             this.saveLogsToolStripMenuItem,
             this.showRawLogsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
+            // 
+            // saveLogsToolStripMenuItem
+            // 
+            this.saveLogsToolStripMenuItem.Name = "saveLogsToolStripMenuItem";
+            this.saveLogsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.saveLogsToolStripMenuItem.Text = "Save logs";
+            this.saveLogsToolStripMenuItem.Click += new System.EventHandler(this.saveLogsToolStripMenuItem_Click);
+            // 
+            // showRawLogsToolStripMenuItem
+            // 
+            this.showRawLogsToolStripMenuItem.Name = "showRawLogsToolStripMenuItem";
+            this.showRawLogsToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.showRawLogsToolStripMenuItem.Text = "Show raw logs";
+            this.showRawLogsToolStripMenuItem.Click += new System.EventHandler(this.showRawLogsToolStripMenuItem_Click);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // settingsToolStripMenuItem
             // 
@@ -253,20 +276,6 @@
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.helpToolStripMenuItem.Text = "Help";
             // 
-            // saveLogsToolStripMenuItem
-            // 
-            this.saveLogsToolStripMenuItem.Name = "saveLogsToolStripMenuItem";
-            this.saveLogsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.saveLogsToolStripMenuItem.Text = "Save logs";
-            this.saveLogsToolStripMenuItem.Click += new System.EventHandler(this.saveLogsToolStripMenuItem_Click);
-            // 
-            // exitToolStripMenuItem
-            // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
             // readMeToolStripMenuItem
             // 
             this.readMeToolStripMenuItem.Name = "readMeToolStripMenuItem";
@@ -281,18 +290,18 @@
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
-            // showRawLogsToolStripMenuItem
+            // takeScreenshotToolStripMenuItem
             // 
-            this.showRawLogsToolStripMenuItem.Name = "showRawLogsToolStripMenuItem";
-            this.showRawLogsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.showRawLogsToolStripMenuItem.Text = "Show raw logs";
-            this.showRawLogsToolStripMenuItem.Click += new System.EventHandler(this.showRawLogsToolStripMenuItem_Click);
+            this.takeScreenshotToolStripMenuItem.Name = "takeScreenshotToolStripMenuItem";
+            this.takeScreenshotToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
+            this.takeScreenshotToolStripMenuItem.Text = "Take screenshot";
+            this.takeScreenshotToolStripMenuItem.Click += new System.EventHandler(this.takeScreenshotToolStripMenuItem_Click);
             // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1241, 507);
+            this.ClientSize = new System.Drawing.Size(1264, 562);
             this.Controls.Add(this.tbcMonitor);
             this.Controls.Add(this.menuGeneral);
             this.MainMenuStrip = this.menuGeneral;
@@ -342,5 +351,6 @@
         private System.Windows.Forms.ToolStripMenuItem readMeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showRawLogsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem takeScreenshotToolStripMenuItem;
     }
 }

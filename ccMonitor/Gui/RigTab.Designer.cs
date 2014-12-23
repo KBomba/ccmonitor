@@ -77,6 +77,7 @@
             this.txtDebugConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtDebugConsole.Size = new System.Drawing.Size(1162, 554);
             this.txtDebugConsole.TabIndex = 0;
+            this.txtDebugConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtDebugConsole_KeyDown);
             // 
             // RigTab
             // 

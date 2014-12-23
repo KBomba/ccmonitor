@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ccMonitor.Gui
@@ -29,8 +22,7 @@ namespace ccMonitor.Gui
             public string MinerNameVersion { get; set; }
             public string Stratum { get; set; }
         }
-
-
+        
         public GpuTab(GpuLogger gpu)
         {
             Gpu = gpu;
@@ -40,10 +32,7 @@ namespace ccMonitor.Gui
 
         private void InitGpuDetails()
         {
-            GpuDetails gpuDetails = new GpuDetails(Gpu.Info)
-            {
-                Dock = DockStyle.Fill
-            };
+            BenchmarkDetails gpuDetails = new BenchmarkDetails(Gpu.Info, 6){Dock = DockStyle.Fill};
             tabGpuDetails.Controls.Add(gpuDetails);
         }
 
@@ -51,7 +40,7 @@ namespace ccMonitor.Gui
         {
             foreach (object control in tabGpuDetails.Controls)
             {
-                GpuDetails gpuDetails = control as GpuDetails;
+                BenchmarkDetails gpuDetails = control as BenchmarkDetails;
                 if (gpuDetails != null) gpuDetails.UpdateStats(Gpu.CurrentBenchmark);
             }
 
@@ -68,8 +57,7 @@ namespace ccMonitor.Gui
                     StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
                     HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
                     AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
-                    MinerNameVersion = benchmark.MinerSetup.MinerName + " " + benchmark.MinerSetup.MinerVersion 
-                                        + " (APIv" + benchmark.MinerSetup.ApiVersion + ")",
+                    MinerNameVersion = benchmark.MinerSetup.ToString(),
                     Stratum = benchmark.MinerSetup.MiningUrl
                 };
 
@@ -86,10 +74,16 @@ namespace ccMonitor.Gui
             int rowIndex = e.RowIndex;
             if(rowIndex<0) return;
 
-            BenchmarkOverview benchmarkOverview =
-                new BenchmarkOverview(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1]);
-            benchmarkOverview.Text = Gpu.Info + " - Detailed benchmark overview";
-            benchmarkOverview.Show();
+            // Over 9000 means max value
+            BenchmarkDetails benchmarkDetails = new BenchmarkDetails(Gpu.Info, 9001) { Dock = DockStyle.Fill };
+            benchmarkDetails.UpdateStats(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1]);
+            Form form = new Form
+            {
+                Text = Gpu.Info + " - Detailed benchmark overview",
+                Size = new Size(this.Size.Width, this.Size.Height)
+            };
+            form.Controls.Add(benchmarkDetails);
+            form.Show();
         }
     }
 

@@ -23,5 +23,10 @@ namespace ccMonitor.Gui
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
+
+        public static long GetCurrentUnixTimeStamp()
+        {
+            return (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+        }
     }
 }

@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using ccMonitor.Api;
 
 namespace ccMonitor.Gui
 {
@@ -23,9 +19,14 @@ namespace ccMonitor.Gui
             public string Difficulty { get; set; }
         }
 
-        public HashLogView()
+        private int _rows;
+
+        public HashLogView(int rows)
         {
+            _rows = rows;
+
             InitializeComponent();
+
             dgvHashLogs.AutoGenerateColumns = false;
             dgvHashLogs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             dgvHashLogs.ColumnHeadersHeight = 42;
@@ -36,11 +37,16 @@ namespace ccMonitor.Gui
             dgvHashLogs.DataSource = null;
             List<UserFriendlyHashEntry> userFriendlyHashEntries = new List<UserFriendlyHashEntry>(hashLogs.Count);
 
-            foreach (GpuLogger.HashEntry hashEntry in hashLogs)
+            List<GpuLogger.HashEntry> sortedHashLogs = hashLogs.OrderByDescending(entry => entry.TimeStamp).ToList();
+            // If over 9000, just use max size, else make sure it doesn't get out of index
+            int max = _rows > 9000? sortedHashLogs.Count : sortedHashLogs.Count < _rows ? sortedHashLogs.Count : _rows;
+            for (int index = 0; index < max; index++)
             {
+                GpuLogger.HashEntry hashEntry = sortedHashLogs[index];
                 UserFriendlyHashEntry userFriendlyHashEntry = new UserFriendlyHashEntry
                 {
-                    TimeStamp = GuiHelper.UnixTimeStampToDateTime(hashEntry.TimeStamp).ToString(CultureInfo.InvariantCulture),
+                    TimeStamp =
+                        GuiHelper.UnixTimeStampToDateTime(hashEntry.TimeStamp).ToString(CultureInfo.InvariantCulture),
                     HashRate = GuiHelper.GetRightMagnitude(hashEntry.HashRate, "H"),
                     HashCount = GuiHelper.GetRightMagnitude(hashEntry.HashCount),
                     Found = String.Format("{0:0}", hashEntry.Found),
@@ -51,7 +57,7 @@ namespace ccMonitor.Gui
                 userFriendlyHashEntries.Add(userFriendlyHashEntry);
             }
 
-            dgvHashLogs.DataSource = userFriendlyHashEntries.OrderByDescending(entry => entry.TimeStamp).ToList();
+            dgvHashLogs.DataSource = userFriendlyHashEntries;
         }
     }
 }

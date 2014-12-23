@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using ccMonitor.Api;
 
 namespace ccMonitor.Gui
 {
@@ -26,8 +20,11 @@ namespace ccMonitor.Gui
             public string NetworkRigPing { get; set; }
         }
 
-        public SensorLogView()
+        private int _rows;
+
+        public SensorLogView(int rows)
         {
+            _rows = rows;
             InitializeComponent();
             dgvSensorLogs.AutoGenerateColumns = false;
             dgvSensorLogs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
@@ -39,11 +36,16 @@ namespace ccMonitor.Gui
             dgvSensorLogs.DataSource = null;
             List<UserFriendlySensorValue> userFriendlySensorValues = new List<UserFriendlySensorValue>(sensorLog.Count);
 
-            foreach (GpuLogger.SensorValues sensorValue in sensorLog)
+            List<GpuLogger.SensorValues> sortedSensorLog = sensorLog.OrderByDescending(value => value.TimeStamp).ToList();
+            // If over 9000, just use max size, else make sure it doesn't get out of index
+            int max = _rows > 9000 ? sortedSensorLog.Count : sortedSensorLog.Count < _rows ? sortedSensorLog.Count : _rows;
+            for (int index = 0; index < max; index++)
             {
+                GpuLogger.SensorValues sensorValue = sortedSensorLog[index];
                 UserFriendlySensorValue userFriendlySensorValue = new UserFriendlySensorValue
                 {
-                    TimeStamp = GuiHelper.UnixTimeStampToDateTime(sensorValue.TimeStamp).ToString(CultureInfo.InvariantCulture),
+                    TimeStamp =
+                        GuiHelper.UnixTimeStampToDateTime(sensorValue.TimeStamp).ToString(CultureInfo.InvariantCulture),
                     Temperature = sensorValue.Temperature.ToString(CultureInfo.InvariantCulture) + "°C",
                     FanPercentage = sensorValue.FanPercentage.ToString(CultureInfo.InvariantCulture) + " %",
                     CoreClockFrequency = GuiHelper.GetRightMagnitude(sensorValue.CoreClockFrequency, "Hz"),
@@ -51,7 +53,7 @@ namespace ccMonitor.Gui
                     ShareAnswerPing = sensorValue.ShareAnswerPing.ToString(CultureInfo.InvariantCulture) + " ms",
                     MiningUrlPing = sensorValue.MiningUrlPing.ToString(CultureInfo.InvariantCulture) + " ms",
                     NetworkRigPing = sensorValue.NetworkRigPing.ToString(CultureInfo.InvariantCulture) + " ms",
-                }; 
+                };
 
                 userFriendlySensorValues.Add(userFriendlySensorValue);
             }

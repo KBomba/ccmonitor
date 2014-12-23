@@ -95,7 +95,7 @@ namespace ccMonitor.Api
         }
 
 
-        private static Dictionary<string, string>[] Request(string ip, int port, string message)
+        public static Dictionary<string, string>[] Request(string ip, int port, string message)
         {
             string responseData;
 
