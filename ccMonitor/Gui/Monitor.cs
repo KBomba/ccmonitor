@@ -84,6 +84,7 @@ namespace ccMonitor.Gui
 
         private void UpdateGui()
         {
+            lstGeneralOverview.BeginUpdate();
             // Grabs all the selected items in the General Overview List
             int[] selectedIndexes = new int[lstGeneralOverview.SelectedIndices.Count];
             if (selectedIndexes.Length > 0)
@@ -171,6 +172,7 @@ namespace ccMonitor.Gui
                     lstGeneralOverview.Select();
                 }
             }
+            lstGeneralOverview.EndUpdate();
         }
 
         private void UpdateController(object o)

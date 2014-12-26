@@ -41,6 +41,7 @@
             this.clmTimeStampSensor = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmTemperature = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmFanPercentage = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clmFanRpm = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmCoreClockFrequency = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmMemoryClockFrequency = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmShareAnswerPing = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,6 +60,7 @@
             this.clmTimeStampSensor,
             this.clmTemperature,
             this.clmFanPercentage,
+            this.clmFanRpm,
             this.clmCoreClockFrequency,
             this.clmMemoryClockFrequency,
             this.clmShareAnswerPing,
@@ -113,9 +115,17 @@
             dataGridViewCellStyle3.Format = "N0";
             dataGridViewCellStyle3.NullValue = "-1";
             this.clmFanPercentage.DefaultCellStyle = dataGridViewCellStyle3;
-            this.clmFanPercentage.HeaderText = "Fan %";
+            this.clmFanPercentage.HeaderText = "Fan (%)";
             this.clmFanPercentage.Name = "clmFanPercentage";
             this.clmFanPercentage.ReadOnly = true;
+            // 
+            // clmFanRpm
+            // 
+            this.clmFanRpm.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.clmFanRpm.DataPropertyName = "FanRpm";
+            this.clmFanRpm.HeaderText = "Fan (rpm)";
+            this.clmFanRpm.Name = "clmFanRpm";
+            this.clmFanRpm.ReadOnly = true;
             // 
             // clmCoreClockFrequency
             // 
@@ -190,6 +200,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTimeStampSensor;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTemperature;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmFanPercentage;
+        private System.Windows.Forms.DataGridViewTextBoxColumn clmFanRpm;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmCoreClockFrequency;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmMemoryClockFrequency;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmShareAnswerPing;

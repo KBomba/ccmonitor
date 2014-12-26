@@ -28,6 +28,13 @@ namespace ccMonitor.Gui
             Gpu = gpu;
             InitializeComponent();
             InitGpuDetails();
+            InitHashrateCharts();
+        }
+
+        private void InitHashrateCharts()
+        {
+            HashChart hashChart = new HashChart() {Dock = DockStyle.Fill};
+            tabGpuCharts.Controls.Add(hashChart);
         }
 
         private void InitGpuDetails()
@@ -42,6 +49,15 @@ namespace ccMonitor.Gui
             {
                 BenchmarkDetails gpuDetails = control as BenchmarkDetails;
                 if (gpuDetails != null) gpuDetails.UpdateStats(Gpu.CurrentBenchmark);
+            }
+
+            foreach (object control in tabGpuCharts.Controls)
+            {
+                HashChart hashChart = control as HashChart;
+                if (hashChart != null)
+                {
+                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs);
+                }
             }
 
             UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
@@ -74,7 +90,7 @@ namespace ccMonitor.Gui
             int rowIndex = e.RowIndex;
             if(rowIndex<0) return;
 
-            // Over 9000 means max value
+            // Over 9000 means max value, max rows default to 5 though
             BenchmarkDetails benchmarkDetails = new BenchmarkDetails(Gpu.Info, 9001) { Dock = DockStyle.Fill };
             benchmarkDetails.UpdateStats(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1]);
             Form form = new Form

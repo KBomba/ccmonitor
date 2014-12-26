@@ -28,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tbcGpu = new System.Windows.Forms.TabControl();
             this.tabGpuDetails = new System.Windows.Forms.TabPage();
             this.tabGpuBenchmarks = new System.Windows.Forms.TabPage();
@@ -45,16 +42,9 @@
             this.clmMinerNameVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmStratum = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabGpuCharts = new System.Windows.Forms.TabPage();
-            this.splitCharts = new System.Windows.Forms.SplitContainer();
-            this.chartHistoric = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tbcGpu.SuspendLayout();
             this.tabGpuBenchmarks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBenchmarks)).BeginInit();
-            this.tabGpuCharts.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitCharts)).BeginInit();
-            this.splitCharts.Panel2.SuspendLayout();
-            this.splitCharts.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chartHistoric)).BeginInit();
             this.SuspendLayout();
             // 
             // tbcGpu
@@ -197,45 +187,12 @@
             // 
             // tabGpuCharts
             // 
-            this.tabGpuCharts.Controls.Add(this.splitCharts);
             this.tabGpuCharts.Location = new System.Drawing.Point(4, 22);
             this.tabGpuCharts.Name = "tabGpuCharts";
             this.tabGpuCharts.Padding = new System.Windows.Forms.Padding(3);
             this.tabGpuCharts.Size = new System.Drawing.Size(1154, 528);
             this.tabGpuCharts.TabIndex = 2;
-            this.tabGpuCharts.Text = "Historic charts";
-            // 
-            // splitCharts
-            // 
-            this.splitCharts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitCharts.Location = new System.Drawing.Point(3, 3);
-            this.splitCharts.Name = "splitCharts";
-            this.splitCharts.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitCharts.Panel2
-            // 
-            this.splitCharts.Panel2.Controls.Add(this.chartHistoric);
-            this.splitCharts.Size = new System.Drawing.Size(1148, 522);
-            this.splitCharts.SplitterDistance = 93;
-            this.splitCharts.TabIndex = 0;
-            // 
-            // chartHistoric
-            // 
-            chartArea1.Name = "ChartArea1";
-            this.chartHistoric.ChartAreas.Add(chartArea1);
-            this.chartHistoric.Dock = System.Windows.Forms.DockStyle.Fill;
-            legend1.Name = "Legend1";
-            this.chartHistoric.Legends.Add(legend1);
-            this.chartHistoric.Location = new System.Drawing.Point(0, 0);
-            this.chartHistoric.Name = "chartHistoric";
-            this.chartHistoric.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.SemiTransparent;
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chartHistoric.Series.Add(series1);
-            this.chartHistoric.Size = new System.Drawing.Size(1148, 425);
-            this.chartHistoric.TabIndex = 0;
-            this.chartHistoric.Text = "Historic charts";
+            this.tabGpuCharts.Text = "Hash charts";
             // 
             // GpuTab
             // 
@@ -247,11 +204,6 @@
             this.tbcGpu.ResumeLayout(false);
             this.tabGpuBenchmarks.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvBenchmarks)).EndInit();
-            this.tabGpuCharts.ResumeLayout(false);
-            this.splitCharts.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitCharts)).EndInit();
-            this.splitCharts.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chartHistoric)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -263,8 +215,6 @@
         private System.Windows.Forms.TabPage tabGpuBenchmarks;
         private System.Windows.Forms.DataGridView dgvBenchmarks;
         private System.Windows.Forms.TabPage tabGpuCharts;
-        private System.Windows.Forms.SplitContainer splitCharts;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartHistoric;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTimeStarted;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTimeLastUpdate;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmAlgorithm;

@@ -13,13 +13,45 @@ namespace ccMonitor
         {
             public string Name { get; set; }
             public int NvapiId { get; set; }
+            public int NvmlId { get; set; }
             public int Bus { get; set; }
             public int MinerMap { get; set; }
+
+            public uint ComputeCapability { get; set; }
+            
             public bool Available { get; set; }
 
             public override string ToString()
             {
                 return "GPU #" + MinerMap;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((GpuInfo) obj);
+            }
+
+            private bool Equals(GpuInfo other)
+            {
+                return string.Equals(Name, other.Name) && NvapiId == other.NvapiId && NvmlId == other.NvmlId &&
+                    Bus == other.Bus && MinerMap == other.MinerMap && ComputeCapability == other.ComputeCapability;
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ NvapiId;
+                    hashCode = (hashCode * 397) ^ NvmlId;
+                    hashCode = (hashCode * 397) ^ Bus;
+                    hashCode = (hashCode * 397) ^ MinerMap;
+                    hashCode = (hashCode * 397) ^ (int)ComputeCapability;
+                    return hashCode;
+                }
             }
         }
 
@@ -32,133 +64,131 @@ namespace ccMonitor
             public bool Active { get; set; }
 
             public HashSet<HashEntry> HashLogs { get; set; }
+            public class HashEntry
+            {
+                public long TimeStamp { get; set; }
+                public double HashRate { get; set; } // In KH/s
+                public uint HashCount { get; set; } // Amount of hash tries before the entry happened
+                // HashCount is useful to give a weight to the average. Low HashCount entries aren't accurate.
+                public uint Found { get; set; } // Sometimes they can find more than one solution at once
+                public uint Height { get; set; }
+                public double Difficulty { get; set; }
+
+                public override bool Equals(object obj)
+                {
+                    if (ReferenceEquals(null, obj)) return false;
+                    if (ReferenceEquals(this, obj)) return true;
+                    if (obj.GetType() != GetType()) return false;
+                    return Equals((HashEntry)obj);
+                }
+
+                private bool Equals(HashEntry other)
+                {
+                    return TimeStamp == other.TimeStamp && HashRate.Equals(other.HashRate) &&
+                           HashCount == other.HashCount && Found == other.Found && 
+                           Difficulty.Equals(other.Difficulty);
+                }
+
+                public override int GetHashCode()
+                {
+                    unchecked
+                    {
+                        int hashCode = TimeStamp.GetHashCode();
+                        hashCode = (hashCode * 397) ^ HashRate.GetHashCode();
+                        hashCode = (hashCode * 397) ^ (int)HashCount;
+                        hashCode = (hashCode * 397) ^ (int)Found;
+                        hashCode = (hashCode * 397) ^ Difficulty.GetHashCode();
+                        return hashCode;
+                    }
+                }
+            }
             
             public Setup MinerSetup { get; set; }
+            public class Setup
+            {
+                public string MinerName { get; set; }
+                public string MinerVersion { get; set; }
+                public string ApiVersion { get; set; }
 
+                public string MiningUrl { get; set; }
+                public double Intensity { get; set; }
+
+                public string PerformanceState { get; set; }
+                public string BiosVersion { get; set; }
+                public string DriverVersion { get; set; }
+                public string OperatingSystem { get; set; }
+
+                public override bool Equals(object obj)
+                {
+                    if (ReferenceEquals(null, obj)) return false;
+                    if (ReferenceEquals(this, obj)) return true;
+                    if (obj.GetType() != this.GetType()) return false;
+                    return Equals((Setup)obj);
+                }
+
+                private bool Equals(Setup other)
+                {
+                    return String.Equals(MinerName, (string)other.MinerName) && String.Equals(MinerVersion, (string)other.MinerVersion)
+                           && String.Equals(ApiVersion, (string)other.ApiVersion) && String.Equals(MiningUrl, (string)other.MiningUrl)
+                           && Intensity.Equals(other.Intensity) && String.Equals(PerformanceState, (string)other.PerformanceState)
+                           && String.Equals(BiosVersion, (string)other.BiosVersion) && String.Equals(DriverVersion, (string)other.DriverVersion)
+                           && String.Equals(OperatingSystem, (string)other.OperatingSystem);
+                }
+
+                public override int GetHashCode()
+                {
+                    unchecked
+                    {
+                        int hashCode = (MinerName != null ? MinerName.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (MinerVersion != null ? MinerVersion.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (ApiVersion != null ? ApiVersion.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (MiningUrl != null ? MiningUrl.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ Intensity.GetHashCode();
+                        hashCode = (hashCode * 397) ^ (PerformanceState != null ? PerformanceState.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (BiosVersion != null ? BiosVersion.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (DriverVersion != null ? DriverVersion.GetHashCode() : 0);
+                        hashCode = (hashCode * 397) ^ (OperatingSystem != null ? OperatingSystem.GetHashCode() : 0);
+                        return hashCode;
+                    }
+                }
+
+                public override string ToString()
+                {
+                    return MinerName + " " + MinerVersion + " (APIv" + ApiVersion + ")";
+                }
+            }
+            
             public Stat Statistic { get; set; }
-
-            public List<SensorValues> SensorLog { get; set; }
-        }
-
-        public class HashEntry
-        {
-            public long TimeStamp { get; set; }
-            public double HashRate { get; set; } // In KH/s
-            public uint HashCount { get; set; } // Amount of hash tries before the entry happened
-            // HashCount is useful to give a weight to the average. Low HashCount entries aren't accurate.
-            public uint Found { get; set; } // Sometimes they can find more than one solution at once
-            public uint Height { get; set; }
-            public double Difficulty { get; set; }
-
-            public override bool Equals(object obj)
+            public class Stat
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((HashEntry) obj);
+                public double TotalHashCount { get; set; }
+                public double AverageHashRate { get; set; }
+                public double MeanHashRate { get; set; }
+                public double StandardDeviation { get; set; }
+                public double SpreadPercentage { get; set; }
+                public double[] GaussianPercentiles { get; set; }
+                public double LowestHashRate { get; set; }
+                public double HighestHashRate { get; set; }
+                public int Accepts { get; set; } // Taken from FOUND in hashentries
+                public double AverageTemperature { get; set; }
+                public double AverageShareAnswerPing { get; set; }
             }
-
-            protected bool Equals(HashEntry other)
+            
+            public List<SensorValue> SensorLog { get; set; }
+            public class SensorValue
             {
-                return TimeStamp == other.TimeStamp && HashRate.Equals(other.HashRate) && 
-                    HashCount == other.HashCount && Found == other.Found && Difficulty.Equals(other.Difficulty);
+                public long TimeStamp { get; set; }
+
+                public double Temperature { get; set; }
+                public double FanPercentage { get; set; }
+                public double FanRpm { get; set; }
+                public double CoreClockFrequency { get; set; }
+                public double MemoryClockFrequency { get; set; }
+
+                public int ShareAnswerPing { get; set; } // Ping from rig to stratum
+                public int MiningUrlPing { get; set; } // Ping from this PC to stratum
+                public int NetworkRigPing { get; set; } // Ping from this PC to rig
             }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = TimeStamp.GetHashCode();
-                    hashCode = (hashCode * 397) ^ HashRate.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (int)HashCount;
-                    hashCode = (hashCode * 397) ^ (int)Found;
-                    hashCode = (hashCode * 397) ^ Difficulty.GetHashCode();
-                    return hashCode;
-                }
-            }
-        }
-
-        public class Setup
-        {
-            protected bool Equals(Setup other)
-            {
-                return string.Equals(MinerName, other.MinerName) && string.Equals(MinerVersion, other.MinerVersion) && 
-                    string.Equals(ApiVersion, other.ApiVersion) && string.Equals(MiningUrl, other.MiningUrl) && 
-                    string.Equals(PerformanceState, other.PerformanceState) && string.Equals(BiosVersion, other.BiosVersion) && 
-                    string.Equals(DriverVersion, other.DriverVersion) && string.Equals(OperatingSystem, other.OperatingSystem);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = (MinerName != null ? MinerName.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (MinerVersion != null ? MinerVersion.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (ApiVersion != null ? ApiVersion.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (MiningUrl != null ? MiningUrl.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (PerformanceState != null ? PerformanceState.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (BiosVersion != null ? BiosVersion.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (DriverVersion != null ? DriverVersion.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (OperatingSystem != null ? OperatingSystem.GetHashCode() : 0);
-                    return hashCode;
-                }
-            }
-
-            public string MinerName { get; set; }
-            public string MinerVersion { get; set; }
-            public string ApiVersion { get; set; }
-            public string MiningUrl { get; set; }
-
-            public string PerformanceState { get; set; }
-            public string BiosVersion { get; set; }
-            public string DriverVersion { get; set; }
-            public string OperatingSystem { get; set; }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Setup) obj);
-            }
-
-            public override string ToString()
-            {
-                return MinerName + " " + MinerVersion + " (APIv" + ApiVersion + ")";
-            }
-        }
-
-        public class Stat
-        {
-            public double TotalHashCount { get; set; }
-            public double AverageHashRate { get; set; }
-            public double MeanHashRate { get; set; }
-            public double StandardDeviation { get; set; }
-            public double SpreadPercentage { get; set; }
-            public double[] GaussianPercentiles { get; set; }
-            public double LowestHashRate { get; set; }
-            public double HighestHashRate { get; set; }
-            public int Accepts { get; set; } // Taken from FOUND in hashentries
-            public double AverageTemperature { get; set; }
-            public double AverageShareAnswerPing { get; set; }
-        }
-
-        public class SensorValues
-        {
-            public long TimeStamp { get; set; }
-
-            public double Temperature{ get; set; }
-            public double FanPercentage { get; set; }
-            public double CoreClockFrequency { get; set; }
-            public double MemoryClockFrequency { get; set; }
-
-            public int ShareAnswerPing { get; set; } // Ping from rig to stratum
-            public int MiningUrlPing { get; set; } // Ping from this PC to stratum
-            public int NetworkRigPing { get; set; } // Ping from this PC to rig
-        }
-
-        public GpuLogger()
-        {
         }
 
         public void Update(Dictionary<string, string>[][] allApiResults, int[] pingTimes)
@@ -190,7 +220,7 @@ namespace ccMonitor
                 }
             }
 
-            Setup liveSetup = GetLiveSetup(rightHwInfo, totalHwInfo[totalHwInfo.Length - 1], summary, poolInfo);
+            Benchmark.Setup liveSetup = GetLiveSetup(rightHwInfo, totalHwInfo[totalHwInfo.Length - 1], summary, poolInfo);
             
             // If currentBenchmark remained null because of an unknown algo,new install or change of setup,
             // It will create a new benchmark and update again
@@ -214,15 +244,16 @@ namespace ccMonitor
             }
         }
 
-        private static Setup GetLiveSetup(Dictionary<string, string> hwInfo, Dictionary<string, string> setupInfo,
+        private static Benchmark.Setup GetLiveSetup(Dictionary<string, string> hwInfo, Dictionary<string, string> setupInfo,
             Dictionary<string, string>[] summary, Dictionary<string, string>[] poolInfo)
         {
-            Setup minerSetup = new Setup
+            Benchmark.Setup minerSetup = new Benchmark.Setup
             {
                 MinerName = PruvotApi.GetDictValue(summary[0], "NAME"),
                 MinerVersion = PruvotApi.GetDictValue(summary[0], "VER"),
                 ApiVersion = PruvotApi.GetDictValue(summary[0], "API"),
                 MiningUrl = poolInfo.Length > 0 ? PruvotApi.GetDictValue(poolInfo[0], "URL"): string.Empty,
+                //Intensity = PruvotApi.GetDictValue<double>(hwInfo, "I"),
                 PerformanceState = PruvotApi.GetDictValue(hwInfo, "PST"),
                 BiosVersion = PruvotApi.GetDictValue(hwInfo, "BIOS"),
                 DriverVersion = PruvotApi.GetDictValue(setupInfo, "NVDRIVER"),
@@ -234,11 +265,12 @@ namespace ccMonitor
 
         private void UpdateSensors(Dictionary<string, string> hwInfo, int[] pingTimes)
         {
-            SensorValues sensorValues = new SensorValues
+            Benchmark.SensorValue sensorValue = new Benchmark.SensorValue
             {
                 TimeStamp = UnixTimeStamp(),
                 Temperature = PruvotApi.GetDictValue<double>(hwInfo, "TEMP"),
                 FanPercentage = PruvotApi.GetDictValue<double>(hwInfo, "FAN"),
+                FanRpm = PruvotApi.GetDictValue<double>(hwInfo, "RPM"),
                 CoreClockFrequency = PruvotApi.GetDictValue<double>(hwInfo, "FREQ"),
                 MemoryClockFrequency = PruvotApi.GetDictValue<double>(hwInfo, "MEMFREQ"),
                 ShareAnswerPing = pingTimes[0],
@@ -246,14 +278,14 @@ namespace ccMonitor
                 NetworkRigPing = pingTimes[2]
             };
 
-            CurrentBenchmark.SensorLog.Add(sensorValues);
+            CurrentBenchmark.SensorLog.Add(sensorValue);
         }
 
         private void UpdateHashLog(Dictionary<string, string>[] history)
         {
             foreach (Dictionary<string, string> hash in history)
             {
-                HashEntry hashEntry = new HashEntry
+                Benchmark.HashEntry hashEntry = new Benchmark.HashEntry
                 {
                     TimeStamp = PruvotApi.GetDictValue<uint>(hash, "TS"),
                     HashRate = PruvotApi.GetDictValue<double>(hash, "KHS"),
@@ -283,7 +315,7 @@ namespace ccMonitor
 
             for (count = 0; count < CurrentBenchmark.SensorLog.Count; count++)
             {
-                SensorValues sensorValue = CurrentBenchmark.SensorLog[count];
+                Benchmark.SensorValue sensorValue = CurrentBenchmark.SensorLog[count];
                 totalTemp += sensorValue.Temperature;
                 totalPing += sensorValue.ShareAnswerPing;
             }
@@ -295,24 +327,28 @@ namespace ccMonitor
         private void UpdateHashRateStats()
         {
             int hashLogSize = CurrentBenchmark.HashLogs.Count;
-            List<HashEntry> hashList = CurrentBenchmark.HashLogs.ToList();
+            List<Benchmark.HashEntry> hashList = CurrentBenchmark.HashLogs.OrderBy(entry => entry.HashRate).ToList();
             double sumOfWeightedRates = 0, sumOfWeights = 0;
             double[] rates = new double[hashLogSize];
             double[] weights = new double[hashLogSize];
+            CurrentBenchmark.Statistic.TotalHashCount = 0;
 
             for (int i = 0; i < hashLogSize; i++)
             {
                 rates[i] = hashList[i].HashRate;
-                weights[i] = hashList[i].HashCount;
+                weights[i] = hashList[i].Found > 0 ?
+                    hashList[i].HashCount * hashList[i].Difficulty :
+                    hashList[i].HashCount * hashList[i].Difficulty / 2;
+                // If a nonce has been found, it skews the hashrate, so it's weighted less
 
                 sumOfWeightedRates += (rates[i]*weights[i]);
                 sumOfWeights += weights[i];
+                CurrentBenchmark.Statistic.TotalHashCount += hashList[i].HashCount;
             }
 
             // Let's avoid dividing by zero
             if (sumOfWeights != 0)
             {
-                CurrentBenchmark.Statistic.TotalHashCount = sumOfWeights;
                 CurrentBenchmark.Statistic.AverageHashRate = sumOfWeightedRates/sumOfWeights;
                 CurrentBenchmark.Statistic.MeanHashRate = 0;
                 CurrentBenchmark.Statistic.GaussianPercentiles = new double[6];
@@ -321,26 +357,26 @@ namespace ccMonitor
 
                 for (int i = 0; i < hashLogSize; i++)
                 {
-                    sumOfSquaresOfDifferences += ((rates[i] - CurrentBenchmark.Statistic.AverageHashRate)
-                                                  *(rates[i] - CurrentBenchmark.Statistic.AverageHashRate));
+                    sumOfSquaresOfDifferences += (((rates[i] - CurrentBenchmark.Statistic.AverageHashRate)
+                                                   *(rates[i] - CurrentBenchmark.Statistic.AverageHashRate))*weights[i]);
 
                     weights[i] = weights[i]/sumOfWeights;
                     weightCounter += weights[i];
 
                     // -2σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[0] == 0 && weightCounter > 0.045500263896357)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[0] == 0 && weightCounter >= 0.045500263896358)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[0] = rates[i];
                     }
 
                     // -1.5σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[1] == 0 && weightCounter > 0.133614402537715)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[1] == 0 && weightCounter >= 0.133614402537716)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[1] = rates[i];
                     }
 
                     // -1σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[2] == 0 && weightCounter > 0.317310507862913)
+                    if (CurrentBenchmark.Statistic.GaussianPercentiles[2] == 0 && weightCounter >= 0.317310507862914)
                     {
                         CurrentBenchmark.Statistic.GaussianPercentiles[2] = rates[i];
                     }
@@ -354,23 +390,29 @@ namespace ccMonitor
                     // +1σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[3] == 0 && weightCounter > 0.682689492137086)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[3] = rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[3] = i - 1 >= 0 &&
+                                                                CurrentBenchmark.Statistic.MeanHashRate < rates[i - 1]
+                                                                ? rates[i - 1]: rates[i];
                     }
 
                     // +1.5σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[4] == 0 && weightCounter > 0.866385597462284)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[4] = rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[4] = i - 1 >= 0 && 
+                                                                CurrentBenchmark.Statistic.GaussianPercentiles[3] < rates[i - 1] 
+                                                                ? rates[i - 1] : rates[i];
                     }
 
                     // +2σ
                     if (CurrentBenchmark.Statistic.GaussianPercentiles[5] == 0 && weightCounter > 0.954499736103642)
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[5] = rates[i];
+                        CurrentBenchmark.Statistic.GaussianPercentiles[5] = i - 1 >= 0 && 
+                                                                CurrentBenchmark.Statistic.GaussianPercentiles[4] < rates[i - 1] 
+                                                                ? rates[i - 1] : rates[i];
                     }
                 }
 
-                CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/hashLogSize);
+                CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/sumOfWeights);
                 CurrentBenchmark.Statistic.SpreadPercentage = CurrentBenchmark.Statistic.StandardDeviation/
                                                               CurrentBenchmark.Statistic.AverageHashRate;
                 CurrentBenchmark.Statistic.LowestHashRate = rates[0];
@@ -378,7 +420,7 @@ namespace ccMonitor
             }
         }
 
-        private void CreateNewBenchMark(string liveAlgo, Setup liveSetup)
+        private void CreateNewBenchMark(string liveAlgo, Benchmark.Setup liveSetup)
         {
             Benchmark benchmark = new Benchmark
             {
@@ -386,9 +428,9 @@ namespace ccMonitor
                 Algorithm = liveAlgo,
                 MinerSetup = liveSetup,
                 Active = true,
-                HashLogs = new HashSet<HashEntry>(),
-                SensorLog = new List<SensorValues>(),
-                Statistic = new Stat()
+                HashLogs = new HashSet<Benchmark.HashEntry>(),
+                SensorLog = new List<Benchmark.SensorValue>(),
+                Statistic = new Benchmark.Stat()
             };
 
             // Makes all the old benchmarks with the same algo inactive

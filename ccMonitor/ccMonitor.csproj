@@ -90,6 +90,12 @@
     </Compile>
     <Compile Include="GpuLogger.cs" />
     <Compile Include="Gui\GuiHelper.cs" />
+    <Compile Include="Gui\HashChart.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\HashChart.Designer.cs">
+      <DependentUpon>HashChart.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\HashLogView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -125,6 +131,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\GpuTab.resx">
       <DependentUpon>GpuTab.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\HashChart.resx">
+      <DependentUpon>HashChart.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\HashLogView.resx">
       <DependentUpon>HashLogView.cs</DependentUpon>

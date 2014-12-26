@@ -6,9 +6,9 @@ namespace ccMonitor.Gui
 {
     public partial class BenchmarkDetails : UserControl
     {
-        public GpuLogger.GpuInfo GpuInfo { get; set; }
+        private GpuLogger.GpuInfo GpuInfo { get; set; }
 
-        private int _rowsInLogViews;
+        private readonly int _rowsInLogViews;
 
         public BenchmarkDetails(GpuLogger.GpuInfo gpuInfo ,int rowsInLogViews = 5)
         {
@@ -33,22 +33,29 @@ namespace ccMonitor.Gui
 
         private void UpdateTextBoxes(GpuLogger.Benchmark benchmark)
         {
-            txtGpuName.Text = GpuInfo.Name;
-            txtMinerId.Text = GpuInfo.MinerMap.ToString(CultureInfo.InvariantCulture);
-            txtBusId.Text = GpuInfo.Bus.ToString(CultureInfo.InvariantCulture);
+            if (!txtGpuName.Focused) txtGpuName.Text = GpuInfo.Name;
+            if (!txtMinerId.Focused) txtMinerId.Text = GpuInfo.MinerMap.ToString(CultureInfo.InvariantCulture);
+            if (!txtBusId.Focused) txtBusId.Text = GpuInfo.Bus.ToString(CultureInfo.InvariantCulture);
+            if (!txtNvapiId.Focused) txtNvapiId.Text = GpuInfo.NvapiId.ToString(CultureInfo.InvariantCulture);
+            if (!txtNvmlId.Focused) txtNvmlId.Text = GpuInfo.NvmlId.ToString(CultureInfo.InvariantCulture);
+            if (!txtComputeCapability.Focused) txtComputeCapability.Text = 
+                                            GpuInfo.ComputeCapability.ToString(CultureInfo.InvariantCulture);
 
-            txtAccepts.Text = benchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture);
-            txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount);
-            txtAverageTemperature.Text = String.Format("{0:0.##}{1}", benchmark.Statistic.AverageTemperature, "°C");
-            txtAveragePing.Text = String.Format("{0:0.##} {1}", benchmark.Statistic.AverageShareAnswerPing, "ms");
+            if (!txtAccepts.Focused) txtAccepts.Text = benchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture);
+            if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount);
+            if (!txtAverageTemperature.Focused) txtAverageTemperature.Text = 
+                                            String.Format("{0:0.##}{1}", benchmark.Statistic.AverageTemperature, "°C");
+            if (!txtAveragePing.Focused) txtAveragePing.Text = 
+                                            String.Format("{0:0.##} {1}", benchmark.Statistic.AverageShareAnswerPing, "ms");
 
-            txtAlgorithm.Text = benchmark.Algorithm;
-            txtMinerName.Text = benchmark.MinerSetup.ToString();
-            txtUrl.Text = benchmark.MinerSetup.MiningUrl;
-            txtPerformanceState.Text = benchmark.MinerSetup.PerformanceState;
-            txtBiosVersion.Text = benchmark.MinerSetup.BiosVersion;
-            txtDriverVersion.Text = benchmark.MinerSetup.DriverVersion;
-            txtOperatingSystem.Text = benchmark.MinerSetup.OperatingSystem;
+            if (!txtAlgorithm.Focused) txtAlgorithm.Text = benchmark.Algorithm;
+            if (!txtMinerName.Focused) txtMinerName.Text = benchmark.MinerSetup.ToString();
+            if (!txtUrl.Focused) txtUrl.Text = benchmark.MinerSetup.MiningUrl;
+            if (!txtIntensity.Focused) txtIntensity.Text = String.Format("{0:0.####}", benchmark.MinerSetup.Intensity);
+            if (!txtPerformanceState.Focused) txtPerformanceState.Text = benchmark.MinerSetup.PerformanceState;
+            if (!txtBiosVersion.Focused) txtBiosVersion.Text = benchmark.MinerSetup.BiosVersion;
+            if (!txtDriverVersion.Focused) txtDriverVersion.Text = benchmark.MinerSetup.DriverVersion;
+            if (!txtOperatingSystem.Focused) txtOperatingSystem.Text = benchmark.MinerSetup.OperatingSystem;
         }
 
         private void UpdateLogs(GpuLogger.Benchmark benchmark)
@@ -66,7 +73,7 @@ namespace ccMonitor.Gui
             }
         }
 
-        private void UpdateSpread(GpuLogger.Stat statistic)
+        private void UpdateSpread(GpuLogger.Benchmark.Stat statistic)
         {
             dgvSpread.Rows.Clear();
             dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.AverageHashRate, "H"));
@@ -88,7 +95,7 @@ namespace ccMonitor.Gui
             chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic));
         }
 
-        private double[] GetBoxPlotValues(GpuLogger.Stat statistic)
+        private double[] GetBoxPlotValues(GpuLogger.Benchmark.Stat statistic)
         {
             if (statistic.GaussianPercentiles != null)
             {

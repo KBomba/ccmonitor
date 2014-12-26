@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Documents;
 using System.Windows.Forms;
-using System.Windows.Input;
 using ccMonitor.Api;
 using Newtonsoft.Json;
 using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
@@ -18,7 +16,7 @@ namespace ccMonitor.Gui
             InitializeComponent();
         }
 
-        private bool hadRequestResult = false;
+        private bool _hadRequestResult;
 
         public void UpdateGui()
         {
@@ -46,9 +44,9 @@ namespace ccMonitor.Gui
                 if (!found)
                 {
                     TabPage tabPage = new TabPage(gpu.Info.ToString());
-                    GpuTab gpuTab = new GpuTab(gpu) { Dock = DockStyle.Fill };
-                    gpuTab.UpdateGui();
-                    tabPage.Controls.Add(gpuTab);
+                    GpuTab gpuGpuTab = new GpuTab(gpu) { Dock = DockStyle.Fill };
+                    gpuGpuTab.UpdateGui();
+                    tabPage.Controls.Add(gpuGpuTab);
                     tbcRig.TabPages.Add(tabPage);
                 }
             }
@@ -58,11 +56,11 @@ namespace ccMonitor.Gui
 
         private void txtDebugConsole_KeyDown(object sender, KeyEventArgs e)
         {
-            if (hadRequestResult)
+            if (_hadRequestResult)
             {
                 txtDebugConsole.Clear();
                 txtDebugConsole.AppendText(Environment.NewLine + ">  ");
-                hadRequestResult = false;
+                _hadRequestResult = false;
             }
 
             if (e.KeyCode == Keys.Enter)
@@ -76,7 +74,7 @@ namespace ccMonitor.Gui
                                                 JsonConvert.SerializeObject(request, Formatting.Indented));
                 }
 
-                hadRequestResult = true;
+                _hadRequestResult = true;
             }
         }
     }

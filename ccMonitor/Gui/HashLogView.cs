@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using ccMonitor.Api;
 
 namespace ccMonitor.Gui
 {
     public partial class HashLogView : UserControl
     {
-        public class UserFriendlyHashEntry
+        private class UserFriendlyHashEntry
         {
             public string TimeStamp { get; set; }
             public string HashRate { get; set; }
@@ -19,7 +18,7 @@ namespace ccMonitor.Gui
             public string Difficulty { get; set; }
         }
 
-        private int _rows;
+        private readonly int _rows;
 
         public HashLogView(int rows)
         {
@@ -32,17 +31,17 @@ namespace ccMonitor.Gui
             dgvHashLogs.ColumnHeadersHeight = 42;
         }
 
-        public void UpdateLogs(HashSet<GpuLogger.HashEntry> hashLogs)
+        public void UpdateLogs(HashSet<GpuLogger.Benchmark.HashEntry> hashLogs)
         {
             dgvHashLogs.DataSource = null;
             List<UserFriendlyHashEntry> userFriendlyHashEntries = new List<UserFriendlyHashEntry>(hashLogs.Count);
 
-            List<GpuLogger.HashEntry> sortedHashLogs = hashLogs.OrderByDescending(entry => entry.TimeStamp).ToList();
+            List<GpuLogger.Benchmark.HashEntry> sortedHashLogs = hashLogs.OrderByDescending(entry => entry.TimeStamp).ToList();
             // If over 9000, just use max size, else make sure it doesn't get out of index
             int max = _rows > 9000? sortedHashLogs.Count : sortedHashLogs.Count < _rows ? sortedHashLogs.Count : _rows;
             for (int index = 0; index < max; index++)
             {
-                GpuLogger.HashEntry hashEntry = sortedHashLogs[index];
+                GpuLogger.Benchmark.HashEntry hashEntry = sortedHashLogs[index];
                 UserFriendlyHashEntry userFriendlyHashEntry = new UserFriendlyHashEntry
                 {
                     TimeStamp =

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using ccMonitor.Api;
@@ -118,11 +117,10 @@ namespace ccMonitor
                             ? PruvotApi.GetHistory(rig.IpAddress, rig.Port, gpu.Info.MinerMap)
                             : new Dictionary<string, string>[0];
 
-                        if (allApiResults[3] != null)
+                        if (allApiResults[3] != null && gpu.Info.Available)
                         {
                             gpu.Update(allApiResults, pingTimes);
                             
-
                             // While we're at it, calculate the total stats for the rig
                             totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
@@ -177,14 +175,28 @@ namespace ccMonitor
             {
                 foreach (Dictionary<string, string> hwInfo in allApiResults[2])
                 {
-                    int apiBus = PruvotApi.GetDictValue<int>(hwInfo, "BUS");
-                    if (apiBus >= 0)
+                    GpuLogger newGpu = new GpuLogger
+                    {
+                        Info = new GpuLogger.GpuInfo
+                        {
+                            Name = PruvotApi.GetDictValue(hwInfo, "CARD"),
+                            Bus = PruvotApi.GetDictValue<int>(hwInfo, "BUS"),
+                            MinerMap = PruvotApi.GetDictValue<int>(hwInfo, "GPU"),
+                            NvapiId = PruvotApi.GetDictValue<int>(hwInfo, "NVAPI"),
+                            NvmlId = PruvotApi.GetDictValue<int>(hwInfo, "NVML"),
+                            ComputeCapability = PruvotApi.GetDictValue<uint>(hwInfo, "SM"),
+                            Available = true
+                        },
+                        BenchLogs = new List<GpuLogger.Benchmark>()
+                    };
+
+                    if (newGpu.Info.Bus >= 0)
                     {
                         bool found = false;
 
                         foreach (GpuLogger gpu in rig.GpuLogs)
                         {
-                            if (gpu.Info.Bus == apiBus)
+                            if (gpu.Info.Equals(newGpu.Info) && gpu.Info.Available)
                             {
                                 found = true;
                             }
@@ -192,19 +204,16 @@ namespace ccMonitor
 
                         if (!found)
                         {
-                            GpuLogger gpu = new GpuLogger
+                            foreach (GpuLogger gpu in rig.GpuLogs)
                             {
-                                Info = new GpuLogger.GpuInfo
+                                // Let's loop again, but now only check for "old" GPUs on that bus
+                                // Don't delete them, just make them unavailable
+                                if (gpu.Info.Bus == newGpu.Info.Bus)
                                 {
-                                    Name = PruvotApi.GetDictValue(hwInfo, "CARD"),
-                                    Bus = apiBus,
-                                    MinerMap = PruvotApi.GetDictValue<int>(hwInfo, "GPU"),
-                                    NvapiId = PruvotApi.GetDictValue<int>(hwInfo, "NVAPI"),
-                                    Available = true
-                                },
-                                BenchLogs = new List<GpuLogger.Benchmark>(),
-                            };
-                            rig.GpuLogs.Add(gpu);
+                                    gpu.Info.Available = false;
+                                }
+                            }
+                            rig.GpuLogs.Add(newGpu);
                         }
                     }
                 }

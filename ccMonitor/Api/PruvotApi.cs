@@ -43,6 +43,8 @@ namespace ccMonitor.Api
             {
                 return (T) Convert.ChangeType(value, typeof (T), CultureInfo.InvariantCulture);
             }
+
+            if (typeof(T) == typeof(uint)) return (T)Convert.ChangeType(9001, typeof(T), CultureInfo.InvariantCulture);
             return (T) Convert.ChangeType(-1, typeof (T), CultureInfo.InvariantCulture);
         }
 
