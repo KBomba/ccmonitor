@@ -30,16 +30,16 @@
         {
             this.tbcRig = new System.Windows.Forms.TabControl();
             this.tabRigOverview = new System.Windows.Forms.TabPage();
-            this.tabRigDebug = new System.Windows.Forms.TabPage();
-            this.txtDebugConsole = new System.Windows.Forms.TextBox();
+            this.tabRigApiConsole = new System.Windows.Forms.TabPage();
+            this.txtApiConsole = new System.Windows.Forms.TextBox();
             this.tbcRig.SuspendLayout();
-            this.tabRigDebug.SuspendLayout();
+            this.tabRigApiConsole.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcRig
             // 
             this.tbcRig.Controls.Add(this.tabRigOverview);
-            this.tbcRig.Controls.Add(this.tabRigDebug);
+            this.tbcRig.Controls.Add(this.tabRigApiConsole);
             this.tbcRig.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbcRig.Location = new System.Drawing.Point(0, 0);
             this.tbcRig.Name = "tbcRig";
@@ -56,28 +56,30 @@
             this.tabRigOverview.TabIndex = 0;
             this.tabRigOverview.Text = "Rig overview";
             // 
-            // tabRigDebug
+            // tabRigApiConsole
             // 
-            this.tabRigDebug.Controls.Add(this.txtDebugConsole);
-            this.tabRigDebug.Location = new System.Drawing.Point(4, 22);
-            this.tabRigDebug.Name = "tabRigDebug";
-            this.tabRigDebug.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRigDebug.Size = new System.Drawing.Size(1168, 560);
-            this.tabRigDebug.TabIndex = 1;
-            this.tabRigDebug.Text = "Debug console";
+            this.tabRigApiConsole.Controls.Add(this.txtApiConsole);
+            this.tabRigApiConsole.Location = new System.Drawing.Point(4, 22);
+            this.tabRigApiConsole.Name = "tabRigApiConsole";
+            this.tabRigApiConsole.Padding = new System.Windows.Forms.Padding(3);
+            this.tabRigApiConsole.Size = new System.Drawing.Size(1168, 560);
+            this.tabRigApiConsole.TabIndex = 1;
+            this.tabRigApiConsole.Text = "API console";
             // 
-            // txtDebugConsole
+            // txtApiConsole
             // 
-            this.txtDebugConsole.BackColor = System.Drawing.SystemColors.WindowText;
-            this.txtDebugConsole.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtDebugConsole.ForeColor = System.Drawing.SystemColors.Window;
-            this.txtDebugConsole.Location = new System.Drawing.Point(3, 3);
-            this.txtDebugConsole.Multiline = true;
-            this.txtDebugConsole.Name = "txtDebugConsole";
-            this.txtDebugConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtDebugConsole.Size = new System.Drawing.Size(1162, 554);
-            this.txtDebugConsole.TabIndex = 0;
-            this.txtDebugConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtDebugConsole_KeyDown);
+            this.txtApiConsole.BackColor = System.Drawing.SystemColors.WindowText;
+            this.txtApiConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtApiConsole.ForeColor = System.Drawing.Color.Lime;
+            this.txtApiConsole.Location = new System.Drawing.Point(3, 3);
+            this.txtApiConsole.Multiline = true;
+            this.txtApiConsole.Name = "txtApiConsole";
+            this.txtApiConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtApiConsole.Size = new System.Drawing.Size(1162, 554);
+            this.txtApiConsole.TabIndex = 0;
+            this.txtApiConsole.Text = " >  ";
+            this.txtApiConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtApiConsole_KeyDown);
+            this.txtApiConsole.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtApiConsole_KeyPress);
             // 
             // RigTab
             // 
@@ -87,8 +89,8 @@
             this.Name = "RigTab";
             this.Size = new System.Drawing.Size(1176, 586);
             this.tbcRig.ResumeLayout(false);
-            this.tabRigDebug.ResumeLayout(false);
-            this.tabRigDebug.PerformLayout();
+            this.tabRigApiConsole.ResumeLayout(false);
+            this.tabRigApiConsole.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -96,8 +98,8 @@
         #endregion
 
         private System.Windows.Forms.TabPage tabRigOverview;
-        private System.Windows.Forms.TabPage tabRigDebug;
-        private System.Windows.Forms.TextBox txtDebugConsole;
+        private System.Windows.Forms.TabPage tabRigApiConsole;
+        private System.Windows.Forms.TextBox txtApiConsole;
         internal System.Windows.Forms.TabControl tbcRig;
     }
 }

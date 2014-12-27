@@ -54,27 +54,29 @@ namespace ccMonitor.Gui
 
         }
 
-        private void txtDebugConsole_KeyDown(object sender, KeyEventArgs e)
+        private void txtApiConsole_KeyDown(object sender, KeyEventArgs e)
         {
-            if (_hadRequestResult)
-            {
-                txtDebugConsole.Clear();
-                txtDebugConsole.AppendText(Environment.NewLine + ">  ");
-                _hadRequestResult = false;
-            }
-
             if (e.KeyCode == Keys.Enter)
             {
-                string[] splitStrings = txtDebugConsole.Text.Split('>');
+                string[] splitStrings = txtApiConsole.Text.Split('>');
 
                 Dictionary<string, string>[] request = PruvotApi.Request(Rig.IpAddress, Rig.Port, splitStrings[splitStrings.Length -1].Trim());
                 if (request != null)
                 {
-                    txtDebugConsole.AppendText(Environment.NewLine + ">  " + Environment.NewLine + 
-                                                JsonConvert.SerializeObject(request, Formatting.Indented));
+                    txtApiConsole.AppendText(Environment.NewLine + " >  " + Environment.NewLine +
+                                                JsonConvert.SerializeObject(request, Formatting.Indented) + 
+                                                Environment.NewLine + " >  ");
+                    _hadRequestResult = true;
                 }
+            }
+        }
 
-                _hadRequestResult = true;
+        private void txtApiConsole_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (_hadRequestResult)
+            {
+                e.Handled = true;
+                _hadRequestResult = false;
             }
         }
     }
