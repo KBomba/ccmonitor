@@ -79,7 +79,6 @@
             this.txtApiConsole.TabIndex = 0;
             this.txtApiConsole.Text = " >  ";
             this.txtApiConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtApiConsole_KeyDown);
-            this.txtApiConsole.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtApiConsole_KeyPress);
             // 
             // RigTab
             // 
