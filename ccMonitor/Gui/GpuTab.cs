@@ -28,13 +28,16 @@ namespace ccMonitor.Gui
             Gpu = gpu;
             InitializeComponent();
             InitGpuDetails();
-            InitHashrateCharts();
+            InitCharts();
         }
 
-        private void InitHashrateCharts()
+        private void InitCharts()
         {
-            HashChart hashChart = new HashChart() {Dock = DockStyle.Fill};
-            tabGpuCharts.Controls.Add(hashChart);
+            HashChart hashChart = new HashChart(1) {Dock = DockStyle.Fill};
+            tabHashCharts.Controls.Add(hashChart);
+
+            SensorChart sensorChart = new SensorChart(1) {Dock = DockStyle.Fill};
+            tabSensorCharts.Controls.Add(sensorChart);
         }
 
         private void InitGpuDetails()
@@ -45,20 +48,7 @@ namespace ccMonitor.Gui
 
         public void UpdateGui()
         {
-            foreach (object control in tabGpuDetails.Controls)
-            {
-                BenchmarkDetails gpuDetails = control as BenchmarkDetails;
-                if (gpuDetails != null) gpuDetails.UpdateStats(Gpu.CurrentBenchmark);
-            }
-
-            foreach (object control in tabGpuCharts.Controls)
-            {
-                HashChart hashChart = control as HashChart;
-                if (hashChart != null)
-                {
-                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs);
-                }
-            }
+            UpdateInternalControls();
 
             UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
             foreach (GpuLogger.Benchmark benchmark in Gpu.BenchLogs)
@@ -85,20 +75,45 @@ namespace ccMonitor.Gui
             if(dgvBenchmarks.Rows.Count > 0) dgvBenchmarks.CurrentCell = dgvBenchmarks.Rows[rowIndex].Cells[0];
         }
 
+        private void UpdateInternalControls()
+        {
+            foreach (object control in tabGpuDetails.Controls)
+            {
+                BenchmarkDetails gpuDetails = control as BenchmarkDetails;
+                if (gpuDetails != null) gpuDetails.UpdateStats(Gpu.CurrentBenchmark);
+            }
+
+            foreach (object control in tabHashCharts.Controls)
+            {
+                HashChart hashChart = control as HashChart;
+                if (hashChart != null)
+                {
+                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs);
+                }
+            }
+
+            foreach (object control in tabSensorCharts.Controls)
+            {
+                SensorChart hashChart = control as SensorChart;
+                if (hashChart != null)
+                {
+                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.SensorLog, Gpu.CurrentBenchmark.MinerSetup.OperatingSystem);
+                }
+            }
+        }
+
         private void dgvBenchmarks_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             int rowIndex = e.RowIndex;
             if(rowIndex<0) return;
 
-            // Over 9000 means max value, max rows default to 5 though
-            BenchmarkDetails benchmarkDetails = new BenchmarkDetails(Gpu.Info, 9001) { Dock = DockStyle.Fill };
-            benchmarkDetails.UpdateStats(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1]);
-            Form form = new Form
+            
+            BenchmarkOverview form = new BenchmarkOverview(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1], Gpu.Info)
             {
-                Text = Gpu.Info + " - Detailed benchmark overview",
+                Text = Gpu.Info + " - Benchmark overview",
                 Size = new Size(this.Size.Width, this.Size.Height)
             };
-            form.Controls.Add(benchmarkDetails);
+            
             form.Show();
         }
     }

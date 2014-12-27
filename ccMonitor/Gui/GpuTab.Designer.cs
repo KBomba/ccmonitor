@@ -41,7 +41,8 @@
             this.clmAverageTemperature = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmMinerNameVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmStratum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabGpuCharts = new System.Windows.Forms.TabPage();
+            this.tabHashCharts = new System.Windows.Forms.TabPage();
+            this.tabSensorCharts = new System.Windows.Forms.TabPage();
             this.tbcGpu.SuspendLayout();
             this.tabGpuBenchmarks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBenchmarks)).BeginInit();
@@ -51,7 +52,8 @@
             // 
             this.tbcGpu.Controls.Add(this.tabGpuDetails);
             this.tbcGpu.Controls.Add(this.tabGpuBenchmarks);
-            this.tbcGpu.Controls.Add(this.tabGpuCharts);
+            this.tbcGpu.Controls.Add(this.tabHashCharts);
+            this.tbcGpu.Controls.Add(this.tabSensorCharts);
             this.tbcGpu.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbcGpu.Location = new System.Drawing.Point(0, 0);
             this.tbcGpu.Name = "tbcGpu";
@@ -185,14 +187,23 @@
             this.clmStratum.Name = "clmStratum";
             this.clmStratum.ReadOnly = true;
             // 
-            // tabGpuCharts
+            // tabHashCharts
             // 
-            this.tabGpuCharts.Location = new System.Drawing.Point(4, 22);
-            this.tabGpuCharts.Name = "tabGpuCharts";
-            this.tabGpuCharts.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGpuCharts.Size = new System.Drawing.Size(1154, 528);
-            this.tabGpuCharts.TabIndex = 2;
-            this.tabGpuCharts.Text = "Hash charts";
+            this.tabHashCharts.Location = new System.Drawing.Point(4, 22);
+            this.tabHashCharts.Name = "tabHashCharts";
+            this.tabHashCharts.Padding = new System.Windows.Forms.Padding(3);
+            this.tabHashCharts.Size = new System.Drawing.Size(1154, 528);
+            this.tabHashCharts.TabIndex = 2;
+            this.tabHashCharts.Text = "Hashrate charts";
+            // 
+            // tabSensorCharts
+            // 
+            this.tabSensorCharts.Location = new System.Drawing.Point(4, 22);
+            this.tabSensorCharts.Name = "tabSensorCharts";
+            this.tabSensorCharts.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSensorCharts.Size = new System.Drawing.Size(1154, 528);
+            this.tabSensorCharts.TabIndex = 3;
+            this.tabSensorCharts.Text = "Sensor charts";
             // 
             // GpuTab
             // 
@@ -214,7 +225,7 @@
         private System.Windows.Forms.TabPage tabGpuDetails;
         private System.Windows.Forms.TabPage tabGpuBenchmarks;
         private System.Windows.Forms.DataGridView dgvBenchmarks;
-        private System.Windows.Forms.TabPage tabGpuCharts;
+        private System.Windows.Forms.TabPage tabHashCharts;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTimeStarted;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmTimeLastUpdate;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmAlgorithm;
@@ -224,6 +235,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmAverageTemperature;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmMinerNameVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmStratum;
+        private System.Windows.Forms.TabPage tabSensorCharts;
 
     }
 }

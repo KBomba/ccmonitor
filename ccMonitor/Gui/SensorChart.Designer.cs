@@ -1,6 +1,6 @@
 ﻿namespace ccMonitor.Gui
 {
-    partial class HashChart
+    partial class SensorChart
     {
         /// <summary> 
         /// Required designer variable.
@@ -36,13 +36,15 @@
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            this.chartHash = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            ((System.ComponentModel.ISupportInitialize)(this.chartHash)).BeginInit();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            this.chartSensor = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            ((System.ComponentModel.ISupportInitialize)(this.chartSensor)).BeginInit();
             this.SuspendLayout();
             // 
-            // chartHash
+            // chartSensor
             // 
-            chartArea1.AlignWithChartArea = "ChartAreaDifficultyHashcount";
             chartArea1.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
             chartArea1.AxisX.IsMarginVisible = false;
             chartArea1.AxisX.IsStartedFromZero = false;
@@ -57,20 +59,20 @@
             chartArea1.AxisX2.LabelStyle.Format = "g";
             chartArea1.AxisY.IsStartedFromZero = false;
             chartArea1.AxisY.LabelStyle.Format = "N0";
-            chartArea1.AxisY.Title = "Hashrate (KH/s)";
+            chartArea1.AxisY.Title = "Temperature (°C)";
+            chartArea1.AxisY2.IsStartedFromZero = false;
             chartArea1.AxisY2.MajorGrid.Enabled = false;
-            chartArea1.AxisY2.Maximum = 5D;
-            chartArea1.AxisY2.Title = "Found";
+            chartArea1.AxisY2.Title = "Fan (%)";
             chartArea1.CursorX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Minutes;
             chartArea1.CursorX.IsUserEnabled = true;
             chartArea1.CursorX.IsUserSelectionEnabled = true;
             chartArea1.IsSameFontSizeForAllAxes = true;
-            chartArea1.Name = "ChartAreaFoundHashrate";
+            chartArea1.Name = "ChartAreaTemperatureFan";
             chartArea1.Position.Auto = false;
             chartArea1.Position.Height = 39.55485F;
             chartArea1.Position.Width = 100F;
             chartArea1.Position.Y = 8.945152F;
-            chartArea2.AlignWithChartArea = "ChartAreaFoundHashrate";
+            chartArea2.AlignWithChartArea = "ChartAreaTemperatureFan";
             chartArea2.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
             chartArea2.AxisX.IsMarginVisible = false;
             chartArea2.AxisX.IsStartedFromZero = false;
@@ -83,110 +85,150 @@
             chartArea2.AxisX2.IsMarginVisible = false;
             chartArea2.AxisX2.IsStartedFromZero = false;
             chartArea2.AxisX2.LabelStyle.Format = "g";
-            chartArea2.AxisY.IsLogarithmic = true;
             chartArea2.AxisY.IsStartedFromZero = false;
             chartArea2.AxisY.LabelStyle.Format = "N0";
-            chartArea2.AxisY.Title = "Hash count";
+            chartArea2.AxisY.Title = "Pings (ms)";
             chartArea2.AxisY2.IsStartedFromZero = false;
             chartArea2.AxisY2.LabelStyle.Format = "0.###";
             chartArea2.AxisY2.MajorGrid.Enabled = false;
-            chartArea2.AxisY2.Title = "Difficulty";
+            chartArea2.AxisY2.Title = "Frequencies (Hz)";
             chartArea2.CursorX.IntervalType = System.Windows.Forms.DataVisualization.Charting.DateTimeIntervalType.Minutes;
             chartArea2.CursorX.IsUserEnabled = true;
             chartArea2.CursorX.IsUserSelectionEnabled = true;
             chartArea2.IsSameFontSizeForAllAxes = true;
-            chartArea2.Name = "ChartAreaDifficultyHashcount";
+            chartArea2.Name = "ChartAreaCoreclockMemoryclock";
             chartArea2.Position.Auto = false;
             chartArea2.Position.Height = 39.55485F;
             chartArea2.Position.Width = 100F;
             chartArea2.Position.Y = 57.44515F;
-            this.chartHash.ChartAreas.Add(chartArea1);
-            this.chartHash.ChartAreas.Add(chartArea2);
-            this.chartHash.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartSensor.ChartAreas.Add(chartArea1);
+            this.chartSensor.ChartAreas.Add(chartArea2);
+            this.chartSensor.Dock = System.Windows.Forms.DockStyle.Fill;
             legend1.Alignment = System.Drawing.StringAlignment.Far;
             legend1.BorderColor = System.Drawing.Color.Transparent;
             legend1.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.NotSet;
-            legend1.DockedToChartArea = "ChartAreaFoundHashrate";
+            legend1.DockedToChartArea = "ChartAreaTemperatureFan";
             legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
             legend1.IsDockedInsideChartArea = false;
-            legend1.Name = "LegendFoundHashrate";
+            legend1.Name = "LegendTemperatureFan";
             legend2.Alignment = System.Drawing.StringAlignment.Far;
             legend2.BorderColor = System.Drawing.Color.Transparent;
             legend2.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.NotSet;
-            legend2.DockedToChartArea = "ChartAreaDifficultyHashcount";
+            legend2.DockedToChartArea = "ChartAreaCoreclockMemoryclock";
             legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
             legend2.IsDockedInsideChartArea = false;
             legend2.LegendItemOrder = System.Windows.Forms.DataVisualization.Charting.LegendItemOrder.SameAsSeriesOrder;
-            legend2.Name = "LegendDifficultyHashcount";
-            this.chartHash.Legends.Add(legend1);
-            this.chartHash.Legends.Add(legend2);
-            this.chartHash.Location = new System.Drawing.Point(0, 0);
-            this.chartHash.Margin = new System.Windows.Forms.Padding(0);
-            this.chartHash.Name = "chartHash";
-            series1.ChartArea = "ChartAreaFoundHashrate";
-            series1.Color = System.Drawing.Color.Goldenrod;
+            legend2.Name = "LegendCoreclockMemoryclock";
+            this.chartSensor.Legends.Add(legend1);
+            this.chartSensor.Legends.Add(legend2);
+            this.chartSensor.Location = new System.Drawing.Point(0, 0);
+            this.chartSensor.Margin = new System.Windows.Forms.Padding(0);
+            this.chartSensor.Name = "chartSensor";
+            series1.BorderWidth = 2;
+            series1.ChartArea = "ChartAreaTemperatureFan";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series1.Color = System.Drawing.SystemColors.MenuHighlight;
             series1.CustomProperties = "EmptyPointValue=Zero, PointWidth=0.5";
-            series1.Legend = "LegendFoundHashrate";
-            series1.LegendText = "Found";
-            series1.Name = "FoundSeries";
+            series1.Legend = "LegendTemperatureFan";
+            series1.LegendText = "Fan";
+            series1.Name = "FanSeries";
             series1.XValueMember = "TimeStamp";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series1.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
-            series1.YValueMembers = "Found";
+            series1.YValueMembers = "Fan";
             series2.BorderWidth = 2;
-            series2.ChartArea = "ChartAreaFoundHashrate";
+            series2.ChartArea = "ChartAreaTemperatureFan";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            series2.Color = System.Drawing.Color.Red;
             series2.CustomProperties = "IsXAxisQuantitative=False, LineTension=0.1";
-            series2.Legend = "LegendFoundHashrate";
-            series2.LegendText = "Hashrate";
-            series2.Name = "HashrateSeries";
+            series2.Legend = "LegendTemperatureFan";
+            series2.LegendText = "Temperature";
+            series2.Name = "TemperatureSeries";
             series2.XValueMember = "TimeStamp";
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            series2.YValueMembers = "HashRate";
-            series3.ChartArea = "ChartAreaDifficultyHashcount";
-            series3.Color = System.Drawing.Color.Navy;
-            series3.Legend = "LegendDifficultyHashcount";
-            series3.LegendText = "Hash count";
-            series3.Name = "HashcountSeries";
+            series2.YValueMembers = "Temperature";
+            series3.BorderWidth = 2;
+            series3.ChartArea = "ChartAreaCoreclockMemoryclock";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series3.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            series3.CustomProperties = "DrawSideBySide=True";
+            series3.Legend = "LegendCoreclockMemoryclock";
+            series3.LegendText = "Core frequency";
+            series3.Name = "CoreclockSeries";
             series3.XValueMember = "TimeStamp";
             series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
-            series3.YValueMembers = "HashCount";
-            series4.ChartArea = "ChartAreaDifficultyHashcount";
+            series3.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
+            series3.YValueMembers = "CoreClockFrequency";
+            series4.BorderWidth = 2;
+            series4.ChartArea = "ChartAreaCoreclockMemoryclock";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
-            series4.Color = System.Drawing.Color.Red;
-            series4.Legend = "LegendDifficultyHashcount";
-            series4.LegendText = "Difficulty";
-            series4.Name = "DifficultySeries";
+            series4.Color = System.Drawing.Color.SaddleBrown;
+            series4.CustomProperties = "DrawSideBySide=True";
+            series4.Legend = "LegendCoreclockMemoryclock";
+            series4.LegendText = "Memory frequency";
+            series4.Name = "MemoryclockSeries";
             series4.XValueMember = "TimeStamp";
             series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series4.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
-            series4.YValueMembers = "Difficulty";
-            this.chartHash.Series.Add(series1);
-            this.chartHash.Series.Add(series2);
-            this.chartHash.Series.Add(series3);
-            this.chartHash.Series.Add(series4);
-            this.chartHash.Size = new System.Drawing.Size(1150, 525);
-            this.chartHash.TabIndex = 0;
-            this.chartHash.Text = "chartHash";
-            this.chartHash.MouseEnter += new System.EventHandler(this.chart_MouseEnter);
-            this.chartHash.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
+            series4.YValueMembers = "MemoryClockFrequency";
+            series5.BorderWidth = 2;
+            series5.ChartArea = "ChartAreaCoreclockMemoryclock";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series5.Color = System.Drawing.Color.Fuchsia;
+            series5.Legend = "LegendCoreclockMemoryclock";
+            series5.LegendText = "Ping: This to miner";
+            series5.Name = "NetworkpingSeries";
+            series5.XValueMember = "TimeStamp";
+            series5.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series5.YValueMembers = "NetworkRigPing";
+            series6.BorderWidth = 2;
+            series6.ChartArea = "ChartAreaCoreclockMemoryclock";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series6.Color = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            series6.Legend = "LegendCoreclockMemoryclock";
+            series6.LegendText = "Ping: This to URL";
+            series6.Name = "MiningpingSeries";
+            series6.XValueMember = "TimeStamp";
+            series6.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series6.YValueMembers = "MiningUrlPing";
+            series7.BorderWidth = 2;
+            series7.ChartArea = "ChartAreaCoreclockMemoryclock";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
+            series7.Color = System.Drawing.Color.Indigo;
+            series7.Legend = "LegendCoreclockMemoryclock";
+            series7.LegendText = "Ping: Miner to URL";
+            series7.Name = "SharepingSeries";
+            series7.XValueMember = "TimeStamp";
+            series7.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series7.YValueMembers = "ShareAnswerPing";
+            this.chartSensor.Series.Add(series1);
+            this.chartSensor.Series.Add(series2);
+            this.chartSensor.Series.Add(series3);
+            this.chartSensor.Series.Add(series4);
+            this.chartSensor.Series.Add(series5);
+            this.chartSensor.Series.Add(series6);
+            this.chartSensor.Series.Add(series7);
+            this.chartSensor.Size = new System.Drawing.Size(1150, 525);
+            this.chartSensor.TabIndex = 0;
+            this.chartSensor.Text = "chartSensor";
+            this.chartSensor.MouseEnter += new System.EventHandler(this.chart_MouseEnter);
+            this.chartSensor.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
             // 
-            // HashChart
+            // SensorChart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.chartHash);
-            this.Name = "HashChart";
+            this.Controls.Add(this.chartSensor);
+            this.Name = "SensorChart";
             this.Size = new System.Drawing.Size(1150, 525);
-            ((System.ComponentModel.ISupportInitialize)(this.chartHash)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartSensor)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.DataVisualization.Charting.Chart chartHash;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartSensor;
 
     }
 }

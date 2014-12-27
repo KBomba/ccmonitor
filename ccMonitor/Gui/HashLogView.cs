@@ -33,10 +33,9 @@ namespace ccMonitor.Gui
 
         public void UpdateLogs(HashSet<GpuLogger.Benchmark.HashEntry> hashLogs)
         {
-            dgvHashLogs.DataSource = null;
             List<UserFriendlyHashEntry> userFriendlyHashEntries = new List<UserFriendlyHashEntry>(hashLogs.Count);
-
             List<GpuLogger.Benchmark.HashEntry> sortedHashLogs = hashLogs.OrderByDescending(entry => entry.TimeStamp).ToList();
+
             // If over 9000, just use max size, else make sure it doesn't get out of index
             int max = _rows > 9000? sortedHashLogs.Count : sortedHashLogs.Count < _rows ? sortedHashLogs.Count : _rows;
             for (int index = 0; index < max; index++)

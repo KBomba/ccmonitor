@@ -33,10 +33,9 @@ namespace ccMonitor.Gui
         
         public void UpdateLogs(List<GpuLogger.Benchmark.SensorValue> sensorLog)
         {
-            dgvSensorLogs.DataSource = null;
             List<UserFriendlySensorValue> userFriendlySensorValues = new List<UserFriendlySensorValue>(sensorLog.Count);
-
             List<GpuLogger.Benchmark.SensorValue> sortedSensorLog = sensorLog.OrderByDescending(value => value.TimeStamp).ToList();
+
             // If over 9000, just use max size, else make sure it doesn't get out of index
             int max = _rows > 9000 ? sortedSensorLog.Count : sortedSensorLog.Count < _rows ? sortedSensorLog.Count : _rows;
             for (int index = 0; index < max; index++)
@@ -59,7 +58,7 @@ namespace ccMonitor.Gui
                 userFriendlySensorValues.Add(userFriendlySensorValue);
             }
 
-            dgvSensorLogs.DataSource = userFriendlySensorValues.OrderByDescending(value => value.TimeStamp).ToList();
+            dgvSensorLogs.DataSource = userFriendlySensorValues;
         }
     }
 }
