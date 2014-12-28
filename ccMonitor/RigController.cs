@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Windows.Forms;
 using ccMonitor.Api;
 
 namespace ccMonitor
@@ -117,10 +118,11 @@ namespace ccMonitor
                             ? PruvotApi.GetHistory(rig.IpAddress, rig.Port, gpu.Info.MinerMap)
                             : new Dictionary<string, string>[0];
 
-                        if (allApiResults[3] != null && gpu.Info.Available)
+                        gpu.Info.Available = allApiResults[3] != null;
+                        if (gpu.Info.Available)
                         {
                             gpu.Update(allApiResults, pingTimes);
-                            
+
                             // While we're at it, calculate the total stats for the rig
                             totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
@@ -161,8 +163,17 @@ namespace ccMonitor
 
                         for (int i = 0; i < 4; i++)
                         {
-                            rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i] / rig.GpuLogs.Count;
+                            rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i]/
+                                                                                 rig.GpuLogs.Count;
                         }
+                    }
+                }
+                else
+                {
+                    foreach (GpuLogger gpu in rig.GpuLogs)
+                    {
+                        gpu.Info.Available = false;
+                        MessageBox.Show("Disabled because of apiresults1,2,3 erroring out");
                     }
                 }
             }
@@ -206,7 +217,7 @@ namespace ccMonitor
                         {
                             foreach (GpuLogger gpu in rig.GpuLogs)
                             {
-                                // Let's loop again, but now only check for "old" GPUs on that bus
+                                // Let's loop again, but now only check for "old" GPUs on that specific bus
                                 // Don't delete them, just make them unavailable
                                 if (gpu.Info.Bus == newGpu.Info.Bus)
                                 {

@@ -43,6 +43,38 @@ namespace ccMonitor.Gui
 
             chartHash.DataSource = chartFriendlyHashEntries;
             chartHash.DataBind();
+
+            AutoFormatXAxis(chartFriendlyHashEntries);
+        }
+
+        private void AutoFormatXAxis(List<ChartFriendlyHashEntry> chartHashEntries)
+        {
+            int hours = _hours;
+            if (hours > 9000)
+            {
+                hours = (int)Math.Round((chartHashEntries[chartHashEntries.Count - 1].TimeStamp -
+                                          chartHashEntries[0].TimeStamp).TotalHours, MidpointRounding.AwayFromZero);
+            }
+
+            foreach (ChartArea chartArea in chartHash.ChartAreas)
+            {
+                if (hours < 6)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "ddd HH:mm:ss";
+                }
+                else if (hours < 320)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd HH:mm";
+                }
+                else if (hours < 4600)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd YY HH";
+                }
+                else
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd YYYY";
+                }
+            }
         }
 
         private void chart_MouseWheel(object sender, MouseEventArgs e)

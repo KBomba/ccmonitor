@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using ccMonitor.Api;
@@ -13,7 +12,7 @@ namespace ccMonitor.Gui
     {
         private RigController.RigInfo Rig { get; set; }
 
-        private List<string> _apiCommands;
+        private readonly List<string> _apiCommands;
         private int _apiCommandsIndex;
         private string _stringBeforeUpOrDown;
 
@@ -47,9 +46,9 @@ namespace ccMonitor.Gui
                 if (!found)
                 {
                     TabPage tabPage = new TabPage(gpu.Info.ToString());
-                    GpuTab gpuGpuTab = new GpuTab(gpu) { Dock = DockStyle.Fill };
-                    gpuGpuTab.UpdateGui();
-                    tabPage.Controls.Add(gpuGpuTab);
+                    GpuTab gpuTab = new GpuTab(gpu) { Dock = DockStyle.Fill };
+                    gpuTab.UpdateGui();
+                    tabPage.Controls.Add(gpuTab);
                     tbcRig.TabPages.Add(tabPage);
                 }
             }
@@ -85,26 +84,55 @@ namespace ccMonitor.Gui
 
         private void txtApiConsole_KeyDown(object sender, KeyEventArgs e)
         {
+            // Always go to the end of the textbox, never type in the middle
+            txtApiConsole.SelectionStart = txtApiConsole.TextLength;
+            txtApiConsole.ScrollToCaret();
+
+            // Never remove the last >
+            if (e.KeyCode == Keys.Back)
+            {
+                if (txtApiConsole.Text[txtApiConsole.TextLength - 1] == '>')
+                {
+                    e.SuppressKeyPress = true;
+                }
+            }
+
             if (e.KeyCode == Keys.Enter)
             {
                 string[] splitStrings = txtApiConsole.Text.Split('>');
                 string trimmed = splitStrings[splitStrings.Length - 1].Trim();
-                _apiCommands.Insert(0, trimmed);
+                // Only the last line starting with a > is needed
 
-                Dictionary<string, string>[] request = PruvotApi.Request(Rig.IpAddress, Rig.Port, trimmed);
-                if (request != null)
+                // Avoid sending empty requests
+                if (trimmed != string.Empty)
                 {
-                    txtApiConsole.AppendText(Environment.NewLine + JsonConvert.SerializeObject(request, Formatting.Indented)
-                                                + Environment.NewLine + " >  ");
-                    e.SuppressKeyPress = true;
-                    _apiCommandsIndex = 0;
+                    _apiCommands.Insert(0, trimmed);
+
+                    Dictionary<string, string>[] request = PruvotApi.Request(Rig.IpAddress, Rig.Port, trimmed);
+                    if (request != null)
+                    {
+                        txtApiConsole.AppendText(Environment.NewLine +
+                                                 JsonConvert.SerializeObject(request, Formatting.Indented)
+                                                 + Environment.NewLine + " >  ");
+                        _apiCommandsIndex = 0;
+                    }
                 }
+                else
+                {
+                    txtApiConsole.AppendText(Environment.NewLine + " >  ");
+                }
+
+                e.SuppressKeyPress = true;
             }
 
             if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
             {
-                if (_stringBeforeUpOrDown == string.Empty)
+                if (string.IsNullOrEmpty(_stringBeforeUpOrDown))
+                {
                     _stringBeforeUpOrDown = txtApiConsole.Lines[txtApiConsole.Lines.Length - 1];
+                    // Keep the current string in memory when browsing through history of commands
+                }
+
                 StringBuilder sb = new StringBuilder(txtApiConsole.TextLength);
                 for (int index = 0; index < txtApiConsole.Lines.Length - 1; index++)
                 {
@@ -125,7 +153,8 @@ namespace ccMonitor.Gui
                     else
                     {
                         _apiCommandsIndex -= 2;
-                        if (_apiCommandsIndex < 0)
+                        // -2 seems to give the most normal behavior
+                        if ( _apiCommandsIndex < 0)
                         {
                             _apiCommandsIndex = -1;
                             sb.AppendLine(_stringBeforeUpOrDown);
@@ -137,8 +166,6 @@ namespace ccMonitor.Gui
                     }
 
                     _apiCommandsIndex++;
-
-
                 }
                 else
                 {

@@ -55,7 +55,7 @@ namespace ccMonitor.Gui
                 userFriendlyHashEntries.Add(userFriendlyHashEntry);
             }
 
-            dgvHashLogs.DataSource = userFriendlyHashEntries;
+            dgvHashLogs.DataSource = new SortableBindingList<UserFriendlyHashEntry>(userFriendlyHashEntries);
         }
     }
 }

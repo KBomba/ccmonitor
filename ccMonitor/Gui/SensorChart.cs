@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -20,6 +21,8 @@ namespace ccMonitor.Gui
             public int NetworkRigPing { get; set; }
         }
 
+        
+
         private readonly int _hours;
 
         public SensorChart(int hours = 1)
@@ -29,9 +32,11 @@ namespace ccMonitor.Gui
             InitializeComponent();
 
             chartSensor.MouseWheel += chart_MouseWheel;
+            chartSensor.Series["AvailabilityTemperatureSeries"].Color = Color.FromArgb(100, Color.Red);
+            chartSensor.Series["AvailabilityPingSeries"].Color = Color.FromArgb(100, Color.Red);
         }
 
-        public void UpdateCharts(List<GpuLogger.Benchmark.SensorValue> sensorValues, string os)
+        public void UpdateCharts(List<GpuLogger.Benchmark.SensorValue> sensorValues, List<Tuple<long,bool>> availabilityTimeStamps , string os)
         {
             List<ChartFriendlySensorValue> chartFriendlySensorValues = new List<ChartFriendlySensorValue>(sensorValues.Count);
             DateTime now = DateTime.Now;
@@ -40,7 +45,8 @@ namespace ccMonitor.Gui
             bool windows = os.StartsWith("windows");
             chartSensor.ChartAreas["ChartAreaTemperatureFan"].AxisY2.Title = windows ? "Fan (RPM)" : "Fan (%)";
 
-            chartFriendlySensorValues.AddRange(sensorValues.OrderBy(value => value.TimeStamp).Select(sensorValue => new ChartFriendlySensorValue
+            IEnumerable<ChartFriendlySensorValue> friendlySensorValues = sensorValues
+                .OrderBy(value => value.TimeStamp).Select(sensorValue => new ChartFriendlySensorValue
             {
                 TimeStamp = GuiHelper.UnixTimeStampToDateTime(sensorValue.TimeStamp), 
                 Temperature = sensorValue.Temperature,
@@ -50,10 +56,94 @@ namespace ccMonitor.Gui
                 ShareAnswerPing = sensorValue.ShareAnswerPing,
                 MiningUrlPing = sensorValue.MiningUrlPing,
                 NetworkRigPing = sensorValue.NetworkRigPing,
-            }).Where(chartFriendlySensorValue => _hours > 9000 || chartFriendlySensorValue.TimeStamp > (now - start)));
+            }).Where(chartFriendlySensorValue => _hours > 9000 || chartFriendlySensorValue.TimeStamp > (now - start));
 
+            IList<ChartFriendlySensorValue> values = friendlySensorValues as IList<ChartFriendlySensorValue> ?? friendlySensorValues.ToList();
+            chartFriendlySensorValues.AddRange(values);
+            
             chartSensor.DataSource = chartFriendlySensorValues;
             chartSensor.DataBind();
+
+            UpdateAvailabilityCharts(availabilityTimeStamps, values);
+
+            AutoFormatXAxis(chartFriendlySensorValues);
+        }
+
+        private void UpdateAvailabilityCharts(List<Tuple<long, bool>> availabilityTimeStamps, IList<ChartFriendlySensorValue> friendlySensorValues)
+        {
+            chartSensor.Series["AvailabilityTemperatureSeries"].Points.Clear();
+            chartSensor.Series["AvailabilityPingSeries"].Points.Clear();
+            DateTime firstTimeStamp = friendlySensorValues.First().TimeStamp;
+            double chartTempMaximum = friendlySensorValues.Max(value => value.Temperature)*1.2;
+            double chartTempMinimum = friendlySensorValues.Min(value => value.Temperature)*0.8;
+            double chartPingMaximum =
+                friendlySensorValues.SelectMany(
+                    value => new[] {value.MiningUrlPing, value.NetworkRigPing, value.ShareAnswerPing}).Max()*1.2;
+            double chartPingMinimum = -2;
+
+            for (int index = 0; index < availabilityTimeStamps.Count - 1; index++)
+            {
+                Tuple<long, bool> availabilityTimeStamp = availabilityTimeStamps[index];
+                DateTime dateTime = GuiHelper.UnixTimeStampToDateTime(availabilityTimeStamp.Item1);
+                if (!availabilityTimeStamp.Item2 && dateTime > firstTimeStamp)
+                {
+                    Tuple<long, bool> nextAvailabilityTimeStamp = availabilityTimeStamps[index + 1];
+
+                    DateTime nextDateTime = GuiHelper.UnixTimeStampToDateTime(nextAvailabilityTimeStamp.Item1);
+
+                    chartSensor.Series["AvailabilityTemperatureSeries"].Points.AddXY(dateTime + new TimeSpan(0, 0, 1),
+                        chartTempMinimum);
+                    chartSensor.Series["AvailabilityTemperatureSeries"].Points.AddXY(dateTime + new TimeSpan(0, 0, 1),
+                        chartTempMaximum + 1);
+                    chartSensor.Series["AvailabilityTemperatureSeries"].Points.AddXY(nextDateTime - new TimeSpan(0, 0, 1),
+                        chartTempMaximum + 1);
+                    chartSensor.Series["AvailabilityTemperatureSeries"].Points.AddXY(nextDateTime - new TimeSpan(0, 0, 1),
+                        chartTempMinimum);
+
+                    chartSensor.Series["AvailabilityPingSeries"].Points.AddXY(dateTime + new TimeSpan(0, 0, 1),
+                        chartPingMinimum);
+                    chartSensor.Series["AvailabilityPingSeries"].Points.AddXY(dateTime + new TimeSpan(0, 0, 1),
+                        chartPingMaximum + 1);
+                    chartSensor.Series["AvailabilityPingSeries"].Points.AddXY(nextDateTime - new TimeSpan(0, 0, 1),
+                        chartPingMaximum + 1);
+                    chartSensor.Series["AvailabilityPingSeries"].Points.AddXY(nextDateTime - new TimeSpan(0, 0, 1),
+                        chartPingMinimum);
+                }
+            }
+
+            chartSensor.ChartAreas["ChartAreaTemperatureFan"].AxisY.Maximum = chartTempMaximum;
+            chartSensor.ChartAreas["ChartAreaTemperatureFan"].AxisY.Minimum = chartTempMinimum;
+            chartSensor.ChartAreas["ChartAreaPingFrequency"].AxisY.Maximum = chartPingMaximum;
+            chartSensor.ChartAreas["ChartAreaPingFrequency"].AxisY.Minimum = chartPingMinimum;
+        }
+
+        private void AutoFormatXAxis(List<ChartFriendlySensorValue> chartFriendlySensorValues)
+        {
+            int hours = _hours;
+            if (hours > 9000)
+            {
+                hours = (int) Math.Round((chartFriendlySensorValues[chartFriendlySensorValues.Count - 1].TimeStamp -
+                                          chartFriendlySensorValues[0].TimeStamp).TotalHours, MidpointRounding.AwayFromZero);
+            }
+            foreach (ChartArea chartArea in chartSensor.ChartAreas)
+            {
+                if (hours < 6)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "ddd HH:mm:ss";
+                }
+                else if (hours < 320)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd HH:mm";
+                }
+                else if (hours < 4600)
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd YY HH";
+                }
+                else
+                {
+                    chartArea.AxisX.LabelStyle.Format = "MMM dd YYYY";
+                }
+            }
         }
 
         private void chart_MouseWheel(object sender, MouseEventArgs e)

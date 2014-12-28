@@ -127,6 +127,7 @@
     <Compile Include="Gui\SensorLogView.Designer.cs">
       <DependentUpon>SensorLogView.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gui\SortableBindingList.cs" />
     <Compile Include="RigController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

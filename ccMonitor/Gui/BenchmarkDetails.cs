@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Windows.Forms;
 
 namespace ccMonitor.Gui
@@ -12,10 +13,12 @@ namespace ccMonitor.Gui
 
         public BenchmarkDetails(GpuLogger.GpuInfo gpuInfo ,int rowsInLogViews = 5)
         {
+            
             GpuInfo = gpuInfo;
             _rowsInLogViews = rowsInLogViews;
             InitializeComponent();
             InitHashesAndSensors();
+            
         }
 
         private void InitHashesAndSensors()
@@ -26,6 +29,7 @@ namespace ccMonitor.Gui
 
         public void UpdateStats(GpuLogger.Benchmark benchmark)
         {
+            if (benchmark == null) return;
             UpdateSpread(benchmark.Statistic);
             UpdateLogs(benchmark);
             UpdateTextBoxes(benchmark);

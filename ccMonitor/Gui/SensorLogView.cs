@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
@@ -58,7 +59,7 @@ namespace ccMonitor.Gui
                 userFriendlySensorValues.Add(userFriendlySensorValue);
             }
 
-            dgvSensorLogs.DataSource = userFriendlySensorValues;
+            dgvSensorLogs.DataSource = new SortableBindingList<UserFriendlySensorValue>(userFriendlySensorValues);
         }
     }
 }

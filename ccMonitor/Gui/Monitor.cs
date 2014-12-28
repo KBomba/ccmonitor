@@ -21,6 +21,7 @@ namespace ccMonitor.Gui
 
         public Monitor()
         {
+            
             InitializeComponent();
 
             LoadSettings();
@@ -43,6 +44,7 @@ namespace ccMonitor.Gui
             _guiTimer = new System.Windows.Forms.Timer {Interval = 5000};
             _guiTimer.Tick += GuiTimerTick;
             _guiTimer.Start();
+
             UpdateGui();
         }
 
@@ -87,7 +89,7 @@ namespace ccMonitor.Gui
             lstGeneralOverview.BeginUpdate();
             // Grabs all the selected items in the General Overview List
             int[] selectedIndexes = new int[lstGeneralOverview.SelectedIndices.Count];
-            if (selectedIndexes.Length > 0)
+            if (lstGeneralOverview.SelectedIndices.Count > 0)
             {
                 for (int i = 0; i < selectedIndexes.Length; i++)
                 {
@@ -101,6 +103,7 @@ namespace ccMonitor.Gui
             
             foreach (RigController.RigInfo rig in _controller.RigLogs)
             {
+                
                 // Makes sure all rigs that are in the logs are shown in RigStats
                 // And updates them
                 bool tabPageExists = false;
@@ -129,6 +132,7 @@ namespace ccMonitor.Gui
                     tbcMonitor.TabPages.Add(tabPage);
                 }
                 
+                
                 // Adds the controller info to the listview
                 ListViewGroup lvg = new ListViewGroup(rig.UserFriendlyName);
                 lstGeneralOverview.Groups.Add(lvg);
@@ -137,29 +141,57 @@ namespace ccMonitor.Gui
                 foreach (GpuLogger gpu in rig.GpuLogs)
                 {
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
+                    if(gpu.Info.Available == false) lvi.BackColor = Color.DarkOrange;
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, "H"));
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
-                    lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture));
-                    lvi.SubItems.Add(string.Empty);
-                    lvi.SubItems.Add(gpu.CurrentBenchmark.SensorLog[gpu.CurrentBenchmark.SensorLog.Count -1]
-                        .Temperature.ToString(CultureInfo.InvariantCulture) + " °C");
+                    if (gpu.CurrentBenchmark == null)
+                    {
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
+                    }
+                    else
+                    {
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, "H"));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
+                        lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture));
+                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(gpu.CurrentBenchmark.SensorLog[gpu.CurrentBenchmark.SensorLog.Count - 1]
+                            .Temperature.ToString(CultureInfo.InvariantCulture) + " °C");
+                    }
                     lvi.SubItems.Add(string.Empty);
                     lstGeneralOverview.Items.Add(lvi);
                 }
 
                 lvi = new ListViewItem(string.Empty, lvg);
                 lvi.SubItems.Add("Total");
-                lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
-                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, "H"));
-                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, "H"));
-                lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
-                lvi.SubItems.Add(rig.CurrentStatistic.Accepts.ToString(CultureInfo.InvariantCulture));
-                lvi.SubItems.Add(rig.CurrentStatistic.Rejects.ToString(CultureInfo.InvariantCulture));
-                lvi.SubItems.Add(string.Empty);
-                lvi.SubItems.Add(rig.CurrentStatistic.ShareAnswerPing.ToString(CultureInfo.InvariantCulture));
+                if (rig.CurrentStatistic == null)
+                {
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
+                }
+                else
+                {
+                    lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, "H"));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, "H"));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
+                    lvi.SubItems.Add(rig.CurrentStatistic.Accepts.ToString(CultureInfo.InvariantCulture));
+                    lvi.SubItems.Add(rig.CurrentStatistic.Rejects.ToString(CultureInfo.InvariantCulture));
+                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(rig.CurrentStatistic.ShareAnswerPing.ToString(CultureInfo.InvariantCulture));
+                }
+                
                 lstGeneralOverview.Items.Add(lvi);
             }
 
@@ -196,6 +228,13 @@ namespace ccMonitor.Gui
 
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e)
         {
+            foreach (RigController.RigInfo rig in _controller.RigLogs)
+            {
+                foreach (GpuLogger gpu in rig.GpuLogs)
+                {
+                    gpu.Info.Available = false;
+                }
+            }
             SaveLogs();
             SaveSettings();
         }

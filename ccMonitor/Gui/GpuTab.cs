@@ -48,31 +48,34 @@ namespace ccMonitor.Gui
 
         public void UpdateGui()
         {
-            UpdateInternalControls();
-
-            UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
-            foreach (GpuLogger.Benchmark benchmark in Gpu.BenchLogs)
+            if (Gpu.CurrentBenchmark != null && Gpu.BenchLogs != null && Gpu.BenchLogs.Count > 0)
             {
-                UserFriendlyBenchmark userFriendlyBenchmark = new UserFriendlyBenchmark
+                UpdateInternalControls();
+                
+                UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
+                foreach (GpuLogger.Benchmark benchmark in Gpu.BenchLogs)
                 {
-                    TimeStarted = GuiHelper.UnixTimeStampToDateTime(benchmark.TimeStamp).ToString("g"),
-                    TimeLastUpdate = GuiHelper.UnixTimeStampToDateTime(benchmark.SensorLog
-                                        [benchmark.SensorLog.Count - 1].TimeStamp).ToString("g"),
-                    Algorithm = benchmark.Algorithm,
-                    AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.AverageHashRate, "H"),
-                    StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
-                    HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
-                    AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
-                    MinerNameVersion = benchmark.MinerSetup.ToString(),
-                    Stratum = benchmark.MinerSetup.MiningUrl
-                };
+                    UserFriendlyBenchmark userFriendlyBenchmark = new UserFriendlyBenchmark
+                    {
+                        TimeStarted = GuiHelper.UnixTimeStampToDateTime(benchmark.TimeStamp).ToString("g"),
+                        TimeLastUpdate = GuiHelper.UnixTimeStampToDateTime(benchmark.SensorLog
+                            [benchmark.SensorLog.Count - 1].TimeStamp).ToString("g"),
+                        Algorithm = benchmark.Algorithm,
+                        AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.AverageHashRate, "H"),
+                        StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
+                        HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
+                        AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
+                        MinerNameVersion = benchmark.MinerSetup.ToString(),
+                        Stratum = benchmark.MinerSetup.MiningUrl
+                    };
 
-                UserFriendlyBenchmarks.Insert(0, userFriendlyBenchmark);
+                    UserFriendlyBenchmarks.Insert(0, userFriendlyBenchmark);
+                }
+
+                int rowIndex = dgvBenchmarks.SelectedRows.Count > 0 ? dgvBenchmarks.SelectedRows[0].Index : 0;
+                dgvBenchmarks.DataSource = new SortableBindingList<UserFriendlyBenchmark>(UserFriendlyBenchmarks);
+                if (dgvBenchmarks.Rows.Count > 0) dgvBenchmarks.CurrentCell = dgvBenchmarks.Rows[rowIndex].Cells[0];
             }
-
-            int rowIndex = dgvBenchmarks.SelectedRows.Count > 0 ? dgvBenchmarks.SelectedRows[0].Index : 0;
-            dgvBenchmarks.DataSource = UserFriendlyBenchmarks;
-            if(dgvBenchmarks.Rows.Count > 0) dgvBenchmarks.CurrentCell = dgvBenchmarks.Rows[rowIndex].Cells[0];
         }
 
         private void UpdateInternalControls()
@@ -94,10 +97,11 @@ namespace ccMonitor.Gui
 
             foreach (object control in tabSensorCharts.Controls)
             {
-                SensorChart hashChart = control as SensorChart;
-                if (hashChart != null)
+                SensorChart sensorChartChart = control as SensorChart;
+                if (sensorChartChart != null)
                 {
-                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.SensorLog, Gpu.CurrentBenchmark.MinerSetup.OperatingSystem);
+                    sensorChartChart.UpdateCharts(Gpu.CurrentBenchmark.SensorLog, 
+                        Gpu.Info.AvailableTimeStamps, Gpu.CurrentBenchmark.MinerSetup.OperatingSystem);
                 }
             }
         }
@@ -106,7 +110,6 @@ namespace ccMonitor.Gui
         {
             int rowIndex = e.RowIndex;
             if(rowIndex<0) return;
-
             
             BenchmarkOverview form = new BenchmarkOverview(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1], Gpu.Info)
             {

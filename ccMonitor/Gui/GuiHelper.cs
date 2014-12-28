@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
 namespace ccMonitor.Gui
 {
@@ -31,7 +29,7 @@ namespace ccMonitor.Gui
             return (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         }
 
-        [DllImport("user32.dll")]
+        /*[DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
 
         private const int WmSetredraw = 11;
@@ -46,5 +44,14 @@ namespace ccMonitor.Gui
             SendMessage(parent.Handle, WmSetredraw, true, 0);
             parent.Refresh();
         }
+
+        public static void ApplyAll(Control control, Action<Control> action)
+        {
+            action(control);
+            foreach (Control child in control.Controls)
+            {
+                ApplyAll(child, action);
+            }
+        }*/
     }
 }

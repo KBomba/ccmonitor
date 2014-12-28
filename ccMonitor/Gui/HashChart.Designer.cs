@@ -125,7 +125,7 @@
             this.chartHash.Name = "chartHash";
             series1.ChartArea = "ChartAreaFoundHashrate";
             series1.Color = System.Drawing.Color.Goldenrod;
-            series1.CustomProperties = "EmptyPointValue=Zero, PointWidth=0.5";
+            series1.CustomProperties = "EmptyPointValue=Zero, PointWidth=1";
             series1.Legend = "LegendFoundHashrate";
             series1.LegendText = "Found";
             series1.Name = "FoundSeries";
@@ -137,7 +137,7 @@
             series2.ChartArea = "ChartAreaFoundHashrate";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
             series2.Color = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
-            series2.CustomProperties = "IsXAxisQuantitative=False, LineTension=0.1";
+            series2.CustomProperties = "IsXAxisQuantitative=True";
             series2.Legend = "LegendFoundHashrate";
             series2.LegendText = "Hashrate";
             series2.Name = "HashrateSeries";
@@ -146,6 +146,7 @@
             series2.YValueMembers = "HashRate";
             series3.ChartArea = "ChartAreaDifficultyHashcount";
             series3.Color = System.Drawing.Color.Navy;
+            series3.CustomProperties = "EmptyPointValue=Zero, PointWidth=1";
             series3.Legend = "LegendDifficultyHashcount";
             series3.LegendText = "Hash count";
             series3.Name = "HashcountSeries";

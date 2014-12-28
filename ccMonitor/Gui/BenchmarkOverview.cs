@@ -18,7 +18,7 @@ namespace ccMonitor.Gui
             tabHashCharts.Controls.Add(hashChart);
 
             SensorChart sensorChart = new SensorChart(9001) {Dock = DockStyle.Fill};
-            sensorChart.UpdateCharts(benchmark.SensorLog, benchmark.MinerSetup.OperatingSystem);
+            sensorChart.UpdateCharts(benchmark.SensorLog, gpuInfo.AvailableTimeStamps, benchmark.MinerSetup.OperatingSystem);
             tabSensorCharts.Controls.Add(sensorChart);
 
         }

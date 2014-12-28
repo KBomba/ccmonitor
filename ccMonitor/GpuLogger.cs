@@ -18,8 +18,34 @@ namespace ccMonitor
             public int MinerMap { get; set; }
 
             public uint ComputeCapability { get; set; }
-            
-            public bool Available { get; set; }
+
+            private bool _available;
+            public List<Tuple<long,bool>> AvailableTimeStamps { get; set; } 
+            // long: unix timestamp, bool: availability
+            public bool Available
+            {
+                get { return _available; }
+                set
+                {
+                    long unixTimeStamp = UnixTimeStamp();
+                    if (AvailableTimeStamps == null)
+                    {
+                        AvailableTimeStamps = new List<Tuple<long, bool>>()
+                        {
+                            new Tuple<long, bool>(unixTimeStamp, value)
+                        };
+                    }
+                    else
+                    {
+                        Tuple<long, bool> prevAvailableTimeStamp = AvailableTimeStamps[AvailableTimeStamps.Count - 1];
+                        if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != value)
+                        {
+                            AvailableTimeStamps.Add(new Tuple<long, bool>(unixTimeStamp, value));
+                        }
+                    }
+                    _available = value;
+                }
+            }
 
             public override string ToString()
             {

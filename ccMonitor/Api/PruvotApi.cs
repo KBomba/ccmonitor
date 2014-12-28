@@ -44,6 +44,7 @@ namespace ccMonitor.Api
                 return (T) Convert.ChangeType(value, typeof (T), CultureInfo.InvariantCulture);
             }
 
+            // Unsigneds can't be negative
             if (typeof(T) == typeof(uint)) return (T)Convert.ChangeType(9001, typeof(T), CultureInfo.InvariantCulture);
             return (T) Convert.ChangeType(-1, typeof (T), CultureInfo.InvariantCulture);
         }
@@ -83,7 +84,23 @@ namespace ccMonitor.Api
 
         public static Dictionary<string, string>[] GetHistory(string ip = "127.0.0.1", int port = 4068, int minerMap = -1)
         {
-            return minerMap == -1 ? Request(ip, port, "histo") : Request(ip, port, "histo|" + minerMap);
+            Dictionary<string, string>[] histo = Request(ip, port, "histo");
+            
+            if (histo == null) return null;
+
+            bool existsInHisto = false;
+            foreach (Dictionary<string, string> log in histo)
+            {
+                if (GetDictValue<int>(log, "GPU") == minerMap)
+                {
+                    existsInHisto = true;
+                    break;
+                }
+            }
+
+            if(existsInHisto) return minerMap == -1 ? histo : Request(ip, port, "histo|" + minerMap);
+            
+            return null;
         }
 
         public static Dictionary<string, string>[] GetPoolInfo(string ip = "127.0.0.1", int port = 4068)
