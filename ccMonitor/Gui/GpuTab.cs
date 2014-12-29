@@ -1,12 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 
 namespace ccMonitor.Gui
 {
     public partial class GpuTab : UserControl
     {
         public GpuLogger Gpu { get; set; }
+
+        private bool _pauseUpdate;
 
         public List<UserFriendlyBenchmark> UserFriendlyBenchmarks { get; set; }
         public class UserFriendlyBenchmark
@@ -29,6 +36,10 @@ namespace ccMonitor.Gui
             InitializeComponent();
             InitGpuDetails();
             InitCharts();
+
+            rightClickStrip.Items["copySelectedItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.CopySingleImage);
+            rightClickStrip.Items["copyAllItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.CopyAllImage);
+            rightClickStrip.Items["startNewItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.ReloadButtonImage);
         }
 
         private void InitCharts()
@@ -48,34 +59,41 @@ namespace ccMonitor.Gui
 
         public void UpdateGui()
         {
-            if (Gpu.CurrentBenchmark != null && Gpu.BenchLogs != null && Gpu.BenchLogs.Count > 0)
+            if (!_pauseUpdate)
             {
-                UpdateInternalControls();
-                
-                UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
-                foreach (GpuLogger.Benchmark benchmark in Gpu.BenchLogs)
+                if (Gpu.CurrentBenchmark != null && Gpu.BenchLogs != null && Gpu.BenchLogs.Count > 0)
                 {
-                    UserFriendlyBenchmark userFriendlyBenchmark = new UserFriendlyBenchmark
+                    UpdateInternalControls();
+
+                    UserFriendlyBenchmarks = new List<UserFriendlyBenchmark>(Gpu.BenchLogs.Count);
+                    foreach (GpuLogger.Benchmark benchmark in Gpu.BenchLogs)
                     {
-                        TimeStarted = GuiHelper.UnixTimeStampToDateTime(benchmark.TimeStamp).ToString("g"),
-                        TimeLastUpdate = GuiHelper.UnixTimeStampToDateTime(benchmark.SensorLog
-                            [benchmark.SensorLog.Count - 1].TimeStamp).ToString("g"),
-                        Algorithm = benchmark.Algorithm,
-                        AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.AverageHashRate, "H"),
-                        StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
-                        HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
-                        AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
-                        MinerNameVersion = benchmark.MinerSetup.ToString(),
-                        Stratum = benchmark.MinerSetup.MiningUrl
-                    };
+                        string timeStarted = GuiHelper.UnixTimeStampToDateTime(benchmark.TimeStamp).ToString("g");
+                        string timeLastUpdate = benchmark.SensorLog.Count > 2
+                            ? GuiHelper.UnixTimeStampToDateTime(benchmark.SensorLog[benchmark.SensorLog.Count - 1].TimeStamp).ToString("g")
+                            : timeStarted;
+                        UserFriendlyBenchmark userFriendlyBenchmark = new UserFriendlyBenchmark
+                        {
+                            TimeStarted = timeStarted,
+                            TimeLastUpdate = timeLastUpdate,
+                            Algorithm = benchmark.Algorithm,
+                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.AverageHashRate, "H"),
+                            StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
+                            HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
+                            AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
+                            MinerNameVersion = benchmark.MinerSetup.ToString(),
+                            Stratum = benchmark.MinerSetup.MiningUrl
+                        };
 
-                    UserFriendlyBenchmarks.Insert(0, userFriendlyBenchmark);
+                        UserFriendlyBenchmarks.Insert(0, userFriendlyBenchmark);
+                    }
+
+                    int rowIndex = dgvBenchmarks.SelectedRows.Count > 0 ? dgvBenchmarks.SelectedRows[0].Index : 0;
+                    dgvBenchmarks.DataSource = new SortableBindingList<UserFriendlyBenchmark>(UserFriendlyBenchmarks);
+                    if (dgvBenchmarks.Rows.Count > 0) dgvBenchmarks.CurrentCell = dgvBenchmarks.Rows[rowIndex].Cells[0];
                 }
-
-                int rowIndex = dgvBenchmarks.SelectedRows.Count > 0 ? dgvBenchmarks.SelectedRows[0].Index : 0;
-                dgvBenchmarks.DataSource = new SortableBindingList<UserFriendlyBenchmark>(UserFriendlyBenchmarks);
-                if (dgvBenchmarks.Rows.Count > 0) dgvBenchmarks.CurrentCell = dgvBenchmarks.Rows[rowIndex].Cells[0];
             }
+            
         }
 
         private void UpdateInternalControls()
@@ -91,7 +109,7 @@ namespace ccMonitor.Gui
                 HashChart hashChart = control as HashChart;
                 if (hashChart != null)
                 {
-                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs);
+                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs, Gpu.Info.AvailableTimeStamps);
                 }
             }
 
@@ -110,16 +128,56 @@ namespace ccMonitor.Gui
         {
             int rowIndex = e.RowIndex;
             if(rowIndex<0) return;
-            
-            BenchmarkOverview form = new BenchmarkOverview(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1], Gpu.Info)
+
+            Thread thread = new Thread(ShowBenchmarkOverview);
+            thread.Start(rowIndex);
+        }
+
+        private void ShowBenchmarkOverview(object obj)
+        {
+            int rowIndex = obj is int ? (int) obj : 0;
+            using (BenchmarkOverview benchmarkOverview = new BenchmarkOverview(Gpu.BenchLogs[Gpu.BenchLogs.Count - rowIndex - 1], Gpu.Info))
             {
-                Text = Gpu.Info + " - Benchmark overview",
-                Size = new Size(this.Size.Width, this.Size.Height)
-            };
+                benchmarkOverview.Text = Gpu.Info + " - Benchmark overview";
+                benchmarkOverview.Size = new Size(this.Size.Width, this.Size.Height);
+                benchmarkOverview.ShowDialog();
+            }
             
-            form.Show();
+        }
+
+        private void dgvBenchmarks_MouseDown(object sender, MouseEventArgs e)
+        {
+            _pauseUpdate = e.Button == MouseButtons.Right;
+        }
+
+        private void copySelectedItem_Click(object sender, System.EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var row in dgvBenchmarks.SelectedRows)
+            {
+                DataGridViewRow selectedRow = row as DataGridViewRow;
+                if (selectedRow != null)
+                {
+                    sb.AppendLine(JsonConvert.SerializeObject(UserFriendlyBenchmarks [selectedRow.Index], Formatting.Indented));
+                }
+            }
+
+            Clipboard.SetText(sb.ToString());
+            _pauseUpdate = false;
+        }
+
+        private void copyAllItem_Click(object sender, System.EventArgs e)
+        {
+            Clipboard.SetText(JsonConvert.SerializeObject(UserFriendlyBenchmarks, Formatting.Indented));
+            _pauseUpdate = false;
+        }
+
+        private void startNewItem_Click(object sender, System.EventArgs e)
+        {
+            Gpu.RestartCurrentBenchmark();
+            _pauseUpdate = false;
+            UpdateGui();
         }
     }
-
-    
 }

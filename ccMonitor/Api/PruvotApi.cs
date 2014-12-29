@@ -98,7 +98,7 @@ namespace ccMonitor.Api
                 }
             }
 
-            if(existsInHisto) return minerMap == -1 ? histo : Request(ip, port, "histo|" + minerMap);
+            if(existsInHisto || minerMap == -1) return minerMap == -1 ? histo : Request(ip, port, "histo|" + minerMap);
             
             return null;
         }

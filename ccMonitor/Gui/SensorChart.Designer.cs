@@ -155,7 +155,7 @@
             series4.ChartArea = "ChartAreaPingFrequency";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series4.IsVisibleInLegend = false;
-            series4.Legend = "LegendTemperatureFan";
+            series4.Legend = "LegendCoreclockMemoryclock";
             series4.Name = "AvailabilityPingSeries";
             series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series5.BorderWidth = 2;
@@ -222,6 +222,7 @@
             this.chartSensor.Size = new System.Drawing.Size(1150, 525);
             this.chartSensor.TabIndex = 0;
             this.chartSensor.Text = "chartSensor";
+            this.chartSensor.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chartSensor_AxisViewChanged);
             this.chartSensor.MouseEnter += new System.EventHandler(this.chart_MouseEnter);
             this.chartSensor.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
             // 

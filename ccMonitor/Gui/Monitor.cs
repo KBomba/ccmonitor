@@ -141,7 +141,7 @@ namespace ccMonitor.Gui
                 foreach (GpuLogger gpu in rig.GpuLogs)
                 {
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
-                    if(gpu.Info.Available == false) lvi.BackColor = Color.DarkOrange;
+                    if (gpu.Info.Available == false) lvi.BackColor = Color.FromArgb(100, Color.Red);
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
                     if (gpu.CurrentBenchmark == null)

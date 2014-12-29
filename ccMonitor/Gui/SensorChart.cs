@@ -20,9 +20,7 @@ namespace ccMonitor.Gui
             public int MiningUrlPing { get; set; }
             public int NetworkRigPing { get; set; }
         }
-
         
-
         private readonly int _hours;
 
         public SensorChart(int hours = 1)
@@ -32,8 +30,8 @@ namespace ccMonitor.Gui
             InitializeComponent();
 
             chartSensor.MouseWheel += chart_MouseWheel;
-            chartSensor.Series["AvailabilityTemperatureSeries"].Color = Color.FromArgb(100, Color.Red);
-            chartSensor.Series["AvailabilityPingSeries"].Color = Color.FromArgb(100, Color.Red);
+            chartSensor.Series["AvailabilityTemperatureSeries"].Color = Color.FromArgb(50, Color.Red);
+            chartSensor.Series["AvailabilityPingSeries"].Color = Color.FromArgb(50, Color.Red);
         }
 
         public void UpdateCharts(List<GpuLogger.Benchmark.SensorValue> sensorValues, List<Tuple<long,bool>> availabilityTimeStamps , string os)
@@ -73,13 +71,12 @@ namespace ccMonitor.Gui
         {
             chartSensor.Series["AvailabilityTemperatureSeries"].Points.Clear();
             chartSensor.Series["AvailabilityPingSeries"].Points.Clear();
-            DateTime firstTimeStamp = friendlySensorValues.First().TimeStamp;
+            DateTime firstTimeStamp = friendlySensorValues[0].TimeStamp;
             double chartTempMaximum = friendlySensorValues.Max(value => value.Temperature)*1.2;
             double chartTempMinimum = friendlySensorValues.Min(value => value.Temperature)*0.8;
-            double chartPingMaximum =
-                friendlySensorValues.SelectMany(
-                    value => new[] {value.MiningUrlPing, value.NetworkRigPing, value.ShareAnswerPing}).Max()*1.2;
-            double chartPingMinimum = -2;
+            double chartPingMaximum = friendlySensorValues.SelectMany(
+                value => new[] {value.MiningUrlPing, value.NetworkRigPing, value.ShareAnswerPing}).Max()*1.2;
+            const double chartPingMinimum = 0;
 
             for (int index = 0; index < availabilityTimeStamps.Count - 1; index++)
             {
@@ -179,6 +176,45 @@ namespace ccMonitor.Gui
         {
             Chart chart = sender as Chart;
             if (chart != null) chart.Parent.Focus();
+        }
+
+        private void chartSensor_AxisViewChanged(object sender, ViewEventArgs e)
+        {
+            if (e.Axis.AxisName == AxisName.X)
+            {
+                double start = e.Axis.ScaleView.ViewMinimum;
+                double end = e.Axis.ScaleView.ViewMaximum;
+
+                double[] temp =
+                    chartSensor.Series["TemperatureSeries"].Points.Where(
+                        point => point.XValue >= start && point.XValue <= end).Select(x => x.YValues[0]).ToArray();
+                if (temp.Length > 0)
+                {
+                    double ymin = temp.Min();
+                    double ymax = temp.Max();
+                    chartSensor.ChartAreas["ChartAreaTemperatureFan"].AxisY.Minimum = ymin * 0.8;
+                    chartSensor.ChartAreas["ChartAreaTemperatureFan"].AxisY.Maximum = ymax * 1.2;
+                }
+
+                double[] sharePing =
+                    chartSensor.Series["SharepingSeries"].Points.Where(
+                        point => point.XValue >= start && point.XValue <= end).Select(x => x.YValues[0]).ToArray();
+                double[] miningPing =
+                    chartSensor.Series["MiningpingSeries"].Points.Where(
+                        point => point.XValue >= start && point.XValue <= end).Select(x => x.YValues[0]).ToArray();
+                double[] networkPing =
+                    chartSensor.Series["NetworkpingSeries"].Points.Where(
+                        point => point.XValue >= start && point.XValue <= end).Select(x => x.YValues[0]).ToArray();
+                if (sharePing.Length > 0 && miningPing.Length > 0 && networkPing.Length > 0)
+                {
+                    double sharePingMax = sharePing.Max(), miningPingMax = miningPing.Max(), networkPingMax = networkPing.Max();
+
+                    double ymin = 0;
+                    double ymax = Math.Max(sharePingMax, Math.Max(miningPingMax, networkPingMax));
+                    chartSensor.ChartAreas["ChartAreaPingFrequency"].AxisY.Minimum = ymin * 0.8;
+                    chartSensor.ChartAreas["ChartAreaPingFrequency"].AxisY.Maximum = ymax * 1.2;
+                }
+            }
         }
     }
 }

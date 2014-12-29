@@ -468,6 +468,11 @@ namespace ccMonitor
 
             BenchLogs.Add(benchmark);
         }
+
+        public void RestartCurrentBenchmark()
+        {
+            CreateNewBenchMark(CurrentBenchmark.Algorithm, CurrentBenchmark.MinerSetup);
+        }
         
         private static long UnixTimeStamp()
         {

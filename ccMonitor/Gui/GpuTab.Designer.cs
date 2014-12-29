@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tbcGpu = new System.Windows.Forms.TabControl();
             this.tabGpuDetails = new System.Windows.Forms.TabPage();
             this.tabGpuBenchmarks = new System.Windows.Forms.TabPage();
@@ -41,11 +42,17 @@
             this.clmAverageTemperature = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmMinerNameVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmStratum = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.rightClickStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copySelectedItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyAllItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.separator = new System.Windows.Forms.ToolStripSeparator();
+            this.startNewItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabHashCharts = new System.Windows.Forms.TabPage();
             this.tabSensorCharts = new System.Windows.Forms.TabPage();
             this.tbcGpu.SuspendLayout();
             this.tabGpuBenchmarks.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBenchmarks)).BeginInit();
+            this.rightClickStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcGpu
@@ -96,9 +103,9 @@
             this.clmAverageTemperature,
             this.clmMinerNameVersion,
             this.clmStratum});
+            this.dgvBenchmarks.ContextMenuStrip = this.rightClickStrip;
             this.dgvBenchmarks.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvBenchmarks.Location = new System.Drawing.Point(3, 3);
-            this.dgvBenchmarks.MultiSelect = false;
             this.dgvBenchmarks.Name = "dgvBenchmarks";
             this.dgvBenchmarks.ReadOnly = true;
             this.dgvBenchmarks.RowHeadersVisible = false;
@@ -106,6 +113,7 @@
             this.dgvBenchmarks.Size = new System.Drawing.Size(1148, 522);
             this.dgvBenchmarks.TabIndex = 0;
             this.dgvBenchmarks.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvBenchmarks_CellMouseDoubleClick);
+            this.dgvBenchmarks.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dgvBenchmarks_MouseDown);
             // 
             // clmTimeStarted
             // 
@@ -187,6 +195,43 @@
             this.clmStratum.Name = "clmStratum";
             this.clmStratum.ReadOnly = true;
             // 
+            // rightClickStrip
+            // 
+            this.rightClickStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copySelectedItem,
+            this.copyAllItem,
+            this.separator,
+            this.startNewItem});
+            this.rightClickStrip.Name = "rightClickStrip";
+            this.rightClickStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.rightClickStrip.Size = new System.Drawing.Size(212, 76);
+            // 
+            // copySelectedItem
+            // 
+            this.copySelectedItem.Name = "copySelectedItem";
+            this.copySelectedItem.Size = new System.Drawing.Size(211, 22);
+            this.copySelectedItem.Text = "Copy selected benchmark";
+            this.copySelectedItem.Click += new System.EventHandler(this.copySelectedItem_Click);
+            // 
+            // copyAllItem
+            // 
+            this.copyAllItem.Name = "copyAllItem";
+            this.copyAllItem.Size = new System.Drawing.Size(211, 22);
+            this.copyAllItem.Text = "Copy all benchmarks";
+            this.copyAllItem.Click += new System.EventHandler(this.copyAllItem_Click);
+            // 
+            // separator
+            // 
+            this.separator.Name = "separator";
+            this.separator.Size = new System.Drawing.Size(208, 6);
+            // 
+            // startNewItem
+            // 
+            this.startNewItem.Name = "startNewItem";
+            this.startNewItem.Size = new System.Drawing.Size(211, 22);
+            this.startNewItem.Text = "Start new benchmark";
+            this.startNewItem.Click += new System.EventHandler(this.startNewItem_Click);
+            // 
             // tabHashCharts
             // 
             this.tabHashCharts.Location = new System.Drawing.Point(4, 22);
@@ -215,6 +260,7 @@
             this.tbcGpu.ResumeLayout(false);
             this.tabGpuBenchmarks.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvBenchmarks)).EndInit();
+            this.rightClickStrip.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -236,6 +282,11 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn clmMinerNameVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn clmStratum;
         private System.Windows.Forms.TabPage tabSensorCharts;
+        private System.Windows.Forms.ContextMenuStrip rightClickStrip;
+        private System.Windows.Forms.ToolStripMenuItem copyAllItem;
+        private System.Windows.Forms.ToolStripMenuItem copySelectedItem;
+        private System.Windows.Forms.ToolStripSeparator separator;
+        private System.Windows.Forms.ToolStripMenuItem startNewItem;
 
     }
 }

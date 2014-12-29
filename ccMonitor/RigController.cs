@@ -173,7 +173,6 @@ namespace ccMonitor
                     foreach (GpuLogger gpu in rig.GpuLogs)
                     {
                         gpu.Info.Available = false;
-                        MessageBox.Show("Disabled because of apiresults1,2,3 erroring out");
                     }
                 }
             }
@@ -251,15 +250,15 @@ namespace ccMonitor
 
         private static int[] GetPingTimes(Dictionary<string, string>[] poolInfo, RigInfo rig)
         {
-            if (poolInfo == null || poolInfo.Length == 0) return new[] {999, 999, 999};
+            if (poolInfo == null || poolInfo.Length == 0) return new[] {333, 333, 333};
 
             string[] stratum = PruvotApi.GetDictValue<string>(poolInfo[0], "URL").Split('/');
             string[] stratumUrlPort = stratum[stratum.Length - 1].Split(':');
 
             int[] pingTimes = new int[3];
             Ping pinger = new Ping();
-            PingReply miningUrlPing = pinger.Send(stratumUrlPort[0], 500);
-            PingReply networkRigPing = pinger.Send(rig.IpAddress, 500);
+            PingReply miningUrlPing = pinger.Send(stratumUrlPort[0], 333);
+            PingReply networkRigPing = pinger.Send(rig.IpAddress, 333);
 
             // Will try to just ping the URL without subdomain if it failed, 
             // May give bad results but it's just a small stat for fun ^^
@@ -270,14 +269,14 @@ namespace ccMonitor
                 string[] stratumDomains = stratumUrlPort[0].Split('.');
                 string lastParts = stratumDomains[stratumDomains.Length - 2] + '.' +
                                    stratumDomains[stratumDomains.Length - 1];
-                miningUrlPing = pinger.Send(lastParts, 500);
+                miningUrlPing = pinger.Send(lastParts, 333);
             }
 
             pingTimes[0] = PruvotApi.GetDictValue<int>(poolInfo[0], "PING");
             pingTimes[1] = (int) (miningUrlPing != null && miningUrlPing.Status == IPStatus.Success
-                            ? miningUrlPing.RoundtripTime : 999);
+                            ? miningUrlPing.RoundtripTime : 333);
             pingTimes[2] = (int) (networkRigPing != null && networkRigPing.Status == IPStatus.Success
-                            ? networkRigPing.RoundtripTime : 999);
+                            ? networkRigPing.RoundtripTime : 333);
 
             return pingTimes;
         }

@@ -14,7 +14,7 @@ namespace ccMonitor.Gui
             tabDetails.Controls.Add(benchmarkDetails);
 
             HashChart hashChart = new HashChart(9001) {Dock = DockStyle.Fill};
-            hashChart.UpdateCharts(benchmark.HashLogs);
+            hashChart.UpdateCharts(benchmark.HashLogs, gpuInfo.AvailableTimeStamps);
             tabHashCharts.Controls.Add(hashChart);
 
             SensorChart sensorChart = new SensorChart(9001) {Dock = DockStyle.Fill};
