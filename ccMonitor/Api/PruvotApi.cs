@@ -27,6 +27,7 @@ namespace ccMonitor.Api
                 for (int i = 0; i < keyValues.Length; i++)
                 {
                     string[] elements = keyValues[i].Split('=');
+                    if (elements.Length <= 1) return null;
                     separateDict.Add(elements[0], elements[1]);
                 }
                 totalDict[index] = separateDict;
