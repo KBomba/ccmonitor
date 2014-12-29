@@ -57,14 +57,18 @@ namespace ccMonitor.Gui
             }).Where(chartFriendlySensorValue => _hours > 9000 || chartFriendlySensorValue.TimeStamp > (now - start));
 
             IList<ChartFriendlySensorValue> values = friendlySensorValues as IList<ChartFriendlySensorValue> ?? friendlySensorValues.ToList();
-            chartFriendlySensorValues.AddRange(values);
-            
-            chartSensor.DataSource = chartFriendlySensorValues;
-            chartSensor.DataBind();
 
-            UpdateAvailabilityCharts(availabilityTimeStamps, values);
+            if (values.Count > 0)
+            {
+                chartFriendlySensorValues.AddRange(values);
 
-            AutoFormatXAxis(chartFriendlySensorValues);
+                chartSensor.DataSource = chartFriendlySensorValues;
+                chartSensor.DataBind();
+
+                UpdateAvailabilityCharts(availabilityTimeStamps, values);
+
+                AutoFormatXAxis(chartFriendlySensorValues);
+            }
         }
 
         private void UpdateAvailabilityCharts(List<Tuple<long, bool>> availabilityTimeStamps, IList<ChartFriendlySensorValue> friendlySensorValues)

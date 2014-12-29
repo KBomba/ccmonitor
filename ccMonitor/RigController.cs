@@ -257,7 +257,7 @@ namespace ccMonitor
 
             int[] pingTimes = new int[3];
             Ping pinger = new Ping();
-            PingReply miningUrlPing = pinger.Send(stratumUrlPort[0], 333);
+            PingReply miningUrlPing = stratumUrlPort[0] != "-1" ? pinger.Send(stratumUrlPort[0], 333) : null;
             PingReply networkRigPing = pinger.Send(rig.IpAddress, 333);
 
             // Will try to just ping the URL without subdomain if it failed, 

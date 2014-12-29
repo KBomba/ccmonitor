@@ -45,14 +45,16 @@ namespace ccMonitor.Gui
             }).Where(chartFriendlyHashEntry => _hours > 9000 || chartFriendlyHashEntry.TimeStamp > (now - start));
 
             IList<ChartFriendlyHashEntry> values = friendlyHashEntries as IList<ChartFriendlyHashEntry> ?? friendlyHashEntries.ToList();
-            chartFriendlyHashEntries.AddRange(values);
+            if (values.Count > 0)
+            {
+                chartFriendlyHashEntries.AddRange(values);
 
+                chartHash.DataSource = chartFriendlyHashEntries;
+                chartHash.DataBind();
 
-            chartHash.DataSource = chartFriendlyHashEntries;
-            chartHash.DataBind();
-
-            UpdateAvailabilityCharts(availabilityTimeStamps, values);
-            AutoFormatXAxis(chartFriendlyHashEntries);
+                UpdateAvailabilityCharts(availabilityTimeStamps, values);
+                AutoFormatXAxis(chartFriendlyHashEntries);
+            }
         }
 
         private void UpdateAvailabilityCharts(List<Tuple<long, bool>> availabilityTimeStamps, IList<ChartFriendlyHashEntry> friendlyHashEntry)
