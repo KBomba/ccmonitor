@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using ccMonitor.Api;
 
@@ -95,24 +96,23 @@ namespace ccMonitor
                 public long TimeStamp { get; set; }
                 public double HashRate { get; set; } // In KH/s
                 public uint HashCount { get; set; } // Amount of hash tries before the entry happened
-                // HashCount is useful to give a weight to the average. Low HashCount entries aren't accurate.
                 public uint Found { get; set; } // Sometimes they can find more than one solution at once
-                public uint Height { get; set; }
                 public double Difficulty { get; set; }
-
+                public uint Height { get; set; }
+                
                 public override bool Equals(object obj)
                 {
                     if (ReferenceEquals(null, obj)) return false;
                     if (ReferenceEquals(this, obj)) return true;
-                    if (obj.GetType() != GetType()) return false;
-                    return Equals((HashEntry)obj);
+                    if (obj.GetType() != this.GetType()) return false;
+                    return Equals((HashEntry) obj);
                 }
 
                 private bool Equals(HashEntry other)
                 {
-                    return TimeStamp == other.TimeStamp && HashRate.Equals(other.HashRate) &&
-                           HashCount == other.HashCount && Found == other.Found && 
-                           Difficulty.Equals(other.Difficulty);
+                    return TimeStamp == other.TimeStamp && HashRate.Equals(other.HashRate)
+                        && HashCount == other.HashCount && Found == other.Found
+                        && Difficulty.Equals(other.Difficulty) && Height == other.Height;
                 }
 
                 public override int GetHashCode()
@@ -124,6 +124,7 @@ namespace ccMonitor
                         hashCode = (hashCode * 397) ^ (int)HashCount;
                         hashCode = (hashCode * 397) ^ (int)Found;
                         hashCode = (hashCode * 397) ^ Difficulty.GetHashCode();
+                        hashCode = (hashCode * 397) ^ (int)Height;
                         return hashCode;
                     }
                 }
@@ -184,20 +185,28 @@ namespace ccMonitor
                 }
             }
             
-            public Stat Statistic { get; set; }
-            public class Stat
+            public GpuStat Statistic { get; set; }
+            public class GpuStat
             {
                 public double TotalHashCount { get; set; }
                 public double AverageHashRate { get; set; }
-                public double MeanHashRate { get; set; }
                 public double StandardDeviation { get; set; }
                 public double SpreadPercentage { get; set; }
-                public double[] GaussianPercentiles { get; set; }
+                public Dictionary<string, double> Percentiles { get; set; }
                 public double LowestHashRate { get; set; }
                 public double HighestHashRate { get; set; }
-                public int Accepts { get; set; } // Taken from FOUND in hashentries
+                public int Founds { get; set; } // Taken from FOUND in hashentries
                 public double AverageTemperature { get; set; }
                 public double AverageShareAnswerPing { get; set; }
+
+                public List<RollingAverage> RollingAverages { get; set; }
+                public class RollingAverage
+                {
+                    public long TimeStamp { get; set; }
+                    public double AverageHashRate { get; set; }
+                    public double SpreadTopHashRate { get; set; }
+                    public double SpreadBottomHashRate { get; set; }
+                }
             }
             
             public List<SensorValue> SensorLog { get; set; }
@@ -323,7 +332,7 @@ namespace ccMonitor
 
                 if (CurrentBenchmark.HashLogs.Add(hashEntry))
                 {
-                    CurrentBenchmark.Statistic.Accepts += (int) hashEntry.Found;
+                    CurrentBenchmark.Statistic.Founds += (int) hashEntry.Found;
                 }
             }
         }
@@ -331,7 +340,64 @@ namespace ccMonitor
         private void UpdateStats()
         {
             UpdateSensorStats();
-            UpdateHashRateStats();
+            UpdateTotalHashRateStats();
+            UpdateRollingAverages();
+        }
+
+        private void UpdateRollingAverages()
+        {
+            List<Benchmark.HashEntry> hashList = CurrentBenchmark.HashLogs
+                    .Where(entry => entry.TimeStamp > UnixTimeStamp() - 3600)
+                    .OrderBy(entry => entry.TimeStamp)
+                    .ToList();
+            int hashLogSize = hashList.Count;
+            double sumOfWeightedRates = 0;
+            double totalWeight = 0;
+            double[] rates = new double[hashLogSize];
+            double[] weights = new double[hashLogSize];
+            Benchmark.GpuStat.RollingAverage roller = new Benchmark.GpuStat.RollingAverage()
+            {
+                TimeStamp = UnixTimeStamp()
+            };
+
+            for (int i = 0; i < hashLogSize; i++)
+            {
+                rates[i] = hashList[i].HashRate;
+                weights[i] = hashList[i].HashCount;
+
+                sumOfWeightedRates += (rates[i] * weights[i]);
+                totalWeight += weights[i];
+            }
+
+            if (totalWeight != 0)
+            {
+                roller.AverageHashRate = sumOfWeightedRates/totalWeight;
+
+                double weightCounter = 0;
+                Array.Sort(rates, weights);
+                for (int i = 0; i < hashLogSize; i++)
+                {
+                    weights[i] = weights[i] / CurrentBenchmark.Statistic.TotalHashCount;
+                    weightCounter += weights[i];
+                    if (weightCounter >= 0.045500263896358 && roller.SpreadBottomHashRate == 0)
+                    {
+                        roller.SpreadBottomHashRate = rates[i];
+                    }
+
+                    if (weightCounter > 0.954499736103642 && !CurrentBenchmark.Statistic.Percentiles.ContainsKey("+2σ"))
+                    {
+                        roller.SpreadTopHashRate = i > 0 ? rates[i - 1] : rates[i];
+                    }
+                }
+
+                if (CurrentBenchmark.Statistic.RollingAverages == null)
+                {
+                    CurrentBenchmark.Statistic.RollingAverages = new List<Benchmark.GpuStat.RollingAverage>();
+                }
+
+                CurrentBenchmark.Statistic.RollingAverages.Add(roller);
+                
+            }
         }
 
         private void UpdateSensorStats()
@@ -350,11 +416,11 @@ namespace ccMonitor
             CurrentBenchmark.Statistic.AverageShareAnswerPing = Math.Round(totalPing/ count, MidpointRounding.AwayFromZero);
         }
 
-        private void UpdateHashRateStats()
+        private void UpdateTotalHashRateStats()
         {
-            int hashLogSize = CurrentBenchmark.HashLogs.Count;
-            List<Benchmark.HashEntry> hashList = CurrentBenchmark.HashLogs.OrderBy(entry => entry.HashRate).ToList();
-            double sumOfWeightedRates = 0, sumOfWeights = 0;
+            List<Benchmark.HashEntry> hashList = CurrentBenchmark.HashLogs.ToList();
+            int hashLogSize = hashList.Count;
+            double sumOfWeightedRates = 0;
             double[] rates = new double[hashLogSize];
             double[] weights = new double[hashLogSize];
             CurrentBenchmark.Statistic.TotalHashCount = 0;
@@ -362,22 +428,17 @@ namespace ccMonitor
             for (int i = 0; i < hashLogSize; i++)
             {
                 rates[i] = hashList[i].HashRate;
-                weights[i] = hashList[i].Found > 0 ?
-                    hashList[i].HashCount * hashList[i].Difficulty :
-                    hashList[i].HashCount * hashList[i].Difficulty / 2;
-                // If a nonce has been found, it skews the hashrate, so it's weighted less
+                weights[i] = hashList[i].HashCount;
 
                 sumOfWeightedRates += (rates[i]*weights[i]);
-                sumOfWeights += weights[i];
                 CurrentBenchmark.Statistic.TotalHashCount += hashList[i].HashCount;
             }
 
             // Let's avoid dividing by zero
-            if (sumOfWeights != 0)
+            if (CurrentBenchmark.Statistic.TotalHashCount != 0)
             {
-                CurrentBenchmark.Statistic.AverageHashRate = sumOfWeightedRates/sumOfWeights;
-                CurrentBenchmark.Statistic.MeanHashRate = 0;
-                CurrentBenchmark.Statistic.GaussianPercentiles = new double[6];
+                CurrentBenchmark.Statistic.AverageHashRate = sumOfWeightedRates / CurrentBenchmark.Statistic.TotalHashCount;
+                Dictionary<string, double> percentiles = new Dictionary<string, double>();
                 double weightCounter = 0, sumOfSquaresOfDifferences = 0;
                 Array.Sort(rates, weights);
 
@@ -386,61 +447,81 @@ namespace ccMonitor
                     sumOfSquaresOfDifferences += (((rates[i] - CurrentBenchmark.Statistic.AverageHashRate)
                                                    *(rates[i] - CurrentBenchmark.Statistic.AverageHashRate))*weights[i]);
 
-                    weights[i] = weights[i]/sumOfWeights;
+                    weights[i] = weights[i] / CurrentBenchmark.Statistic.TotalHashCount;
                     weightCounter += weights[i];
+                    
 
-                    // -2σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[0] == 0 && weightCounter >= 0.045500263896358)
+                    if (weightCounter >= 0.00269979606326 && !percentiles.ContainsKey("-3σ"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[0] = rates[i];
+                        percentiles.Add("-3σ", rates[i]);
                     }
 
-                    // -1.5σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[1] == 0 && weightCounter >= 0.133614402537716)
+                    if (weightCounter >= 0.012419330651552 && !percentiles.ContainsKey("-2.5σ"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[1] = rates[i];
+                        percentiles.Add("-2.5σ", rates[i]);
                     }
 
-                    // -1σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[2] == 0 && weightCounter >= 0.317310507862914)
+                    if (weightCounter >= 0.045500263896358 && !percentiles.ContainsKey("-2σ"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[2] = rates[i];
+                        percentiles.Add("-2σ", rates[i]);
                     }
 
-                    // 0σ
-                    if (CurrentBenchmark.Statistic.MeanHashRate == 0 && weightCounter > 0.499999999999999)
+                    if (weightCounter >= 0.133614402537716 && !percentiles.ContainsKey("-1.5σ"))
                     {
-                        CurrentBenchmark.Statistic.MeanHashRate = rates[i];
+                        percentiles.Add("-1.5σ", rates[i]);
                     }
 
-                    // +1σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[3] == 0 && weightCounter > 0.682689492137086)
+                    if (weightCounter >= 0.25 && !percentiles.ContainsKey("Q1"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[3] = i - 1 >= 0 &&
-                                                                CurrentBenchmark.Statistic.MeanHashRate < rates[i - 1]
-                                                                ? rates[i - 1]: rates[i];
+                        percentiles.Add("Q1", rates[i]);
                     }
 
-                    // +1.5σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[4] == 0 && weightCounter > 0.866385597462284)
+                    if (weightCounter >= 0.317310507862914 && !percentiles.ContainsKey("-1σ"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[4] = i - 1 >= 0 && 
-                                                                CurrentBenchmark.Statistic.GaussianPercentiles[3] < rates[i - 1] 
-                                                                ? rates[i - 1] : rates[i];
+                        percentiles.Add("-1σ", rates[i]);
                     }
 
-                    // +2σ
-                    if (CurrentBenchmark.Statistic.GaussianPercentiles[5] == 0 && weightCounter > 0.954499736103642)
+                    if (weightCounter >= 0.5 && !percentiles.ContainsKey("0σ"))
                     {
-                        CurrentBenchmark.Statistic.GaussianPercentiles[5] = i - 1 >= 0 && 
-                                                                CurrentBenchmark.Statistic.GaussianPercentiles[4] < rates[i - 1] 
-                                                                ? rates[i - 1] : rates[i];
+                        percentiles.Add("0σ", rates[i]);
+                    }
+
+                    if (weightCounter >= 0.682689492137086 && !percentiles.ContainsKey("+1σ"))
+                    {
+                        percentiles.Add("+1σ", rates[i]);
+                    }
+
+                    if (weightCounter >= 0.75 && !percentiles.ContainsKey("Q3"))
+                    {
+                        percentiles.Add("Q3", rates[i]);
+                    }
+
+                    if (weightCounter >= 0.866385597462284 && !percentiles.ContainsKey("+1.5σ"))
+                    {
+                        percentiles.Add("+1.5σ", rates[i]);
+                    }
+
+                    if (weightCounter >= 0.954499736103642 && !percentiles.ContainsKey("+2σ"))
+                    {
+                        percentiles.Add("+2σ", rates[i]);
+                    }
+                    
+                    if (weightCounter >= 0.987580669348448 && !percentiles.ContainsKey("+2.5σ"))
+                    {
+                        percentiles.Add("+2.5σ", rates[i]);
+                    }
+
+                    if (weightCounter >= 0.997300203936740 && !percentiles.ContainsKey("+3σ"))
+                    {
+                        percentiles.Add("+3σ", rates[i]);
                     }
                 }
 
-                CurrentBenchmark.Statistic.StandardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/sumOfWeights);
-                CurrentBenchmark.Statistic.SpreadPercentage = CurrentBenchmark.Statistic.StandardDeviation/
-                                                              CurrentBenchmark.Statistic.AverageHashRate;
+                CurrentBenchmark.Statistic.Percentiles = percentiles;
+                CurrentBenchmark.Statistic.StandardDeviation =
+                    Math.Sqrt(sumOfSquaresOfDifferences/CurrentBenchmark.Statistic.TotalHashCount);
+                CurrentBenchmark.Statistic.SpreadPercentage =
+                    CurrentBenchmark.Statistic.StandardDeviation/CurrentBenchmark.Statistic.AverageHashRate;
                 CurrentBenchmark.Statistic.LowestHashRate = rates[0];
                 CurrentBenchmark.Statistic.HighestHashRate = rates[rates.Length - 1];
             }
@@ -456,7 +537,7 @@ namespace ccMonitor
                 Active = true,
                 HashLogs = new HashSet<Benchmark.HashEntry>(),
                 SensorLog = new List<Benchmark.SensorValue>(),
-                Statistic = new Benchmark.Stat()
+                Statistic = new Benchmark.GpuStat()
             };
 
             // Makes all the old benchmarks with the same algo inactive

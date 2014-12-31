@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using ccMonitor.Api;
 using Newtonsoft.Json;
 using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
@@ -10,13 +13,14 @@ namespace ccMonitor.Gui
 {
     public partial class RigTab : UserControl
     {
-        private RigController.RigInfo Rig { get; set; }
+        private RigController.Rig Rig { get; set; }
 
+        // Used for the API console
         private readonly List<string> _apiCommands;
         private int _apiCommandsIndex;
         private string _stringBeforeUpOrDown;
 
-        public RigTab(RigController.RigInfo rig)
+        public RigTab(RigController.Rig rig)
         {
             Rig = rig;
             _apiCommands = new List<string>();
@@ -25,6 +29,8 @@ namespace ccMonitor.Gui
 
         public void UpdateGui()
         {
+            UpdateStatCharts();
+
             // Adds missing gpu tabs
             foreach (GpuLogger gpu in Rig.GpuLogs)
             {
@@ -80,6 +86,44 @@ namespace ccMonitor.Gui
             {
                 tbcRig.TabPages.Remove(tabPage);
             }
+        }
+
+        private void UpdateStatCharts()
+        {
+            DateTime now = DateTime.Now;
+            int gpuCount = Rig.GpuLogs.Count(gpu => gpu.Info.Available);
+
+
+            List<GpuLogger.Benchmark.HashEntry> hashEntries = null;
+            if (Rig.GpuLogs.Count > 0 && Rig.GpuLogs[0] != null && Rig.GpuLogs[0].CurrentBenchmark != null) hashEntries = Rig.GpuLogs[0].CurrentBenchmark.HashLogs.OrderBy(entry => entry.TimeStamp).ToList();
+            if (hashEntries != null && hashEntries.Count > 1)
+            {
+                double totalHashCount = Rig.GpuLogs[0].CurrentBenchmark.Statistic.TotalHashCount;
+                double start = hashEntries[0].TimeStamp;
+                double end = hashEntries[hashEntries.Count - 1].TimeStamp;
+
+                chartStats.Series["TotalHashrateSeries"].ChartType = SeriesChartType.FastLine;
+                chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, totalHashCount/(end - start));
+            }
+            /*chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, Rig.CurrentStatistic.TotalHashRate);
+            if (Rig.CurrentStatistic.AveragePercentiles != null)
+            {
+                chartStats.Series["TotalSpreadSeries"].Points.AddXY(now,
+                Rig.CurrentStatistic.AveragePercentiles["-2σ"] * gpuCount,
+                Rig.CurrentStatistic.AveragePercentiles["+2σ"] * gpuCount);
+            }
+
+            Color totalHashrateColor = chartStats.Series["TotalHashrateSeries"].Color;
+            chartStats.Series["TotalSpreadSeries"].BorderColor = totalHashrateColor;
+            chartStats.Series["TotalSpreadSeries"].Color = Color.FromArgb(50, totalHashrateColor);
+
+            Random r = new Random();
+            foreach (GpuLogger gpu in Rig.GpuLogs)
+            {
+                Series total = new Series(gpu.Info.ToString());
+                total.ChartArea = chartStats.ChartAreas[0].Name;
+                total.Color = Color.FromArgb(50, r.Next(0,255), r.Next(0,255), r.Next(0,255));
+            }*/
         }
 
         private void txtApiConsole_KeyDown(object sender, KeyEventArgs e)

@@ -37,9 +37,9 @@ namespace ccMonitor.Gui
             InitGpuDetails();
             InitCharts();
 
-            rightClickStrip.Items["copySelectedItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.CopySingleImage);
-            rightClickStrip.Items["copyAllItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.CopyAllImage);
-            rightClickStrip.Items["startNewItem"].Image = GuiHelper.GetImageFromBase64DataUri(GuiHelper.ReloadButtonImage);
+            rightClickStrip.Items["copySelectedItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopySingleImage);
+            rightClickStrip.Items["copyAllItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopyAllImage);
+            rightClickStrip.Items["startNewItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.ReloadButtonImage);
         }
 
         private void InitCharts()

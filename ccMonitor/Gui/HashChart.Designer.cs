@@ -59,7 +59,7 @@
             chartArea1.AxisX2.LabelStyle.Format = "g";
             chartArea1.AxisY.IsStartedFromZero = false;
             chartArea1.AxisY.LabelStyle.Format = "#,##0,K";
-            chartArea1.AxisY.Title = "Hashrate (KH/s)";
+            chartArea1.AxisY.Title = "Hashrate";
             chartArea1.AxisY2.MajorGrid.Enabled = false;
             chartArea1.AxisY2.Maximum = 5D;
             chartArea1.AxisY2.Title = "Found";
@@ -125,6 +125,7 @@
             this.chartHash.Location = new System.Drawing.Point(0, 0);
             this.chartHash.Margin = new System.Windows.Forms.Padding(0);
             this.chartHash.Name = "chartHash";
+            series1.BorderWidth = 0;
             series1.ChartArea = "ChartAreaFoundHashrate";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series1.IsVisibleInLegend = false;
@@ -138,6 +139,7 @@
             series2.Legend = "LegendFoundHashrate";
             series2.LegendText = "Found";
             series2.Name = "FoundSeries";
+            series2.ToolTip = "Time: #VALX{g} \\nFound: #VAL{N0}";
             series2.XValueMember = "TimeStamp";
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
@@ -150,9 +152,11 @@
             series3.Legend = "LegendFoundHashrate";
             series3.LegendText = "Hashrate";
             series3.Name = "HashrateSeries";
+            series3.ToolTip = "Time: #VALX{g} \\nHashrate: #VAL{N0} H/s";
             series3.XValueMember = "TimeStamp";
             series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series3.YValueMembers = "HashRate";
+            series4.BorderWidth = 0;
             series4.ChartArea = "ChartAreaDifficultyHashcount";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series4.IsVisibleInLegend = false;
@@ -166,6 +170,7 @@
             series5.Legend = "LegendDifficultyHashcount";
             series5.LegendText = "Hash count";
             series5.Name = "HashcountSeries";
+            series5.ToolTip = "Time: #VALX{g} \\nHash count: #VAL{N0}\\n";
             series5.XValueMember = "TimeStamp";
             series5.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series5.YValueMembers = "HashCount";
@@ -175,6 +180,7 @@
             series6.Legend = "LegendDifficultyHashcount";
             series6.LegendText = "Difficulty";
             series6.Name = "DifficultySeries";
+            series6.ToolTip = "Time: #VALX{g} \\nDifficulty: #VAL{N3}";
             series6.XValueMember = "TimeStamp";
             series6.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series6.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
@@ -207,6 +213,7 @@
         #endregion
 
         private System.Windows.Forms.DataVisualization.Charting.Chart chartHash;
+
 
     }
 }

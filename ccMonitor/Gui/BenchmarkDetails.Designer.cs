@@ -28,19 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.splitGpuDetails = new System.Windows.Forms.SplitContainer();
             this.splitStatsAndSpread = new System.Windows.Forms.SplitContainer();
             this.grpStats = new System.Windows.Forms.GroupBox();
             this.lblAveragePing = new System.Windows.Forms.Label();
             this.txtAveragePing = new System.Windows.Forms.TextBox();
-            this.txtAccepts = new System.Windows.Forms.TextBox();
+            this.txtFounds = new System.Windows.Forms.TextBox();
             this.lblAverageTemperature = new System.Windows.Forms.Label();
             this.txtAverageTemperature = new System.Windows.Forms.TextBox();
             this.lblHashCount = new System.Windows.Forms.Label();
             this.txtHashCount = new System.Windows.Forms.TextBox();
-            this.lblAccepts = new System.Windows.Forms.Label();
+            this.lblFounds = new System.Windows.Forms.Label();
             this.grpSetup = new System.Windows.Forms.GroupBox();
             this.lblIntensity = new System.Windows.Forms.Label();
             this.txtIntensity = new System.Windows.Forms.TextBox();
@@ -59,6 +59,12 @@
             this.lblMinerName = new System.Windows.Forms.Label();
             this.txtMinerName = new System.Windows.Forms.TextBox();
             this.grpInfo = new System.Windows.Forms.GroupBox();
+            this.lblComputeCapability = new System.Windows.Forms.Label();
+            this.txtComputeCapability = new System.Windows.Forms.TextBox();
+            this.lblNvmlId = new System.Windows.Forms.Label();
+            this.txtNvmlId = new System.Windows.Forms.TextBox();
+            this.lblNvapiId = new System.Windows.Forms.Label();
+            this.txtNvapiId = new System.Windows.Forms.TextBox();
             this.lblBusId = new System.Windows.Forms.Label();
             this.txtBusId = new System.Windows.Forms.TextBox();
             this.lblMinerId = new System.Windows.Forms.Label();
@@ -68,16 +74,10 @@
             this.grpHashrateSpread = new System.Windows.Forms.GroupBox();
             this.splitSpread = new System.Windows.Forms.SplitContainer();
             this.dgvSpread = new System.Windows.Forms.DataGridView();
-            this.chartSpread = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.splitHashesAndSensors = new System.Windows.Forms.SplitContainer();
-            this.lblNvmlId = new System.Windows.Forms.Label();
-            this.txtNvmlId = new System.Windows.Forms.TextBox();
-            this.lblNvapiId = new System.Windows.Forms.Label();
-            this.txtNvapiId = new System.Windows.Forms.TextBox();
-            this.lblComputeCapability = new System.Windows.Forms.Label();
-            this.txtComputeCapability = new System.Windows.Forms.TextBox();
             this.clmName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clmValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.chartSpread = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.splitHashesAndSensors = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.splitGpuDetails)).BeginInit();
             this.splitGpuDetails.Panel1.SuspendLayout();
             this.splitGpuDetails.Panel2.SuspendLayout();
@@ -141,12 +141,12 @@
             // 
             this.grpStats.Controls.Add(this.lblAveragePing);
             this.grpStats.Controls.Add(this.txtAveragePing);
-            this.grpStats.Controls.Add(this.txtAccepts);
+            this.grpStats.Controls.Add(this.txtFounds);
             this.grpStats.Controls.Add(this.lblAverageTemperature);
             this.grpStats.Controls.Add(this.txtAverageTemperature);
             this.grpStats.Controls.Add(this.lblHashCount);
             this.grpStats.Controls.Add(this.txtHashCount);
-            this.grpStats.Controls.Add(this.lblAccepts);
+            this.grpStats.Controls.Add(this.lblFounds);
             this.grpStats.Location = new System.Drawing.Point(3, 157);
             this.grpStats.Name = "grpStats";
             this.grpStats.Size = new System.Drawing.Size(331, 76);
@@ -172,14 +172,14 @@
             this.txtAveragePing.Size = new System.Drawing.Size(56, 20);
             this.txtAveragePing.TabIndex = 10;
             // 
-            // txtAccepts
+            // txtFounds
             // 
-            this.txtAccepts.BackColor = System.Drawing.SystemColors.Window;
-            this.txtAccepts.Location = new System.Drawing.Point(85, 19);
-            this.txtAccepts.Name = "txtAccepts";
-            this.txtAccepts.ReadOnly = true;
-            this.txtAccepts.Size = new System.Drawing.Size(56, 20);
-            this.txtAccepts.TabIndex = 8;
+            this.txtFounds.BackColor = System.Drawing.SystemColors.Window;
+            this.txtFounds.Location = new System.Drawing.Point(85, 19);
+            this.txtFounds.Name = "txtFounds";
+            this.txtFounds.ReadOnly = true;
+            this.txtFounds.Size = new System.Drawing.Size(56, 20);
+            this.txtFounds.TabIndex = 8;
             // 
             // lblAverageTemperature
             // 
@@ -217,14 +217,14 @@
             this.txtHashCount.Size = new System.Drawing.Size(56, 20);
             this.txtHashCount.TabIndex = 6;
             // 
-            // lblAccepts
+            // lblFounds
             // 
-            this.lblAccepts.AutoSize = true;
-            this.lblAccepts.Location = new System.Drawing.Point(6, 22);
-            this.lblAccepts.Name = "lblAccepts";
-            this.lblAccepts.Size = new System.Drawing.Size(46, 13);
-            this.lblAccepts.TabIndex = 5;
-            this.lblAccepts.Text = "Accepts";
+            this.lblFounds.AutoSize = true;
+            this.lblFounds.Location = new System.Drawing.Point(6, 22);
+            this.lblFounds.Name = "lblFounds";
+            this.lblFounds.Size = new System.Drawing.Size(61, 13);
+            this.lblFounds.TabIndex = 5;
+            this.lblFounds.Text = "Total found";
             // 
             // grpSetup
             // 
@@ -416,6 +416,60 @@
             this.grpInfo.TabStop = false;
             this.grpInfo.Text = "Info";
             // 
+            // lblComputeCapability
+            // 
+            this.lblComputeCapability.AutoSize = true;
+            this.lblComputeCapability.Location = new System.Drawing.Point(6, 98);
+            this.lblComputeCapability.Name = "lblComputeCapability";
+            this.lblComputeCapability.Size = new System.Drawing.Size(49, 13);
+            this.lblComputeCapability.TabIndex = 13;
+            this.lblComputeCapability.Text = "Compute";
+            // 
+            // txtComputeCapability
+            // 
+            this.txtComputeCapability.BackColor = System.Drawing.SystemColors.Window;
+            this.txtComputeCapability.Location = new System.Drawing.Point(76, 95);
+            this.txtComputeCapability.Name = "txtComputeCapability";
+            this.txtComputeCapability.ReadOnly = true;
+            this.txtComputeCapability.Size = new System.Drawing.Size(36, 20);
+            this.txtComputeCapability.TabIndex = 12;
+            // 
+            // lblNvmlId
+            // 
+            this.lblNvmlId.AutoSize = true;
+            this.lblNvmlId.Location = new System.Drawing.Point(134, 72);
+            this.lblNvmlId.Name = "lblNvmlId";
+            this.lblNvmlId.Size = new System.Drawing.Size(47, 13);
+            this.lblNvmlId.TabIndex = 11;
+            this.lblNvmlId.Text = "NVML #";
+            // 
+            // txtNvmlId
+            // 
+            this.txtNvmlId.BackColor = System.Drawing.SystemColors.Window;
+            this.txtNvmlId.Location = new System.Drawing.Point(197, 69);
+            this.txtNvmlId.Name = "txtNvmlId";
+            this.txtNvmlId.ReadOnly = true;
+            this.txtNvmlId.Size = new System.Drawing.Size(36, 20);
+            this.txtNvmlId.TabIndex = 10;
+            // 
+            // lblNvapiId
+            // 
+            this.lblNvapiId.AutoSize = true;
+            this.lblNvapiId.Location = new System.Drawing.Point(134, 48);
+            this.lblNvapiId.Name = "lblNvapiId";
+            this.lblNvapiId.Size = new System.Drawing.Size(49, 13);
+            this.lblNvapiId.TabIndex = 9;
+            this.lblNvapiId.Text = "NVAPI #";
+            // 
+            // txtNvapiId
+            // 
+            this.txtNvapiId.BackColor = System.Drawing.SystemColors.Window;
+            this.txtNvapiId.Location = new System.Drawing.Point(196, 45);
+            this.txtNvapiId.Name = "txtNvapiId";
+            this.txtNvapiId.ReadOnly = true;
+            this.txtNvapiId.Size = new System.Drawing.Size(36, 20);
+            this.txtNvapiId.TabIndex = 8;
+            // 
             // lblBusId
             // 
             this.lblBusId.AutoSize = true;
@@ -519,96 +573,6 @@
             this.dgvSpread.Size = new System.Drawing.Size(177, 312);
             this.dgvSpread.TabIndex = 54;
             // 
-            // chartSpread
-            // 
-            chartArea3.AlignmentOrientation = System.Windows.Forms.DataVisualization.Charting.AreaAlignmentOrientations.Horizontal;
-            chartArea3.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
-            chartArea3.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
-            chartArea3.AxisX.LabelStyle.Enabled = false;
-            chartArea3.AxisX.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
-            chartArea3.AxisX.MajorGrid.LineWidth = 0;
-            chartArea3.AxisY.IsStartedFromZero = false;
-            chartArea3.AxisY.LabelStyle.Format = "0.######";
-            chartArea3.AxisY.MajorGrid.LineWidth = 0;
-            chartArea3.Name = "ChartArea";
-            this.chartSpread.ChartAreas.Add(chartArea3);
-            this.chartSpread.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartSpread.Location = new System.Drawing.Point(0, 0);
-            this.chartSpread.Name = "chartSpread";
-            series3.BorderColor = System.Drawing.Color.DarkGreen;
-            series3.ChartArea = "ChartArea";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.BoxPlot;
-            series3.Color = System.Drawing.Color.YellowGreen;
-            series3.Name = "BoxPlotSeries";
-            series3.YValuesPerPoint = 6;
-            this.chartSpread.Series.Add(series3);
-            this.chartSpread.Size = new System.Drawing.Size(275, 312);
-            this.chartSpread.TabIndex = 53;
-            this.chartSpread.Text = "chart2";
-            // 
-            // splitHashesAndSensors
-            // 
-            this.splitHashesAndSensors.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitHashesAndSensors.Location = new System.Drawing.Point(0, 0);
-            this.splitHashesAndSensors.Name = "splitHashesAndSensors";
-            this.splitHashesAndSensors.Size = new System.Drawing.Size(1168, 225);
-            this.splitHashesAndSensors.SplitterDistance = 461;
-            this.splitHashesAndSensors.TabIndex = 0;
-            // 
-            // lblNvmlId
-            // 
-            this.lblNvmlId.AutoSize = true;
-            this.lblNvmlId.Location = new System.Drawing.Point(134, 72);
-            this.lblNvmlId.Name = "lblNvmlId";
-            this.lblNvmlId.Size = new System.Drawing.Size(47, 13);
-            this.lblNvmlId.TabIndex = 11;
-            this.lblNvmlId.Text = "NVML #";
-            // 
-            // txtNvmlId
-            // 
-            this.txtNvmlId.BackColor = System.Drawing.SystemColors.Window;
-            this.txtNvmlId.Location = new System.Drawing.Point(197, 69);
-            this.txtNvmlId.Name = "txtNvmlId";
-            this.txtNvmlId.ReadOnly = true;
-            this.txtNvmlId.Size = new System.Drawing.Size(36, 20);
-            this.txtNvmlId.TabIndex = 10;
-            // 
-            // lblNvapiId
-            // 
-            this.lblNvapiId.AutoSize = true;
-            this.lblNvapiId.Location = new System.Drawing.Point(134, 48);
-            this.lblNvapiId.Name = "lblNvapiId";
-            this.lblNvapiId.Size = new System.Drawing.Size(49, 13);
-            this.lblNvapiId.TabIndex = 9;
-            this.lblNvapiId.Text = "NVAPI #";
-            // 
-            // txtNvapiId
-            // 
-            this.txtNvapiId.BackColor = System.Drawing.SystemColors.Window;
-            this.txtNvapiId.Location = new System.Drawing.Point(196, 45);
-            this.txtNvapiId.Name = "txtNvapiId";
-            this.txtNvapiId.ReadOnly = true;
-            this.txtNvapiId.Size = new System.Drawing.Size(36, 20);
-            this.txtNvapiId.TabIndex = 8;
-            // 
-            // lblComputeCapability
-            // 
-            this.lblComputeCapability.AutoSize = true;
-            this.lblComputeCapability.Location = new System.Drawing.Point(6, 98);
-            this.lblComputeCapability.Name = "lblComputeCapability";
-            this.lblComputeCapability.Size = new System.Drawing.Size(49, 13);
-            this.lblComputeCapability.TabIndex = 13;
-            this.lblComputeCapability.Text = "Compute";
-            // 
-            // txtComputeCapability
-            // 
-            this.txtComputeCapability.BackColor = System.Drawing.SystemColors.Window;
-            this.txtComputeCapability.Location = new System.Drawing.Point(76, 95);
-            this.txtComputeCapability.Name = "txtComputeCapability";
-            this.txtComputeCapability.ReadOnly = true;
-            this.txtComputeCapability.Size = new System.Drawing.Size(36, 20);
-            this.txtComputeCapability.TabIndex = 12;
-            // 
             // clmName
             // 
             this.clmName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -624,6 +588,42 @@
             this.clmValue.HeaderText = "Value";
             this.clmValue.Name = "clmValue";
             this.clmValue.ReadOnly = true;
+            // 
+            // chartSpread
+            // 
+            chartArea1.AlignmentOrientation = System.Windows.Forms.DataVisualization.Charting.AreaAlignmentOrientations.Horizontal;
+            chartArea1.AxisX.Enabled = System.Windows.Forms.DataVisualization.Charting.AxisEnabled.False;
+            chartArea1.AxisX.IntervalAutoMode = System.Windows.Forms.DataVisualization.Charting.IntervalAutoMode.VariableCount;
+            chartArea1.AxisX.LabelStyle.Enabled = false;
+            chartArea1.AxisX.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+            chartArea1.AxisX.MajorGrid.LineWidth = 0;
+            chartArea1.AxisY.IsStartedFromZero = false;
+            chartArea1.AxisY.LabelStyle.Format = "0.######";
+            chartArea1.AxisY.MajorGrid.LineWidth = 0;
+            chartArea1.Name = "ChartArea";
+            this.chartSpread.ChartAreas.Add(chartArea1);
+            this.chartSpread.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartSpread.Location = new System.Drawing.Point(0, 0);
+            this.chartSpread.Name = "chartSpread";
+            series1.BorderColor = System.Drawing.Color.DarkGreen;
+            series1.ChartArea = "ChartArea";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.BoxPlot;
+            series1.Color = System.Drawing.Color.YellowGreen;
+            series1.Name = "BoxPlotSeries";
+            series1.YValuesPerPoint = 6;
+            this.chartSpread.Series.Add(series1);
+            this.chartSpread.Size = new System.Drawing.Size(275, 312);
+            this.chartSpread.TabIndex = 53;
+            this.chartSpread.Text = "chart2";
+            // 
+            // splitHashesAndSensors
+            // 
+            this.splitHashesAndSensors.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitHashesAndSensors.Location = new System.Drawing.Point(0, 0);
+            this.splitHashesAndSensors.Name = "splitHashesAndSensors";
+            this.splitHashesAndSensors.Size = new System.Drawing.Size(1168, 225);
+            this.splitHashesAndSensors.SplitterDistance = 461;
+            this.splitHashesAndSensors.TabIndex = 0;
             // 
             // BenchmarkDetails
             // 
@@ -693,8 +693,8 @@
         private System.Windows.Forms.TextBox txtAverageTemperature;
         private System.Windows.Forms.Label lblHashCount;
         private System.Windows.Forms.TextBox txtHashCount;
-        private System.Windows.Forms.Label lblAccepts;
-        private System.Windows.Forms.TextBox txtAccepts;
+        private System.Windows.Forms.Label lblFounds;
+        private System.Windows.Forms.TextBox txtFounds;
         private System.Windows.Forms.Label lblAveragePing;
         private System.Windows.Forms.TextBox txtAveragePing;
         private System.Windows.Forms.Label lblAlgorithm;

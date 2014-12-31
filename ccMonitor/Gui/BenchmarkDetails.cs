@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ccMonitor.Gui
@@ -45,7 +46,7 @@ namespace ccMonitor.Gui
             if (!txtComputeCapability.Focused) txtComputeCapability.Text = 
                                             GpuInfo.ComputeCapability.ToString(CultureInfo.InvariantCulture);
 
-            if (!txtAccepts.Focused) txtAccepts.Text = benchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture);
+            if (!txtFounds.Focused) txtFounds.Text = benchmark.Statistic.Founds.ToString(CultureInfo.InvariantCulture);
             if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount);
             if (!txtAverageTemperature.Focused) txtAverageTemperature.Text = 
                                             String.Format("{0:0.##}{1}", benchmark.Statistic.AverageTemperature, "°C");
@@ -77,39 +78,39 @@ namespace ccMonitor.Gui
             }
         }
 
-        private void UpdateSpread(GpuLogger.Benchmark.Stat statistic)
+        private void UpdateSpread(GpuLogger.Benchmark.GpuStat statistic)
         {
             dgvSpread.Rows.Clear();
             dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.AverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
             dgvSpread.Rows.Add("Highest hashrate", GuiHelper.GetRightMagnitude(statistic.HighestHashRate, "H"));
-            if (statistic.GaussianPercentiles != null)
+            if (statistic.Percentiles != null)
             {
-                dgvSpread.Rows.Add("Real 2σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[5], "H"));
-                dgvSpread.Rows.Add("Real 1.5σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[4], "H"));
-                dgvSpread.Rows.Add("Real 1σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[3], "H"));
-                dgvSpread.Rows.Add("Real 0σ (mean)", GuiHelper.GetRightMagnitude(statistic.MeanHashRate, "H"));
-                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[2], "H"));
-                dgvSpread.Rows.Add("Real -1.5σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[1], "H"));
-                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(statistic.GaussianPercentiles[0], "H"));
+                dgvSpread.Rows.Add("Real +3σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+3σ"], "H"));
+                dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+2σ"], "H"));
+                dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+1σ"], "H"));
+                dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(statistic.Percentiles["0σ"], "H"));
+                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-1σ"], "H"));
+                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-2σ"], "H"));
+                dgvSpread.Rows.Add("Real -3σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-3σ"], "H"));
+
+                chartSpread.Series["BoxPlotSeries"].Points.Clear();
+                chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic));
             }
             dgvSpread.Rows.Add("Lowest hashrate", GuiHelper.GetRightMagnitude(statistic.LowestHashRate, "H"));
-
-            chartSpread.Series["BoxPlotSeries"].Points.Clear();
-            chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic));
         }
 
-        private double[] GetBoxPlotValues(GpuLogger.Benchmark.Stat statistic)
+        private double[] GetBoxPlotValues(GpuLogger.Benchmark.GpuStat statistic)
         {
-            if (statistic.GaussianPercentiles != null)
+            if (statistic.Percentiles != null)
             {
                 return new[]
                 {
-                    statistic.GaussianPercentiles[0],
-                    statistic.GaussianPercentiles[5],
-                    statistic.GaussianPercentiles[2],
-                    statistic.GaussianPercentiles[3],
-                    statistic.MeanHashRate,
+                    statistic.Percentiles["-2σ"],
+                    statistic.Percentiles["+2σ"],
+                    statistic.Percentiles["-1σ"],
+                    statistic.Percentiles["+1σ"],
+                    statistic.Percentiles["0σ"],
                     statistic.AverageHashRate
                 };
             }

@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using ccMonitor.Api;
@@ -65,7 +66,7 @@ namespace ccMonitor.Gui
                 rigExistence.Add(tabPage.Text, tabPage == tabGeneral);
             }
 
-            foreach (RigController.RigInfo rig in _controller.RigLogs)
+            foreach (RigController.Rig rig in _controller.RigLogs)
             {
                 if (rig.UserFriendlyName != null && rigExistence.ContainsKey(rig.UserFriendlyName))
                 {
@@ -101,7 +102,7 @@ namespace ccMonitor.Gui
             lstGeneralOverview.Items.Clear();
             lstGeneralOverview.Groups.Clear();
             
-            foreach (RigController.RigInfo rig in _controller.RigLogs)
+            foreach (RigController.Rig rig in _controller.RigLogs)
             {
                 
                 // Makes sure all rigs that are in the logs are shown in RigStats
@@ -152,13 +153,15 @@ namespace ccMonitor.Gui
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add(string.Empty);
                     }
                     else
                     {
                         lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, "H"));
                         lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
                         lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
-                        lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Accepts.ToString(CultureInfo.InvariantCulture));
+                        lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Founds.ToString(CultureInfo.InvariantCulture));
+                        lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(gpu.CurrentBenchmark.SensorLog[gpu.CurrentBenchmark.SensorLog.Count - 1]
                             .Temperature.ToString(CultureInfo.InvariantCulture) + " °C");
@@ -179,13 +182,15 @@ namespace ccMonitor.Gui
                     lvi.SubItems.Add(string.Empty);
                     lvi.SubItems.Add(string.Empty);
                     lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add(string.Empty);
                 }
                 else
                 {
                     lvi.SubItems.Add(rig.CurrentStatistic.Algorithm);
                     lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashRate, "H"));
-                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.AverageStandardDeviation, "H"));
+                    lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalStandardDeviation, "H"));
                     lvi.SubItems.Add(GuiHelper.GetRightMagnitude(rig.CurrentStatistic.TotalHashCount));
+                    lvi.SubItems.Add(string.Empty);
                     lvi.SubItems.Add(rig.CurrentStatistic.Accepts.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(rig.CurrentStatistic.Rejects.ToString(CultureInfo.InvariantCulture));
                     lvi.SubItems.Add(string.Empty);
@@ -221,19 +226,16 @@ namespace ccMonitor.Gui
         private void LoadLogs()
         {
             _controller = File.Exists("logs.gz") 
-                ? new RigController(JsonControl.GetSerializedGzipFile<BindingList<RigController.RigInfo>>("logs.gz"))
+                ? new RigController(JsonControl.GetSerializedGzipFile<BindingList<RigController.Rig>>("logs.gz"))
                 : new RigController();
         }
 
 
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            foreach (RigController.RigInfo rig in _controller.RigLogs)
+            foreach (RigController.Rig rig in _controller.RigLogs)
             {
-                foreach (GpuLogger gpu in rig.GpuLogs)
-                {
-                    gpu.Info.Available = false;
-                }
+                RigController.DisableRig(rig);
             }
             SaveLogs();
             SaveSettings();

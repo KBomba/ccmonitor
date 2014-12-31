@@ -56,6 +56,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clmFounds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -151,6 +152,7 @@
             this.clmHashRate,
             this.clmStandardDeviation,
             this.clmHashCount,
+            this.clmFounds,
             this.clmAccepts,
             this.clmRejects,
             this.clmTemperature,
@@ -199,12 +201,10 @@
             // clmAccepts
             // 
             this.clmAccepts.Text = "Accepts";
-            this.clmAccepts.Width = 70;
             // 
             // clmRejects
             // 
             this.clmRejects.Text = "Rejects";
-            this.clmRejects.Width = 70;
             // 
             // clmTemperature
             // 
@@ -297,6 +297,11 @@
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
+            // clmFounds
+            // 
+            this.clmFounds.Text = "Found";
+            this.clmFounds.Width = 50;
+            // 
             // Monitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -352,5 +357,6 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showRawLogsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem takeScreenshotToolStripMenuItem;
+        private System.Windows.Forms.ColumnHeader clmFounds;
     }
 }

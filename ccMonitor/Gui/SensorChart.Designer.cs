@@ -126,12 +126,14 @@
             this.chartSensor.Location = new System.Drawing.Point(0, 0);
             this.chartSensor.Margin = new System.Windows.Forms.Padding(0);
             this.chartSensor.Name = "chartSensor";
+            series1.BorderWidth = 0;
             series1.ChartArea = "ChartAreaTemperatureFan";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series1.IsVisibleInLegend = false;
             series1.Legend = "LegendCoreclockMemoryclock";
             series1.Name = "AvailabilityTemperatureSeries";
             series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
+            series1.YValuesPerPoint = 5;
             series2.BorderWidth = 2;
             series2.ChartArea = "ChartAreaTemperatureFan";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
@@ -139,6 +141,7 @@
             series2.Legend = "LegendTemperatureFan";
             series2.LegendText = "Fan";
             series2.Name = "FanSeries";
+            series2.ToolTip = "Time: #VALX{g} \\nFan: #VAL{N0}";
             series2.XValueMember = "TimeStamp";
             series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
@@ -149,9 +152,11 @@
             series3.Legend = "LegendTemperatureFan";
             series3.LegendText = "Temperature";
             series3.Name = "TemperatureSeries";
+            series3.ToolTip = "Time: #VALX{g} \\nTemperature: #VAL{N0} °C";
             series3.XValueMember = "TimeStamp";
             series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series3.YValueMembers = "Temperature";
+            series4.BorderWidth = 0;
             series4.ChartArea = "ChartAreaPingFrequency";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Area;
             series4.IsVisibleInLegend = false;
@@ -165,6 +170,7 @@
             series5.Legend = "LegendCoreclockMemoryclock";
             series5.LegendText = "Core frequency";
             series5.Name = "CoreclockSeries";
+            series5.ToolTip = "Time: #VALX{g} \\nCore clock: #VAL{N0} Hz";
             series5.XValueMember = "TimeStamp";
             series5.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series5.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
@@ -176,6 +182,7 @@
             series6.Legend = "LegendCoreclockMemoryclock";
             series6.LegendText = "Memory frequency";
             series6.Name = "MemoryclockSeries";
+            series6.ToolTip = "Time: #VALX{g} \\nMemory clock: #VAL{N0} Hz\\n";
             series6.XValueMember = "TimeStamp";
             series6.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series6.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
@@ -187,6 +194,7 @@
             series7.Legend = "LegendCoreclockMemoryclock";
             series7.LegendText = "Ping: This to miner";
             series7.Name = "NetworkpingSeries";
+            series7.ToolTip = "Time: #VALX{g} \\nThis to rig: #VAL{N0} ms";
             series7.XValueMember = "TimeStamp";
             series7.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series7.YValueMembers = "NetworkRigPing";
@@ -197,6 +205,7 @@
             series8.Legend = "LegendCoreclockMemoryclock";
             series8.LegendText = "Ping: This to URL";
             series8.Name = "MiningpingSeries";
+            series8.ToolTip = "Time: #VALX{g} \\nThis to URL: #VAL{N0} ms";
             series8.XValueMember = "TimeStamp";
             series8.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series8.YValueMembers = "MiningUrlPing";
@@ -207,6 +216,7 @@
             series9.Legend = "LegendCoreclockMemoryclock";
             series9.LegendText = "Ping: Miner to URL";
             series9.Name = "SharepingSeries";
+            series9.ToolTip = "Time: #VALX{g} \\nMiner to URL: #VAL{N0} ms";
             series9.XValueMember = "TimeStamp";
             series9.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.DateTime;
             series9.YValueMembers = "ShareAnswerPing";

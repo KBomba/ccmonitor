@@ -13,6 +13,8 @@ namespace ccMonitor.Gui
         {
             public DateTime TimeStamp { get; set; }
             public double HashRate { get; set; }
+            public double HashRateTop { get; set; }
+            public double HashRateBottom { get; set; }
             public uint Found { get; set; }
             public double Difficulty { get; set; }
             public uint HashCount { get; set; }

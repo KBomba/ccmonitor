@@ -1,20 +1,49 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.NetworkInformation;
 using System.Text;
-using System.Windows.Forms;
 using ccMonitor.Api;
 
 namespace ccMonitor
 {
     public class RigController
     {
-        public BindingList<RigInfo> RigLogs { get; set; }
-        public class RigInfo
+        public BindingList<Rig> RigLogs { get; set; }
+        public class Rig
         {
             public string Name { get; set; }
             public string IpAddress { get; set; }
             public int Port { get; set; }
+
+            private bool _available;
+            public List<Tuple<long, bool>> AvailableTimeStamps { get; set; }
+            // long: unix timestamp, bool: availability
+            public bool Available
+            {
+                get { return _available; }
+                set
+                {
+                    long unixTimeStamp = UnixTimeStamp();
+                    if (AvailableTimeStamps == null)
+                    {
+                        AvailableTimeStamps = new List<Tuple<long, bool>>()
+                        {
+                            new Tuple<long, bool>(unixTimeStamp, value)
+                        };
+                    }
+                    else
+                    {
+                        Tuple<long, bool> prevAvailableTimeStamp = AvailableTimeStamps[AvailableTimeStamps.Count - 1];
+                        if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != value)
+                        {
+                            AvailableTimeStamps.Add(new Tuple<long, bool>(unixTimeStamp, value));
+                        }
+                    }
+
+                    _available = value;
+                }
+            }
 
             public string UserFriendlyName { get; set; }
 
@@ -25,21 +54,23 @@ namespace ccMonitor
             {
                 public string Algorithm { get; set; }
                 public double TotalHashCount { get; set; }
+                public double TotalWeight { get; set; }
                 public double TotalHashRate { get; set; }
                 public double AverageHashRate { get; set; }
-                public double AverageMeanHashRate { get; set; }
+                public double TotalStandardDeviation { get; set; }
                 public double AverageStandardDeviation { get; set; }
                 public double AverageSpreadPercentage { get; set; }
-                public double[] AverageGaussianPercentiles { get; set; }
-                public double AverageLowestHashRate { get; set; }
-                public double AverageHighestHashRate { get; set; }
+                //public double[] AveragePercentiles { get; set; }
+                public Dictionary<string, double> AveragePercentiles { get; set; }
+                public double LowestHashRate { get; set; }
+                public double HighestHashRate { get; set; }
                 public double Accepts { get; set; }
                 public double Rejects { get; set; }
                 public double AverageTemperature { get; set; }
                 public double ShareAnswerPing { get; set; }
             }
 
-            public RigInfo()
+            public Rig()
             {
                 GpuLogs = new List<GpuLogger>();
                 CurrentStatistic = new RigStat();
@@ -47,7 +78,7 @@ namespace ccMonitor
         }
         
 
-        public RigController(BindingList<RigInfo> rigLogs)
+        public RigController(BindingList<Rig> rigLogs)
         {
             RigLogs = rigLogs;
 
@@ -64,7 +95,7 @@ namespace ccMonitor
 
         private void InitDefaultRig()
         {
-            RigInfo localRig = new RigInfo
+            Rig localRig = new Rig
             {
                 Name = "Local rig",
                 IpAddress = "127.0.0.1",
@@ -72,14 +103,14 @@ namespace ccMonitor
                 GpuLogs = new List<GpuLogger>(),
             };
 
-            RigLogs = new BindingList<RigInfo> {localRig};
+            RigLogs = new BindingList<Rig> {localRig};
         }
 
         public void Update()
         {
             for (int index = 0; index < RigLogs.Count; index++)
             {
-                RigInfo rig = RigLogs[index];
+                Rig rig = RigLogs[index];
 
                 // Makes sure the rigname the user sees is always correct
                 StringBuilder sb = new StringBuilder();
@@ -103,14 +134,15 @@ namespace ccMonitor
 
                     // Prepping for total rig statistics
                     double totalHashCount = 0,
+                        totalHashRate = 0,
                         totalAverageHashRate = 0,
-                        totalMeanHashRate = 0,
                         totalStandardDeviation = 0,
+                        totalAverageStandardDeviation = 0,
                         totalSpreadPercentage = 0,
-                        totalLowestHashRate = 0,
-                        totalHighestHashRate = 0,
+                        lowestHashRate = double.MaxValue,
+                        highestHashRate = 0,
                         totalAverageTemperature = 0;
-                    double[] totalGaussianPercentiles = {0.0, 0.0, 0.0, 0.0};
+                    Dictionary<string, double> totalPercentiles = new Dictionary<string, double>();
 
                     foreach (GpuLogger gpu in rig.GpuLogs)
                     {
@@ -125,60 +157,97 @@ namespace ccMonitor
 
                             // While we're at it, calculate the total stats for the rig
                             totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
-                            totalMeanHashRate += gpu.CurrentBenchmark.Statistic.MeanHashRate;
-                            totalLowestHashRate += gpu.CurrentBenchmark.Statistic.LowestHashRate;
-                            totalHighestHashRate += gpu.CurrentBenchmark.Statistic.HighestHashRate;
+                            totalHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
+                            totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate*
+                                                    gpu.CurrentBenchmark.Statistic.TotalHashCount;
+                            lowestHashRate = lowestHashRate < gpu.CurrentBenchmark.Statistic.LowestHashRate
+                                             ? lowestHashRate
+                                             : gpu.CurrentBenchmark.Statistic.LowestHashRate;
+                            highestHashRate = highestHashRate > gpu.CurrentBenchmark.Statistic.HighestHashRate
+                                              ? highestHashRate
+                                              : gpu.CurrentBenchmark.Statistic.HighestHashRate;
                             totalStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation;
-                            totalSpreadPercentage += gpu.CurrentBenchmark.Statistic.SpreadPercentage;
+                            totalAverageStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation *
+                                                      gpu.CurrentBenchmark.Statistic.TotalHashCount;
+                            totalSpreadPercentage += gpu.CurrentBenchmark.Statistic.SpreadPercentage*
+                                                     gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             totalAverageTemperature += gpu.CurrentBenchmark.Statistic.AverageTemperature;
 
-                            for (int i = 0; i < 4; i++)
+                            if (gpu.CurrentBenchmark.Statistic.Percentiles != null)
                             {
-                                if (gpu.CurrentBenchmark.Statistic.GaussianPercentiles != null)
-                                    totalGaussianPercentiles[i] += gpu.CurrentBenchmark.Statistic.GaussianPercentiles[i];
+                                foreach (string percentileName in gpu.CurrentBenchmark.Statistic.Percentiles.Keys)
+                                {
+                                    if (totalPercentiles.ContainsKey(percentileName))
+                                    {
+                                        totalPercentiles[percentileName] +=
+                                            gpu.CurrentBenchmark.Statistic.Percentiles[percentileName]*
+                                            gpu.CurrentBenchmark.Statistic.TotalHashCount;
+                                    }
+                                    else
+                                    {
+                                        totalPercentiles.Add(percentileName,
+                                            gpu.CurrentBenchmark.Statistic.Percentiles[percentileName]*
+                                            gpu.CurrentBenchmark.Statistic.TotalHashCount);
+                                    }
+                                }
                             }
+
+                            if (totalHashRate > 0) rig.Available = true;
                         }
                     }
 
-                    if (rig.GpuLogs.Count > 0)
+                    if (rig.GpuLogs.Count > 0 && totalHashCount > 0)
                     {
-                        rig.CurrentStatistic = new RigInfo.RigStat
+                        rig.CurrentStatistic = new Rig.RigStat
                         {
                             Algorithm = rig.GpuLogs[rig.GpuLogs.Count - 1].CurrentBenchmark.Algorithm,
                             TotalHashCount = totalHashCount,
-                            TotalHashRate = totalAverageHashRate,
-                            AverageHashRate = totalAverageHashRate/rig.GpuLogs.Count,
-                            AverageMeanHashRate = totalMeanHashRate/rig.GpuLogs.Count,
-                            AverageStandardDeviation = totalStandardDeviation/rig.GpuLogs.Count,
-                            AverageSpreadPercentage = totalSpreadPercentage/rig.GpuLogs.Count,
-                            AverageLowestHashRate = totalLowestHashRate/rig.GpuLogs.Count,
-                            AverageHighestHashRate = totalHighestHashRate/rig.GpuLogs.Count,
+                            TotalHashRate = totalHashRate,
+                            AverageHashRate = totalAverageHashRate / totalHashCount,
+                            TotalStandardDeviation = totalStandardDeviation,
+                            AverageStandardDeviation = totalAverageStandardDeviation / totalHashCount,
+                            AverageSpreadPercentage = totalSpreadPercentage / totalHashCount,
+                            LowestHashRate = lowestHashRate,
+                            HighestHashRate = highestHashRate,
                             Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
                             Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
                             AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,
                             ShareAnswerPing = pingTimes[0],
-                            AverageGaussianPercentiles = new double[4]
+                            AveragePercentiles = new Dictionary<string, double>()
                         };
 
-                        for (int i = 0; i < 4; i++)
+                        foreach (string percentileName in totalPercentiles.Keys)
                         {
-                            rig.CurrentStatistic.AverageGaussianPercentiles[i] = totalGaussianPercentiles[i]/
-                                                                                 rig.GpuLogs.Count;
+                            if (rig.CurrentStatistic.AveragePercentiles.ContainsKey(percentileName))
+                            {
+                                rig.CurrentStatistic.AveragePercentiles[percentileName] = 
+                                    totalPercentiles[percentileName] / totalHashCount;
+                            }
+                            else
+                            {
+                                rig.CurrentStatistic.AveragePercentiles.Add(percentileName,
+                                    totalPercentiles[percentileName]/totalHashCount);
+                            }
                         }
                     }
                 }
                 else
                 {
-                    foreach (GpuLogger gpu in rig.GpuLogs)
-                    {
-                        gpu.Info.Available = false;
-                    }
+                    DisableRig(rig);
                 }
             }
         }
 
-        private static void CheckLiveGpus(Dictionary<string, string>[][] allApiResults, RigInfo rig)
+        public static void DisableRig(Rig rig)
+        {
+            rig.Available = false;
+            foreach (GpuLogger gpu in rig.GpuLogs)
+            {
+                gpu.Info.Available = false;
+            }
+        }
+
+        private static void CheckLiveGpus(Dictionary<string, string>[][] allApiResults, Rig rig)
         {
             int apiGpuCount = PruvotApi.GetDictValue<int>(allApiResults[0][0], "GPUS");
             if (rig.GpuLogs.Count < apiGpuCount)
@@ -248,7 +317,7 @@ namespace ccMonitor
             }
         }
 
-        private static int[] GetPingTimes(Dictionary<string, string>[] poolInfo, RigInfo rig)
+        private static int[] GetPingTimes(Dictionary<string, string>[] poolInfo, Rig rig)
         {
             if (poolInfo == null || poolInfo.Length == 0) return new[] {333, 333, 333};
 
@@ -279,6 +348,11 @@ namespace ccMonitor
                             ? networkRigPing.RoundtripTime : 333);
 
             return pingTimes;
+        }
+
+        private static long UnixTimeStamp()
+        {
+            return (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
         }
     }
 }
