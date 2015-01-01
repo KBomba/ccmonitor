@@ -20,33 +20,9 @@ namespace ccMonitor
 
             public uint ComputeCapability { get; set; }
 
-            private bool _available;
-            public List<Tuple<long,bool>> AvailableTimeStamps { get; set; } 
+            public bool Available { get; set; }
+            public List<Tuple<long,bool,bool>> AvailableTimeStamps { get; set; } 
             // long: unix timestamp, bool: availability
-            public bool Available
-            {
-                get { return _available; }
-                set
-                {
-                    long unixTimeStamp = UnixTimeStamp();
-                    if (AvailableTimeStamps == null)
-                    {
-                        AvailableTimeStamps = new List<Tuple<long, bool>>()
-                        {
-                            new Tuple<long, bool>(unixTimeStamp, value)
-                        };
-                    }
-                    else
-                    {
-                        Tuple<long, bool> prevAvailableTimeStamp = AvailableTimeStamps[AvailableTimeStamps.Count - 1];
-                        if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != value)
-                        {
-                            AvailableTimeStamps.Add(new Tuple<long, bool>(unixTimeStamp, value));
-                        }
-                    }
-                    _available = value;
-                }
-            }
 
             public override string ToString()
             {
@@ -87,6 +63,10 @@ namespace ccMonitor
         public class Benchmark
         {
             public long TimeStamp { get; set; }
+            public long TimeHistoStart { get; set; }
+            public long TimeHistoLast { get; set; }
+            public long TimeInHisto { get; set; }
+
             public string Algorithm { get; set; }
             public bool Active { get; set; }
 
@@ -189,16 +169,25 @@ namespace ccMonitor
             public class GpuStat
             {
                 public double TotalHashCount { get; set; }
+
                 public double AverageHashRate { get; set; }
+                public double HarmonicAverageHashRate { get; set; }
+                public double RootMeanSquare { get; set; }
+
                 public double StandardDeviation { get; set; }
                 public double SpreadPercentage { get; set; }
+                public double InterquartileRange { get; set; }
+                public double InterRange { get; set; }
+
+                public List<double>[] GroupedRates { get; set; } // Grouped rates in steps of 100 
                 public Dictionary<string, double> Percentiles { get; set; }
                 public double LowestHashRate { get; set; }
                 public double HighestHashRate { get; set; }
+
                 public int Founds { get; set; } // Taken from FOUND in hashentries
                 public double AverageTemperature { get; set; }
                 public double AverageShareAnswerPing { get; set; }
-
+                
                 public List<RollingAverage> RollingAverages { get; set; }
                 public class RollingAverage
                 {
@@ -333,6 +322,23 @@ namespace ccMonitor
                 if (CurrentBenchmark.HashLogs.Add(hashEntry))
                 {
                     CurrentBenchmark.Statistic.Founds += (int) hashEntry.Found;
+
+                    if (hashEntry.TimeStamp < CurrentBenchmark.TimeHistoStart)
+                    {
+                        CurrentBenchmark.TimeHistoStart = hashEntry.TimeStamp;
+                    }
+                    else if (hashEntry.TimeStamp > CurrentBenchmark.TimeHistoLast)
+                    {
+                        CurrentBenchmark.TimeHistoLast = hashEntry.TimeStamp;
+                    }
+
+                    Tuple<long, bool, bool> availabilityTimestamp = Info.AvailableTimeStamps.LastOrDefault();
+                    if (availabilityTimestamp != null && hashEntry.TimeStamp < availabilityTimestamp.Item1 
+                        && availabilityTimestamp.Item2 && availabilityTimestamp.Item3)
+                    {
+                        Info.AvailableTimeStamps[Info.AvailableTimeStamps.Count - 1] =
+                            new Tuple<long, bool, bool>(hashEntry.TimeStamp, true, true);
+                    }
                 }
             }
         }
@@ -421,9 +427,10 @@ namespace ccMonitor
             List<Benchmark.HashEntry> hashList = CurrentBenchmark.HashLogs.ToList();
             int hashLogSize = hashList.Count;
             double sumOfWeightedRates = 0;
+            double sumOfInverseWeightedRates = 0;
+            double totalWeight = 0;
             double[] rates = new double[hashLogSize];
             double[] weights = new double[hashLogSize];
-            CurrentBenchmark.Statistic.TotalHashCount = 0;
 
             for (int i = 0; i < hashLogSize; i++)
             {
@@ -431,26 +438,37 @@ namespace ccMonitor
                 weights[i] = hashList[i].HashCount;
 
                 sumOfWeightedRates += (rates[i]*weights[i]);
-                CurrentBenchmark.Statistic.TotalHashCount += hashList[i].HashCount;
+                sumOfInverseWeightedRates += (weights[i]/rates[i]);
+                totalWeight += hashList[i].HashCount;
             }
 
             // Let's avoid dividing by zero
-            if (CurrentBenchmark.Statistic.TotalHashCount != 0)
+            if (totalWeight != 0)
             {
-                CurrentBenchmark.Statistic.AverageHashRate = sumOfWeightedRates / CurrentBenchmark.Statistic.TotalHashCount;
+                double averageHashRate = sumOfWeightedRates / totalWeight;
+                double harmonicAverageHashRate = totalWeight/sumOfInverseWeightedRates;
                 Dictionary<string, double> percentiles = new Dictionary<string, double>();
                 double weightCounter = 0, sumOfSquaresOfDifferences = 0;
-                Array.Sort(rates, weights);
+
+                Array.Sort(rates, weights); // Sorts the rates from low to high, weights get sorted along
+                double lowestRate = rates[0];
+                double highestRate = rates[rates.Length - 1];
+                double interRange = highestRate - lowestRate;
+                double step = interRange / 100;
+                double offset = Math.Truncate(lowestRate/step);
+                List<double>[] groupedRates = new List<double>[100];
 
                 for (int i = 0; i < hashLogSize; i++)
                 {
-                    sumOfSquaresOfDifferences += (((rates[i] - CurrentBenchmark.Statistic.AverageHashRate)
-                                                   *(rates[i] - CurrentBenchmark.Statistic.AverageHashRate))*weights[i]);
-
-                    weights[i] = weights[i] / CurrentBenchmark.Statistic.TotalHashCount;
+                    sumOfSquaresOfDifferences += (((rates[i] - averageHashRate)*(rates[i] - averageHashRate))*weights[i]);
+                    weights[i] = weights[i] / totalWeight;
                     weightCounter += weights[i];
-                    
 
+                    int group = (int) (Math.Truncate(rates[i]/step) - offset);
+                    if (group >= 100) group = 99; // Sometimes, thx to rounding, it gets higher
+                    if(groupedRates[group] == null) groupedRates[group] = new List<double>();
+                    groupedRates[group].Add(rates[i]);
+                    
                     if (weightCounter >= 0.00269979606326 && !percentiles.ContainsKey("-3σ"))
                     {
                         percentiles.Add("-3σ", rates[i]);
@@ -517,13 +535,21 @@ namespace ccMonitor
                     }
                 }
 
+                double standardDeviation = Math.Sqrt(sumOfSquaresOfDifferences/totalWeight);
+
+                CurrentBenchmark.Statistic.AverageHashRate = averageHashRate;
+                CurrentBenchmark.Statistic.HarmonicAverageHashRate = harmonicAverageHashRate;
+                CurrentBenchmark.Statistic.RootMeanSquare =
+                    Math.Sqrt((averageHashRate * averageHashRate) + (standardDeviation * standardDeviation));
                 CurrentBenchmark.Statistic.Percentiles = percentiles;
-                CurrentBenchmark.Statistic.StandardDeviation =
-                    Math.Sqrt(sumOfSquaresOfDifferences/CurrentBenchmark.Statistic.TotalHashCount);
-                CurrentBenchmark.Statistic.SpreadPercentage =
-                    CurrentBenchmark.Statistic.StandardDeviation/CurrentBenchmark.Statistic.AverageHashRate;
-                CurrentBenchmark.Statistic.LowestHashRate = rates[0];
-                CurrentBenchmark.Statistic.HighestHashRate = rates[rates.Length - 1];
+                CurrentBenchmark.Statistic.GroupedRates = groupedRates;
+                CurrentBenchmark.Statistic.TotalHashCount = totalWeight;
+                CurrentBenchmark.Statistic.StandardDeviation = standardDeviation;
+                CurrentBenchmark.Statistic.SpreadPercentage = standardDeviation / averageHashRate;
+                CurrentBenchmark.Statistic.InterquartileRange = percentiles["Q3"] - percentiles["Q1"];
+                CurrentBenchmark.Statistic.InterRange = interRange;
+                CurrentBenchmark.Statistic.LowestHashRate = lowestRate;
+                CurrentBenchmark.Statistic.HighestHashRate = highestRate;
             }
         }
 
@@ -553,6 +579,37 @@ namespace ccMonitor
         public void RestartCurrentBenchmark()
         {
             CreateNewBenchMark(CurrentBenchmark.Algorithm, CurrentBenchmark.MinerSetup);
+        }
+
+        public void ChangeAvailability(bool available, bool monitorClosing = false)
+        {
+            long unixTimeStamp = UnixTimeStamp();
+            if (Info.AvailableTimeStamps == null)
+            {
+                Info.AvailableTimeStamps = new List<Tuple<long, bool, bool>>
+                        {
+                            new Tuple<long, bool, bool>(unixTimeStamp, available, monitorClosing )
+                        };
+            }
+            else
+            {
+                Tuple<long, bool, bool> prevAvailableTimeStamp =
+                    Info.AvailableTimeStamps[Info.AvailableTimeStamps.Count - 1];
+                if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != available)
+                {
+                    if (available)
+                    {
+                        Info.AvailableTimeStamps.Add(new Tuple<long, bool, bool>(unixTimeStamp, true,
+                                                     Info.AvailableTimeStamps.Last().Item3));
+                    }
+                    else
+                    {
+                        Info.AvailableTimeStamps.Add(new Tuple<long, bool, bool>(unixTimeStamp, false, monitorClosing));
+                    }
+                }
+            }
+
+            Info.Available = available;
         }
         
         private static long UnixTimeStamp()

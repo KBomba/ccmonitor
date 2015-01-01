@@ -99,8 +99,10 @@ namespace ccMonitor.Gui
             if (hashEntries != null && hashEntries.Count > 1)
             {
                 double totalHashCount = Rig.GpuLogs[0].CurrentBenchmark.Statistic.TotalHashCount;
-                double start = hashEntries[0].TimeStamp;
-                double end = hashEntries[hashEntries.Count - 1].TimeStamp;
+                long start = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoStart;
+                long end = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoLast;
+                long timeRun = 0;
+                
 
                 chartStats.Series["TotalHashrateSeries"].ChartType = SeriesChartType.FastLine;
                 chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, totalHashCount/(end - start));

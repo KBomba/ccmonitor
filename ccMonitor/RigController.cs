@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using ccMonitor.Api;
@@ -16,34 +17,8 @@ namespace ccMonitor
             public string IpAddress { get; set; }
             public int Port { get; set; }
 
-            private bool _available;
-            public List<Tuple<long, bool>> AvailableTimeStamps { get; set; }
-            // long: unix timestamp, bool: availability
-            public bool Available
-            {
-                get { return _available; }
-                set
-                {
-                    long unixTimeStamp = UnixTimeStamp();
-                    if (AvailableTimeStamps == null)
-                    {
-                        AvailableTimeStamps = new List<Tuple<long, bool>>()
-                        {
-                            new Tuple<long, bool>(unixTimeStamp, value)
-                        };
-                    }
-                    else
-                    {
-                        Tuple<long, bool> prevAvailableTimeStamp = AvailableTimeStamps[AvailableTimeStamps.Count - 1];
-                        if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != value)
-                        {
-                            AvailableTimeStamps.Add(new Tuple<long, bool>(unixTimeStamp, value));
-                        }
-                    }
-
-                    _available = value;
-                }
-            }
+            public bool Available { get; set; }
+            public List<Tuple<long, bool, bool>> AvailableTimeStamps { get; set; }
 
             public string UserFriendlyName { get; set; }
 
@@ -54,7 +29,6 @@ namespace ccMonitor
             {
                 public string Algorithm { get; set; }
                 public double TotalHashCount { get; set; }
-                public double TotalWeight { get; set; }
                 public double TotalHashRate { get; set; }
                 public double AverageHashRate { get; set; }
                 public double TotalStandardDeviation { get; set; }
@@ -74,6 +48,29 @@ namespace ccMonitor
             {
                 GpuLogs = new List<GpuLogger>();
                 CurrentStatistic = new RigStat();
+            }
+
+            public void ChangeAvailability(bool available, bool monitorClosing = false)
+            {
+                long unixTimeStamp = UnixTimeStamp();
+                if (AvailableTimeStamps == null)
+                {
+                    AvailableTimeStamps = new List<Tuple<long, bool, bool>>
+                        {
+                            new Tuple<long, bool, bool>(unixTimeStamp, available, monitorClosing )
+                        };
+                }
+                else
+                {
+                    Tuple<long, bool, bool> prevAvailableTimeStamp =
+                        AvailableTimeStamps[AvailableTimeStamps.Count - 1];
+                    if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != available)
+                    {
+                        AvailableTimeStamps.Add(new Tuple<long, bool, bool>(unixTimeStamp, available, monitorClosing));
+                    }
+                }
+
+                Available = available;
             }
         }
         
@@ -149,8 +146,8 @@ namespace ccMonitor
                         allApiResults[3] = gpu.Info.MinerMap != -1
                             ? PruvotApi.GetHistory(rig.IpAddress, rig.Port, gpu.Info.MinerMap)
                             : new Dictionary<string, string>[0];
-
-                        gpu.Info.Available = allApiResults[3] != null;
+                        
+                        gpu.ChangeAvailability(allApiResults[3] != null);
                         if (gpu.Info.Available)
                         {
                             gpu.Update(allApiResults, pingTimes);
@@ -238,12 +235,20 @@ namespace ccMonitor
             }
         }
 
-        public static void DisableRig(Rig rig)
+        private static void DisableRig(Rig rig, bool monitorClosing = false)
         {
-            rig.Available = false;
+            rig.ChangeAvailability(false, monitorClosing);
             foreach (GpuLogger gpu in rig.GpuLogs)
             {
-                gpu.Info.Available = false;
+                gpu.ChangeAvailability(false, monitorClosing);
+            }
+        }
+
+        public void DisableAllRigs(bool monitorClosing)
+        {
+            foreach (Rig rig in RigLogs)
+            {
+                DisableRig(rig, monitorClosing);
             }
         }
 
@@ -264,10 +269,11 @@ namespace ccMonitor
                             NvapiId = PruvotApi.GetDictValue<int>(hwInfo, "NVAPI"),
                             NvmlId = PruvotApi.GetDictValue<int>(hwInfo, "NVML"),
                             ComputeCapability = PruvotApi.GetDictValue<uint>(hwInfo, "SM"),
-                            Available = true
                         },
                         BenchLogs = new List<GpuLogger.Benchmark>()
                     };
+                    newGpu.ChangeAvailability(true);
+                    
 
                     if (newGpu.Info.Bus >= 0)
                     {
@@ -289,7 +295,7 @@ namespace ccMonitor
                                 // Don't delete them, just make them unavailable
                                 if (gpu.Info.Bus == newGpu.Info.Bus)
                                 {
-                                    gpu.Info.Available = false;
+                                    gpu.ChangeAvailability(false);
                                 }
                             }
                             rig.GpuLogs.Add(newGpu);
@@ -312,7 +318,7 @@ namespace ccMonitor
                         }
                     }
 
-                    gpu.Info.Available = found;
+                    gpu.ChangeAvailability(found);
                 }
             }
         }

@@ -82,18 +82,18 @@ namespace ccMonitor.Gui
         {
             dgvSpread.Rows.Clear();
             dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.AverageHashRate, "H"));
+            dgvSpread.Rows.Add("Harmonic average", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
+            dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));
             dgvSpread.Rows.Add("Highest hashrate", GuiHelper.GetRightMagnitude(statistic.HighestHashRate, "H"));
             if (statistic.Percentiles != null)
             {
-                dgvSpread.Rows.Add("Real +3σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+3σ"], "H"));
                 dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+2σ"], "H"));
                 dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+1σ"], "H"));
                 dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(statistic.Percentiles["0σ"], "H"));
                 dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-1σ"], "H"));
                 dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-2σ"], "H"));
-                dgvSpread.Rows.Add("Real -3σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-3σ"], "H"));
-
+                
                 chartSpread.Series["BoxPlotSeries"].Points.Clear();
                 chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic));
             }
@@ -106,10 +106,10 @@ namespace ccMonitor.Gui
             {
                 return new[]
                 {
-                    statistic.Percentiles["-2σ"],
-                    statistic.Percentiles["+2σ"],
-                    statistic.Percentiles["-1σ"],
-                    statistic.Percentiles["+1σ"],
+                    statistic.Percentiles["Q1"]-(1.5 * statistic.InterquartileRange),
+                    statistic.Percentiles["Q3"]+(1.5 * statistic.InterquartileRange),
+                    statistic.Percentiles["Q1"],
+                    statistic.Percentiles["Q3"],
                     statistic.Percentiles["0σ"],
                     statistic.AverageHashRate
                 };

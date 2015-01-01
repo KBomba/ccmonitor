@@ -233,10 +233,7 @@ namespace ccMonitor.Gui
 
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            foreach (RigController.Rig rig in _controller.RigLogs)
-            {
-                RigController.DisableRig(rig);
-            }
+            _controller.DisableAllRigs(true);
             SaveLogs();
             SaveSettings();
         }
