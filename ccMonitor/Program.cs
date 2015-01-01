@@ -19,11 +19,14 @@ namespace ccMonitor
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+
+
             /*TextBox t = new TextBox {Multiline = true, ScrollBars = ScrollBars.Both, Dock = DockStyle.Fill};
             Form f = new Form();
             f.Controls.Add(t);
             try
             {*/
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             Application.Run(new Monitor());
             /*}
             catch (Exception ex)
@@ -35,6 +38,21 @@ namespace ccMonitor
                 File.WriteAllText("error.txt", t.Text);
             }*/
             // Convenient debugging ^^"
+        }
+
+        static System.Reflection.Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            string dllName = args.Name.Contains(',') ? args.Name.Substring(0, args.Name.IndexOf(',')) : args.Name.Replace(".dll", "");
+
+            dllName = dllName.Replace(".", "_");
+
+            if (dllName.EndsWith("_resources")) return null;
+
+            System.Resources.ResourceManager rm = new System.Resources.ResourceManager("ccMonitor.Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
+
+            byte[] bytes = (byte[])rm.GetObject(dllName);
+
+            return System.Reflection.Assembly.Load(bytes);
         }
     }
 }
