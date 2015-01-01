@@ -79,7 +79,7 @@ namespace ccMonitor.Gui
         private void UpdateSpread(GpuLogger.Benchmark.GpuStat statistic)
         {
             dgvSpread.Rows.Clear();
-            dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.ArithmeticAverageHashRate, "H"));
+            dgvSpread.Rows.Add("Arithmetic hashrate", GuiHelper.GetRightMagnitude(statistic.ArithmeticAverageHashRate, "H"));
             dgvSpread.Rows.Add("Harmonic average", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
             dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));

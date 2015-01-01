@@ -446,7 +446,7 @@ namespace ccMonitor
             decimal sumOfWeightedRates = 0;
             decimal sumOfInverseWeightedRates = 0;
             double productOfWeightedLogRates = 0;
-            decimal totalWeight = 0;
+            ulong totalWeight = 0;
             decimal[] rates = new decimal[hashLogSize];
             uint[] weights = new uint[hashLogSize];
             
@@ -467,7 +467,7 @@ namespace ccMonitor
                 Tuple<List<decimal>, uint>[] groupedRates = new Tuple<List<decimal>, uint>[100];
                 Dictionary<string, decimal> percentiles = new Dictionary<string, decimal>();
                 decimal weightCounter = 0;
-                decimal sumOfPow2OfDifferences = 0, sumOfPow3OfDifferences = 0, sumOfPow4OfDifferences = 0;
+                double sumOfPow2OfDifferences = 0, sumOfPow3OfDifferences = 0, sumOfPow4OfDifferences = 0;
 
                 Array.Sort(rates, weights); // Sorts the rates from low to high, weights get sorted along
 
@@ -483,13 +483,13 @@ namespace ccMonitor
 
                 for (int i = 0; i < hashLogSize; i++)
                 {
-                    decimal difference = (rates[i] - arithmeticAverageHashRate);
+                    double difference = (double) (rates[i] - arithmeticAverageHashRate);
                     sumOfPow2OfDifferences += (difference * difference * weights[i]);
                     sumOfPow3OfDifferences += (difference * difference * difference * weights[i]);
                     sumOfPow4OfDifferences += (difference * difference * difference * difference * weights[i]);
                     // Unsure if weights[i] needs to be inside difference, tests will show
 
-                    weightCounter += (weights[i] / totalWeight);
+                    weightCounter += (weights[i] / (decimal)totalWeight);
 
                     int group = (int) (Math.Truncate(rates[i]/step) - offset);
                     if (group >= 100) group = 99; // Sometimes, thx to rounding, it gets higher
@@ -572,9 +572,9 @@ namespace ccMonitor
                     }
                 }
 
-                double pow2Double = (double) sumOfPow2OfDifferences;
-                decimal skewness = sumOfPow3OfDifferences/(decimal) (Math.Pow(pow2Double, 1.5));
-                decimal kurtosis = (decimal) (((double)sumOfPow4OfDifferences / (pow2Double * pow2Double)) - 3);
+                decimal skewness = (decimal) (sumOfPow3OfDifferences/(Math.Pow(sumOfPow2OfDifferences, 1.5)));
+                decimal kurtosis =
+                    (decimal) ((sumOfPow4OfDifferences/(sumOfPow2OfDifferences*sumOfPow2OfDifferences)) - 3);
 
                 decimal[] madMedian = new decimal[hashLogSize];
                 decimal[] madAverage = new decimal[hashLogSize];
@@ -599,7 +599,7 @@ namespace ccMonitor
                 absoluteDeviations[0] = new[] {madMedianMedian, madMedianAverage, madMedianMax};
                 absoluteDeviations[1] = new[] {madAverageMedian, madAverageAverage, madAverageMax};
                 
-                decimal variance = sumOfPow2OfDifferences/totalWeight;
+                decimal variance = (decimal) (sumOfPow2OfDifferences/totalWeight);
                 decimal standardDeviation = (decimal) Math.Sqrt((double)variance);
                 decimal dispersionCoefficient = variance/percentiles["0σ"];
                 decimal variationCoefficient = (standardDeviation / arithmeticAverageHashRate) * 100;
