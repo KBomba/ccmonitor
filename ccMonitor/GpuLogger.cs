@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Numerics;
 using System.Windows.Forms;
 using ccMonitor.Api;
+using Numerics;
 
 namespace ccMonitor
 {
@@ -467,7 +469,9 @@ namespace ccMonitor
                 Tuple<List<decimal>, uint>[] groupedRates = new Tuple<List<decimal>, uint>[100];
                 Dictionary<string, decimal> percentiles = new Dictionary<string, decimal>();
                 decimal weightCounter = 0;
-                double sumOfPow2OfDifferences = 0, sumOfPow3OfDifferences = 0, sumOfPow4OfDifferences = 0;
+                BigRational sumOfPow2OfDifferences = BigRational.Zero,
+                    sumOfPow3OfDifferences = BigRational.Zero,
+                    sumOfPow4OfDifferences = BigRational.Zero;
 
                 Array.Sort(rates, weights); // Sorts the rates from low to high, weights get sorted along
 
@@ -483,10 +487,11 @@ namespace ccMonitor
 
                 for (int i = 0; i < hashLogSize; i++)
                 {
-                    double difference = (double) (rates[i] - arithmeticAverageHashRate);
-                    sumOfPow2OfDifferences += (difference * difference * weights[i]);
-                    sumOfPow3OfDifferences += (difference * difference * difference * weights[i]);
-                    sumOfPow4OfDifferences += (difference * difference * difference * difference * weights[i]);
+                    BigRational difference = new BigRational(rates[i] - arithmeticAverageHashRate);
+                    BigRational bigWeight = new BigRational((decimal) weights[i]);
+                    sumOfPow2OfDifferences += (difference * difference * bigWeight);
+                    sumOfPow3OfDifferences += (difference * difference * difference * bigWeight);
+                    sumOfPow4OfDifferences += (difference * difference * difference * difference * bigWeight);
                     // Unsure if weights[i] needs to be inside difference, tests will show
 
                     weightCounter += (weights[i] / (decimal)totalWeight);
@@ -572,9 +577,9 @@ namespace ccMonitor
                     }
                 }
 
-                decimal skewness = (decimal) (sumOfPow3OfDifferences/(Math.Pow(sumOfPow2OfDifferences, 1.5)));
-                decimal kurtosis =
-                    (decimal) ((sumOfPow4OfDifferences/(sumOfPow2OfDifferences*sumOfPow2OfDifferences)) - 3);
+               double skewness = (double) (sumOfPow3OfDifferences/(BigRational.Pow(sumOfPow2OfDifferences, new BigInteger(1.5d))));
+                double kurtosis =
+                    (double) ((sumOfPow4OfDifferences/(sumOfPow2OfDifferences*sumOfPow2OfDifferences)) - 3);
 
                 decimal[] madMedian = new decimal[hashLogSize];
                 decimal[] madAverage = new decimal[hashLogSize];
@@ -610,8 +615,8 @@ namespace ccMonitor
                     (double)((arithmeticAverageHashRate * arithmeticAverageHashRate) + (standardDeviation * standardDeviation)));
 
                 CurrentBenchmark.Statistic.TotalHashCount = totalWeight;
-                CurrentBenchmark.Statistic.Skewness = skewness;
-                CurrentBenchmark.Statistic.Kurtosis = kurtosis;
+                CurrentBenchmark.Statistic.Skewness = (decimal) skewness;
+                CurrentBenchmark.Statistic.Kurtosis = (decimal) kurtosis;
                 CurrentBenchmark.Statistic.ArithmeticAverageHashRate = arithmeticAverageHashRate;
                 CurrentBenchmark.Statistic.GeometricAverageHashrate = geometricAverageHashRate;
                 CurrentBenchmark.Statistic.HarmonicAverageHashRate = harmonicAverageHashRate;
