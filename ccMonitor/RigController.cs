@@ -28,20 +28,20 @@ namespace ccMonitor
             public class RigStat
             {
                 public string Algorithm { get; set; }
-                public double TotalHashCount { get; set; }
-                public double TotalHashRate { get; set; }
-                public double AverageHashRate { get; set; }
-                public double TotalStandardDeviation { get; set; }
-                public double AverageStandardDeviation { get; set; }
-                public double AverageSpreadPercentage { get; set; }
-                //public double[] AveragePercentiles { get; set; }
-                public Dictionary<string, double> AveragePercentiles { get; set; }
-                public double LowestHashRate { get; set; }
-                public double HighestHashRate { get; set; }
-                public double Accepts { get; set; }
-                public double Rejects { get; set; }
-                public double AverageTemperature { get; set; }
-                public double ShareAnswerPing { get; set; }
+                public decimal TotalHashCount { get; set; }
+                public decimal TotalHashRate { get; set; }
+                public decimal AverageHashRate { get; set; }
+                public decimal TotalStandardDeviation { get; set; }
+                public decimal AverageStandardDeviation { get; set; }
+                public decimal AverageVariationCoefficient { get; set; }
+                //public decimal[] AveragePercentiles { get; set; }
+                public Dictionary<string, decimal> AveragePercentiles { get; set; }
+                public decimal LowestHashRate { get; set; }
+                public decimal HighestHashRate { get; set; }
+                public decimal Accepts { get; set; }
+                public decimal Rejects { get; set; }
+                public decimal AverageTemperature { get; set; }
+                public decimal ShareAnswerPing { get; set; }
             }
 
             public Rig()
@@ -130,16 +130,16 @@ namespace ccMonitor
                     CheckLiveGpus(allApiResults, rig);
 
                     // Prepping for total rig statistics
-                    double totalHashCount = 0,
+                    decimal totalHashCount = 0,
                         totalHashRate = 0,
                         totalAverageHashRate = 0,
                         totalStandardDeviation = 0,
                         totalAverageStandardDeviation = 0,
-                        totalSpreadPercentage = 0,
-                        lowestHashRate = double.MaxValue,
+                        totalVariationCoefficient = 0,
+                        lowestHashRate = decimal.MaxValue,
                         highestHashRate = 0,
                         totalAverageTemperature = 0;
-                    Dictionary<string, double> totalPercentiles = new Dictionary<string, double>();
+                    Dictionary<string, decimal> totalPercentiles = new Dictionary<string, decimal>();
 
                     foreach (GpuLogger gpu in rig.GpuLogs)
                     {
@@ -154,8 +154,8 @@ namespace ccMonitor
 
                             // While we're at it, calculate the total stats for the rig
                             totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate;
-                            totalAverageHashRate += gpu.CurrentBenchmark.Statistic.AverageHashRate*
+                            totalHashRate += gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate;
+                            totalAverageHashRate += gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate*
                                                     gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             lowestHashRate = lowestHashRate < gpu.CurrentBenchmark.Statistic.LowestHashRate
                                              ? lowestHashRate
@@ -166,7 +166,7 @@ namespace ccMonitor
                             totalStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation;
                             totalAverageStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation *
                                                       gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalSpreadPercentage += gpu.CurrentBenchmark.Statistic.SpreadPercentage*
+                            totalVariationCoefficient += gpu.CurrentBenchmark.Statistic.VariationCoefficient*
                                                      gpu.CurrentBenchmark.Statistic.TotalHashCount;
                             totalAverageTemperature += gpu.CurrentBenchmark.Statistic.AverageTemperature;
 
@@ -203,14 +203,14 @@ namespace ccMonitor
                             AverageHashRate = totalAverageHashRate / totalHashCount,
                             TotalStandardDeviation = totalStandardDeviation,
                             AverageStandardDeviation = totalAverageStandardDeviation / totalHashCount,
-                            AverageSpreadPercentage = totalSpreadPercentage / totalHashCount,
+                            AverageVariationCoefficient = totalVariationCoefficient / totalHashCount,
                             LowestHashRate = lowestHashRate,
                             HighestHashRate = highestHashRate,
                             Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
                             Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
                             AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,
                             ShareAnswerPing = pingTimes[0],
-                            AveragePercentiles = new Dictionary<string, double>()
+                            AveragePercentiles = new Dictionary<string, decimal>()
                         };
 
                         foreach (string percentileName in totalPercentiles.Keys)

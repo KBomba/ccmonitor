@@ -98,7 +98,7 @@ namespace ccMonitor.Gui
             if (Rig.GpuLogs.Count > 0 && Rig.GpuLogs[0] != null && Rig.GpuLogs[0].CurrentBenchmark != null) hashEntries = Rig.GpuLogs[0].CurrentBenchmark.HashLogs.OrderBy(entry => entry.TimeStamp).ToList();
             if (hashEntries != null && hashEntries.Count > 1)
             {
-                double totalHashCount = Rig.GpuLogs[0].CurrentBenchmark.Statistic.TotalHashCount;
+                double totalHashCount = (double) Rig.GpuLogs[0].CurrentBenchmark.Statistic.TotalHashCount;
                 long start = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoStart;
                 long end = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoLast;
                 long timeRun = 0;

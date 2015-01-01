@@ -1,16 +1,20 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Windows.Markup;
 
 namespace ccMonitor.Gui
 {
     public static class GuiHelper
     {
         public static string GetRightMagnitude(double rate, string append = "")
+        {
+            return GetRightMagnitude((decimal) rate, append);
+        }
+
+        public static string GetRightMagnitude(uint hashCount, string append = "")
+        {
+            return GetRightMagnitude((decimal)hashCount, append);
+        }
+
+        public static string GetRightMagnitude(decimal rate, string append = "")
         {
             string[] sizes = { "", "K", "M", "G", "T", "P", "E", "Z", "Y" };
             int order = 0;
@@ -59,7 +63,5 @@ namespace ccMonitor.Gui
                 ApplyAll(child, action);
             }
         }*/
-
-        
     }
 }

@@ -77,7 +77,7 @@ namespace ccMonitor.Gui
                             TimeStarted = timeStarted,
                             TimeLastUpdate = timeLastUpdate,
                             Algorithm = benchmark.Algorithm,
-                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.AverageHashRate, "H"),
+                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.ArithmeticAverageHashRate, "H"),
                             StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
                             HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
                             AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",

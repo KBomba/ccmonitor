@@ -40,9 +40,9 @@ namespace ccMonitor.Gui
             IEnumerable<ChartFriendlyHashEntry> friendlyHashEntries = hashLogs.OrderBy(entry => entry.TimeStamp).Select(hashEntry => new ChartFriendlyHashEntry
             {
                 TimeStamp = GuiHelper.UnixTimeStampToDateTime(hashEntry.TimeStamp),
-                HashRate = Math.Round(hashEntry.HashRate, MidpointRounding.AwayFromZero),
+                HashRate = (double) Decimal.Round(hashEntry.HashRate, MidpointRounding.AwayFromZero),
                 Found = hashEntry.Found,
-                Difficulty = hashEntry.Difficulty,
+                Difficulty = (double) hashEntry.Difficulty,
                 HashCount = hashEntry.HashCount
             }).Where(chartFriendlyHashEntry => _hours > 9000 || chartFriendlyHashEntry.TimeStamp > (now - start));
 

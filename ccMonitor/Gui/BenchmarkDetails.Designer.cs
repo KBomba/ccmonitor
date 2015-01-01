@@ -599,7 +599,6 @@
             chartArea1.AxisX.MajorGrid.LineWidth = 0;
             chartArea1.AxisY.IsStartedFromZero = false;
             chartArea1.AxisY.LabelStyle.Format = "0.######";
-            chartArea1.AxisY.MajorGrid.LineWidth = 0;
             chartArea1.Name = "ChartArea";
             this.chartSpread.ChartAreas.Add(chartArea1);
             this.chartSpread.Dock = System.Windows.Forms.DockStyle.Fill;

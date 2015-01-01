@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace ccMonitor.Gui
@@ -81,7 +79,7 @@ namespace ccMonitor.Gui
         private void UpdateSpread(GpuLogger.Benchmark.GpuStat statistic)
         {
             dgvSpread.Rows.Clear();
-            dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.AverageHashRate, "H"));
+            dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.ArithmeticAverageHashRate, "H"));
             dgvSpread.Rows.Add("Harmonic average", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
             dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));
@@ -106,12 +104,12 @@ namespace ccMonitor.Gui
             {
                 return new[]
                 {
-                    statistic.Percentiles["Q1"]-(1.5 * statistic.InterquartileRange),
-                    statistic.Percentiles["Q3"]+(1.5 * statistic.InterquartileRange),
-                    statistic.Percentiles["Q1"],
-                    statistic.Percentiles["Q3"],
-                    statistic.Percentiles["0σ"],
-                    statistic.AverageHashRate
+                    (double)(statistic.Percentiles["Q1"]-(1.5M * statistic.InterquartileRange)),
+                    (double)(statistic.Percentiles["Q3"]+(1.5M * statistic.InterquartileRange)),
+                    (double)(statistic.Percentiles["Q1"]),
+                    (double)(statistic.Percentiles["Q3"]),
+                    (double)(statistic.Percentiles["0σ"]),
+                    (double)(statistic.ArithmeticAverageHashRate)
                 };
             }
 

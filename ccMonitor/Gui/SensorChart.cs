@@ -47,10 +47,10 @@ namespace ccMonitor.Gui
                 .OrderBy(value => value.TimeStamp).Select(sensorValue => new ChartFriendlySensorValue
             {
                 TimeStamp = GuiHelper.UnixTimeStampToDateTime(sensorValue.TimeStamp), 
-                Temperature = sensorValue.Temperature,
-                Fan = windows ? sensorValue.FanRpm : sensorValue.FanPercentage,
-                CoreClockFrequency = sensorValue.CoreClockFrequency,
-                MemoryClockFrequency = sensorValue.MemoryClockFrequency,
+                Temperature = (double) sensorValue.Temperature,
+                Fan = (double) (windows ? sensorValue.FanRpm : sensorValue.FanPercentage),
+                CoreClockFrequency = (double) sensorValue.CoreClockFrequency,
+                MemoryClockFrequency = (double) sensorValue.MemoryClockFrequency,
                 ShareAnswerPing = sensorValue.ShareAnswerPing,
                 MiningUrlPing = sensorValue.MiningUrlPing,
                 NetworkRigPing = sensorValue.NetworkRigPing,

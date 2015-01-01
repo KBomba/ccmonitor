@@ -157,7 +157,7 @@ namespace ccMonitor.Gui
                     }
                     else
                     {
-                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.AverageHashRate, "H"));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate, "H"));
                         lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
                         lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
                         lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Founds.ToString(CultureInfo.InvariantCulture));
