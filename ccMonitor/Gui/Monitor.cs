@@ -157,10 +157,10 @@ namespace ccMonitor.Gui
                     }
                     else
                     {
-                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate, "H"));
-                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.StandardDeviation, "H"));
-                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.Statistic.TotalHashCount));
-                        lvi.SubItems.Add(gpu.CurrentBenchmark.Statistic.Founds.ToString(CultureInfo.InvariantCulture));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.CurrentStatistic.HarmonicAverageHashRate, "H"));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.CurrentStatistic.StandardDeviation, "H"));
+                        lvi.SubItems.Add(GuiHelper.GetRightMagnitude(gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount));
+                        lvi.SubItems.Add(gpu.CurrentBenchmark.CurrentStatistic.Founds.ToString(CultureInfo.InvariantCulture));
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(gpu.CurrentBenchmark.SensorLog[gpu.CurrentBenchmark.SensorLog.Count - 1]

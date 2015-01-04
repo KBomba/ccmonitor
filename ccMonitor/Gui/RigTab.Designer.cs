@@ -34,17 +34,17 @@
             System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tbcRig = new System.Windows.Forms.TabControl();
             this.tabRigOverview = new System.Windows.Forms.TabPage();
-            this.tabRigApiConsole = new System.Windows.Forms.TabPage();
-            this.txtApiConsole = new System.Windows.Forms.TextBox();
             this.splitRigOverview = new System.Windows.Forms.SplitContainer();
             this.chartStats = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tabRigApiConsole = new System.Windows.Forms.TabPage();
+            this.txtApiConsole = new System.Windows.Forms.TextBox();
             this.tbcRig.SuspendLayout();
             this.tabRigOverview.SuspendLayout();
-            this.tabRigApiConsole.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitRigOverview)).BeginInit();
             this.splitRigOverview.Panel2.SuspendLayout();
             this.splitRigOverview.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartStats)).BeginInit();
+            this.tabRigApiConsole.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbcRig
@@ -67,30 +67,6 @@
             this.tabRigOverview.Size = new System.Drawing.Size(1168, 560);
             this.tabRigOverview.TabIndex = 0;
             this.tabRigOverview.Text = "Rig overview";
-            // 
-            // tabRigApiConsole
-            // 
-            this.tabRigApiConsole.Controls.Add(this.txtApiConsole);
-            this.tabRigApiConsole.Location = new System.Drawing.Point(4, 22);
-            this.tabRigApiConsole.Name = "tabRigApiConsole";
-            this.tabRigApiConsole.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRigApiConsole.Size = new System.Drawing.Size(1168, 560);
-            this.tabRigApiConsole.TabIndex = 1;
-            this.tabRigApiConsole.Text = "API console";
-            // 
-            // txtApiConsole
-            // 
-            this.txtApiConsole.BackColor = System.Drawing.SystemColors.WindowText;
-            this.txtApiConsole.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtApiConsole.ForeColor = System.Drawing.Color.Lime;
-            this.txtApiConsole.Location = new System.Drawing.Point(3, 3);
-            this.txtApiConsole.Multiline = true;
-            this.txtApiConsole.Name = "txtApiConsole";
-            this.txtApiConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtApiConsole.Size = new System.Drawing.Size(1162, 554);
-            this.txtApiConsole.TabIndex = 0;
-            this.txtApiConsole.Text = " >  ";
-            this.txtApiConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtApiConsole_KeyDown);
             // 
             // splitRigOverview
             // 
@@ -121,7 +97,6 @@
             chartArea1.AxisX2.IsStartedFromZero = false;
             chartArea1.AxisX2.LabelStyle.Format = "g";
             chartArea1.AxisY.IsStartedFromZero = false;
-            chartArea1.AxisY.LabelStyle.Format = "#,##0,K";
             chartArea1.AxisY.Title = "Total hashrate (KH/s)";
             chartArea1.AxisY2.IsStartedFromZero = false;
             chartArea1.AxisY2.LabelStyle.Format = "#,##0,K";
@@ -173,6 +148,30 @@
             this.chartStats.TabIndex = 1;
             this.chartStats.Text = "chartStats";
             // 
+            // tabRigApiConsole
+            // 
+            this.tabRigApiConsole.Controls.Add(this.txtApiConsole);
+            this.tabRigApiConsole.Location = new System.Drawing.Point(4, 22);
+            this.tabRigApiConsole.Name = "tabRigApiConsole";
+            this.tabRigApiConsole.Padding = new System.Windows.Forms.Padding(3);
+            this.tabRigApiConsole.Size = new System.Drawing.Size(1168, 560);
+            this.tabRigApiConsole.TabIndex = 1;
+            this.tabRigApiConsole.Text = "API console";
+            // 
+            // txtApiConsole
+            // 
+            this.txtApiConsole.BackColor = System.Drawing.SystemColors.WindowText;
+            this.txtApiConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtApiConsole.ForeColor = System.Drawing.Color.Lime;
+            this.txtApiConsole.Location = new System.Drawing.Point(3, 3);
+            this.txtApiConsole.Multiline = true;
+            this.txtApiConsole.Name = "txtApiConsole";
+            this.txtApiConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtApiConsole.Size = new System.Drawing.Size(1162, 554);
+            this.txtApiConsole.TabIndex = 0;
+            this.txtApiConsole.Text = " >  ";
+            this.txtApiConsole.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtApiConsole_KeyDown);
+            // 
             // RigTab
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -182,12 +181,12 @@
             this.Size = new System.Drawing.Size(1176, 586);
             this.tbcRig.ResumeLayout(false);
             this.tabRigOverview.ResumeLayout(false);
-            this.tabRigApiConsole.ResumeLayout(false);
-            this.tabRigApiConsole.PerformLayout();
             this.splitRigOverview.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitRigOverview)).EndInit();
             this.splitRigOverview.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartStats)).EndInit();
+            this.tabRigApiConsole.ResumeLayout(false);
+            this.tabRigApiConsole.PerformLayout();
             this.ResumeLayout(false);
 
         }

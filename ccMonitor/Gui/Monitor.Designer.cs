@@ -15,6 +15,7 @@
         {
             if (disposing && (components != null))
             {
+                _updateTimer.Dispose();
                 components.Dispose();
             }
             base.Dispose(disposing);

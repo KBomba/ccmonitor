@@ -98,14 +98,17 @@ namespace ccMonitor.Gui
             if (Rig.GpuLogs.Count > 0 && Rig.GpuLogs[0] != null && Rig.GpuLogs[0].CurrentBenchmark != null) hashEntries = Rig.GpuLogs[0].CurrentBenchmark.HashLogs.OrderBy(entry => entry.TimeStamp).ToList();
             if (hashEntries != null && hashEntries.Count > 1)
             {
-                double totalHashCount = (double) Rig.GpuLogs[0].CurrentBenchmark.Statistic.TotalHashCount;
-                long start = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoStart;
-                long end = Rig.GpuLogs[0].CurrentBenchmark.TimeHistoLast;
-                long timeRun = 0;
-                
-
                 chartStats.Series["TotalHashrateSeries"].ChartType = SeriesChartType.FastLine;
-                chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, totalHashCount/(end - start));
+                chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, Rig.GpuLogs[0].CurrentBenchmark.CurrentStatistic.HashCountedRate);
+
+                chartStats.Series["TotalSpreadSeries"].ChartType = SeriesChartType.FastLine;
+                chartStats.Series["TotalSpreadSeries"].Points.AddXY(now, Rig.GpuLogs[0].CurrentBenchmark.CurrentStatistic.StdMadFactor);
+                chartStats.Series["TotalSpreadSeries"].YAxisType = AxisType.Primary;
+
+                Color totalHashrateColor = chartStats.Series["TotalHashrateSeries"].Color;
+                chartStats.Series["TotalSpreadSeries"].BorderColor = totalHashrateColor;
+                chartStats.Series["TotalSpreadSeries"].BorderWidth = 2;
+                chartStats.Series["TotalSpreadSeries"].Color = Color.FromArgb(255, Color.Red);
             }
             /*chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, Rig.CurrentStatistic.TotalHashRate);
             if (Rig.CurrentStatistic.AveragePercentiles != null)

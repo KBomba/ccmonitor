@@ -77,10 +77,10 @@ namespace ccMonitor.Gui
                             TimeStarted = timeStarted,
                             TimeLastUpdate = timeLastUpdate,
                             Algorithm = benchmark.Algorithm,
-                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.Statistic.ArithmeticAverageHashRate, "H"),
-                            StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.Statistic.StandardDeviation, "H"),
-                            HashCount = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount),
-                            AverageTemperature = benchmark.Statistic.AverageTemperature.ToString("##.##") + " °C",
+                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.HarmonicAverageHashRate, "H"),
+                            StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.StandardDeviation, "H"),
+                            HashCount = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount),
+                            AverageTemperature = benchmark.CurrentStatistic.AverageTemperature.ToString("##.##") + " °C",
                             MinerNameVersion = benchmark.MinerSetup.ToString(),
                             Stratum = benchmark.MinerSetup.MiningUrl
                         };

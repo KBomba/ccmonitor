@@ -153,38 +153,38 @@ namespace ccMonitor
                             gpu.Update(allApiResults, pingTimes);
 
                             // While we're at it, calculate the total stats for the rig
-                            totalHashCount += gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalHashRate += gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate;
-                            totalAverageHashRate += gpu.CurrentBenchmark.Statistic.ArithmeticAverageHashRate*
-                                                    gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            lowestHashRate = lowestHashRate < gpu.CurrentBenchmark.Statistic.LowestHashRate
+                            totalHashCount += gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
+                            totalHashRate += gpu.CurrentBenchmark.CurrentStatistic.HarmonicAverageHashRate;
+                            totalAverageHashRate += gpu.CurrentBenchmark.CurrentStatistic.HarmonicAverageHashRate*
+                                                    gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
+                            lowestHashRate = lowestHashRate < gpu.CurrentBenchmark.CurrentStatistic.LowestHashRate
                                              ? lowestHashRate
-                                             : gpu.CurrentBenchmark.Statistic.LowestHashRate;
-                            highestHashRate = highestHashRate > gpu.CurrentBenchmark.Statistic.HighestHashRate
+                                             : gpu.CurrentBenchmark.CurrentStatistic.LowestHashRate;
+                            highestHashRate = highestHashRate > gpu.CurrentBenchmark.CurrentStatistic.HighestHashRate
                                               ? highestHashRate
-                                              : gpu.CurrentBenchmark.Statistic.HighestHashRate;
-                            totalStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation;
-                            totalAverageStandardDeviation += gpu.CurrentBenchmark.Statistic.StandardDeviation *
-                                                      gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalVariationCoefficient += gpu.CurrentBenchmark.Statistic.VariationCoefficient*
-                                                     gpu.CurrentBenchmark.Statistic.TotalHashCount;
-                            totalAverageTemperature += gpu.CurrentBenchmark.Statistic.AverageTemperature;
+                                              : gpu.CurrentBenchmark.CurrentStatistic.HighestHashRate;
+                            totalStandardDeviation += gpu.CurrentBenchmark.CurrentStatistic.StandardDeviation;
+                            totalAverageStandardDeviation += gpu.CurrentBenchmark.CurrentStatistic.StandardDeviation *
+                                                      gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
+                            totalVariationCoefficient += gpu.CurrentBenchmark.CurrentStatistic.VariationCoefficient*
+                                                     gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
+                            totalAverageTemperature += gpu.CurrentBenchmark.CurrentStatistic.AverageTemperature;
 
-                            if (gpu.CurrentBenchmark.Statistic.Percentiles != null)
+                            if (gpu.CurrentBenchmark.CurrentStatistic.Percentiles != null)
                             {
-                                foreach (string percentileName in gpu.CurrentBenchmark.Statistic.Percentiles.Keys)
+                                foreach (string percentileName in gpu.CurrentBenchmark.CurrentStatistic.Percentiles.Keys)
                                 {
                                     if (totalPercentiles.ContainsKey(percentileName))
                                     {
                                         totalPercentiles[percentileName] +=
-                                            gpu.CurrentBenchmark.Statistic.Percentiles[percentileName]*
-                                            gpu.CurrentBenchmark.Statistic.TotalHashCount;
+                                            gpu.CurrentBenchmark.CurrentStatistic.Percentiles[percentileName]*
+                                            gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
                                     }
                                     else
                                     {
                                         totalPercentiles.Add(percentileName,
-                                            gpu.CurrentBenchmark.Statistic.Percentiles[percentileName]*
-                                            gpu.CurrentBenchmark.Statistic.TotalHashCount);
+                                            gpu.CurrentBenchmark.CurrentStatistic.Percentiles[percentileName]*
+                                            gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount);
                                     }
                                 }
                             }

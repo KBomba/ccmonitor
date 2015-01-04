@@ -63,16 +63,6 @@ namespace ccMonitor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] BigRationalLibrary {
-            get {
-                object obj = ResourceManager.GetObject("BigRationalLibrary", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] Newtonsoft_Json {
             get {
                 object obj = ResourceManager.GetObject("Newtonsoft_Json", resourceCulture);

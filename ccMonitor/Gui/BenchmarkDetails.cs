@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ccMonitor.Gui
@@ -29,7 +31,7 @@ namespace ccMonitor.Gui
         public void UpdateStats(GpuLogger.Benchmark benchmark)
         {
             if (benchmark == null) return;
-            UpdateSpread(benchmark.Statistic);
+            UpdateSpread(benchmark.CurrentStatistic);
             UpdateLogs(benchmark);
             UpdateTextBoxes(benchmark);
         }
@@ -44,12 +46,12 @@ namespace ccMonitor.Gui
             if (!txtComputeCapability.Focused) txtComputeCapability.Text = 
                                             GpuInfo.ComputeCapability.ToString(CultureInfo.InvariantCulture);
 
-            if (!txtFounds.Focused) txtFounds.Text = benchmark.Statistic.Founds.ToString(CultureInfo.InvariantCulture);
-            if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.Statistic.TotalHashCount);
+            if (!txtFounds.Focused) txtFounds.Text = benchmark.CurrentStatistic.Founds.ToString(CultureInfo.InvariantCulture);
+            if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount);
             if (!txtAverageTemperature.Focused) txtAverageTemperature.Text = 
-                                            String.Format("{0:0.##}{1}", benchmark.Statistic.AverageTemperature, "°C");
+                                            String.Format("{0:0.##}{1}", benchmark.CurrentStatistic.AverageTemperature, "°C");
             if (!txtAveragePing.Focused) txtAveragePing.Text = 
-                                            String.Format("{0:0.##} {1}", benchmark.Statistic.AverageShareAnswerPing, "ms");
+                                            String.Format("{0:0.##} {1}", benchmark.CurrentStatistic.AverageShareAnswerPing, "ms");
 
             if (!txtAlgorithm.Focused) txtAlgorithm.Text = benchmark.Algorithm;
             if (!txtMinerName.Focused) txtMinerName.Text = benchmark.MinerSetup.ToString();
@@ -79,9 +81,9 @@ namespace ccMonitor.Gui
         private void UpdateSpread(GpuLogger.Benchmark.GpuStat statistic)
         {
             dgvSpread.Rows.Clear();
-            dgvSpread.Rows.Add("Arithmetic hashrate", GuiHelper.GetRightMagnitude(statistic.ArithmeticAverageHashRate, "H"));
-            dgvSpread.Rows.Add("Harmonic average", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
+            dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
+            dgvSpread.Rows.Add("MAD", GuiHelper.GetRightMagnitude(statistic.AbsoluteDeviations[0][0], "H"));
             dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));
             dgvSpread.Rows.Add("Highest hashrate", GuiHelper.GetRightMagnitude(statistic.HighestHashRate, "H"));
             if (statistic.Percentiles != null)
@@ -102,15 +104,22 @@ namespace ccMonitor.Gui
         {
             if (statistic.Percentiles != null)
             {
-                return new[]
+                List<double> boxPlotValues = new List<double>
                 {
-                    (double)(statistic.Percentiles["Q1"]-(1.5M * statistic.InterquartileRange)),
-                    (double)(statistic.Percentiles["Q3"]+(1.5M * statistic.InterquartileRange)),
+                    (double)(statistic.OuterWhiskers[0]),
+                    (double)(statistic.OuterWhiskers[1]),
                     (double)(statistic.Percentiles["Q1"]),
                     (double)(statistic.Percentiles["Q3"]),
                     (double)(statistic.Percentiles["0σ"]),
-                    (double)(statistic.ArithmeticAverageHashRate)
+                    (double)(statistic.HarmonicAverageHashRate)
                 };
+
+                foreach (decimal outlier in statistic.Outliers)
+                {
+                    boxPlotValues.Add((double) outlier);
+                }
+
+                return boxPlotValues.ToArray();
             }
 
             return new double[6];

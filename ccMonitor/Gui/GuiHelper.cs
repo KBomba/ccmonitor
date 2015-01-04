@@ -4,6 +4,11 @@ namespace ccMonitor.Gui
 {
     public static class GuiHelper
     {
+        public static string GetRightMagnitude(long totalHashCount, string append = "")
+        {
+            return GetRightMagnitude((decimal)totalHashCount, append);
+        }
+
         public static string GetRightMagnitude(double rate, string append = "")
         {
             return GetRightMagnitude((decimal) rate, append);
