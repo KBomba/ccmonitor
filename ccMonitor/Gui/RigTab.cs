@@ -23,8 +23,15 @@ namespace ccMonitor.Gui
         public RigTab(RigController.Rig rig)
         {
             Rig = rig;
-            _apiCommands = new List<string>();
             InitializeComponent();
+
+            _apiCommands = new List<string>();
+            txtApiConsole.LostFocus += TxtApiConsoleOnLostFocus;
+        }
+
+        private void TxtApiConsoleOnLostFocus(object sender, EventArgs eventArgs)
+        {
+            txtApiConsole.Focus();
         }
 
         public void UpdateGui()
@@ -86,17 +93,19 @@ namespace ccMonitor.Gui
             {
                 tbcRig.TabPages.Remove(tabPage);
             }
+
+            txtApiConsole.Select(); // Otherwisze, might lose focus of the apiConsole when updating the other tabs
         }
 
         private void UpdateStatCharts()
         {
             DateTime now = DateTime.Now;
-            int gpuCount = Rig.GpuLogs.Count(gpu => gpu.Info.Available);
+            //int gpuCount = Rig.GpuLogs.Count(gpu => gpu.CurrentBenchmark.AvailableTimeStamps.Last().Available);
 
 
             List<GpuLogger.Benchmark.HashEntry> hashEntries = null;
             if (Rig.GpuLogs.Count > 0 && Rig.GpuLogs[0] != null && Rig.GpuLogs[0].CurrentBenchmark != null) hashEntries = Rig.GpuLogs[0].CurrentBenchmark.HashLogs.OrderBy(entry => entry.TimeStamp).ToList();
-            if (hashEntries != null && hashEntries.Count > 1)
+            if (hashEntries != null && hashEntries.Count > 1 && Rig.GpuLogs[0].CurrentBenchmark.CurrentStatistic != null)
             {
                 chartStats.Series["TotalHashrateSeries"].ChartType = SeriesChartType.FastLine;
                 chartStats.Series["TotalHashrateSeries"].Points.AddXY(now, Rig.GpuLogs[0].CurrentBenchmark.CurrentStatistic.HashCountedRate);

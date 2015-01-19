@@ -32,7 +32,7 @@ namespace ccMonitor.Gui
             chartHash.Series["AvailabilityDifficultySeries"].Color = Color.FromArgb(50, Color.Red);
         }
 
-        public void UpdateCharts(HashSet<GpuLogger.Benchmark.HashEntry> hashLogs, List<Tuple<long, bool, bool>> availabilityTimeStamps)
+        public void UpdateCharts(HashSet<GpuLogger.Benchmark.HashEntry> hashLogs, List<GpuLogger.Benchmark.Availability> availabilityTimeStamps)
         {
             List<ChartFriendlyHashEntry> chartFriendlyHashEntries = new List<ChartFriendlyHashEntry>(hashLogs.Count);
             DateTime now = DateTime.Now;
@@ -51,15 +51,17 @@ namespace ccMonitor.Gui
             {
                 chartFriendlyHashEntries.AddRange(values);
 
+                chartHash.SuspendLayout();
                 chartHash.DataSource = chartFriendlyHashEntries;
                 chartHash.DataBind();
 
                 UpdateAvailabilityCharts(availabilityTimeStamps, values);
                 AutoFormatXAxis(chartFriendlyHashEntries);
+                chartHash.ResumeLayout(true);
             }
         }
 
-        private void UpdateAvailabilityCharts(List<Tuple<long, bool, bool>> availabilityTimeStamps, IList<ChartFriendlyHashEntry> friendlyHashEntry)
+        private void UpdateAvailabilityCharts(List<GpuLogger.Benchmark.Availability> availabilityTimeStamps, IList<ChartFriendlyHashEntry> friendlyHashEntry)
         {
             chartHash.Series["AvailabilityFoundSeries"].Points.Clear();
             chartHash.Series["AvailabilityDifficultySeries"].Points.Clear();
@@ -71,13 +73,13 @@ namespace ccMonitor.Gui
 
             for (int index = 0; index < availabilityTimeStamps.Count - 1; index++)
             {
-                Tuple<long, bool, bool> availabilityTimeStamp = availabilityTimeStamps[index];
-                DateTime dateTime = GuiHelper.UnixTimeStampToDateTime(availabilityTimeStamp.Item1);
-                if (!availabilityTimeStamp.Item2 && dateTime > firstTimeStamp)
+                GpuLogger.Benchmark.Availability availabilityTimeStamp = availabilityTimeStamps[index];
+                DateTime dateTime = GuiHelper.UnixTimeStampToDateTime(availabilityTimeStamp.TimeStamp);
+                if (!availabilityTimeStamp.Available && dateTime > firstTimeStamp)
                 {
-                    Tuple<long, bool, bool> nextAvailabilityTimeStamp = availabilityTimeStamps[index + 1];
+                    GpuLogger.Benchmark.Availability nextAvailabilityTimeStamp = availabilityTimeStamps[index + 1];
 
-                    DateTime nextDateTime = GuiHelper.UnixTimeStampToDateTime(nextAvailabilityTimeStamp.Item1);
+                    DateTime nextDateTime = GuiHelper.UnixTimeStampToDateTime(nextAvailabilityTimeStamp.TimeStamp);
 
                     chartHash.Series["AvailabilityFoundSeries"].Points.AddXY(dateTime + new TimeSpan(0, 0, 1),
                         chartFoundMinimum);

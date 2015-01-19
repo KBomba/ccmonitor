@@ -37,9 +37,9 @@ namespace ccMonitor.Gui
             InitGpuDetails();
             InitCharts();
 
-            rightClickStrip.Items["copySelectedItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopySingleImage);
-            rightClickStrip.Items["copyAllItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopyAllImage);
-            rightClickStrip.Items["startNewItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.ReloadButtonImage);
+            rightClickStrip.Items["copySelectedItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopySingle);
+            rightClickStrip.Items["copyAllItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.CopyAll);
+            rightClickStrip.Items["startNewItem"].Image = ImageHelper.GetImageFromBase64DataUri(ImageHelper.GreenReloadButton);
         }
 
         private void InitCharts()
@@ -72,17 +72,38 @@ namespace ccMonitor.Gui
                         string timeLastUpdate = benchmark.SensorLog.Count > 2
                             ? GuiHelper.UnixTimeStampToDateTime(benchmark.SensorLog[benchmark.SensorLog.Count - 1].TimeStamp).ToString("g")
                             : timeStarted;
+                        string averageHashRate = string.Empty;
+                        string standardDeviation = string.Empty;
+                        string averageTemperature = string.Empty;
+                        string rightMagnitude = string.Empty;
+                        string minerNameVersion = string.Empty;
+                        string stratum = string.Empty;
+
+                        if (benchmark.CurrentStatistic != null && benchmark.MinerSetup != null)
+                        {
+                            averageHashRate =
+                                GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.HarmonicAverageHashRate, "H");
+                            standardDeviation =
+                                GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.StandardDeviation, "H");
+                            rightMagnitude =
+                                GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount);
+                            averageTemperature =
+                                benchmark.CurrentStatistic.AverageTemperature.ToString("##.##") + " °C";
+                            minerNameVersion = benchmark.MinerSetup.ToString();
+                            stratum = benchmark.MinerSetup.MiningUrl;
+                        }
+
                         UserFriendlyBenchmark userFriendlyBenchmark = new UserFriendlyBenchmark
                         {
                             TimeStarted = timeStarted,
                             TimeLastUpdate = timeLastUpdate,
                             Algorithm = benchmark.Algorithm,
-                            AverageHashRate = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.HarmonicAverageHashRate, "H"),
-                            StandardDeviation = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.StandardDeviation, "H"),
-                            HashCount = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount),
-                            AverageTemperature = benchmark.CurrentStatistic.AverageTemperature.ToString("##.##") + " °C",
-                            MinerNameVersion = benchmark.MinerSetup.ToString(),
-                            Stratum = benchmark.MinerSetup.MiningUrl
+                            AverageHashRate = averageHashRate,
+                            StandardDeviation = standardDeviation,
+                            HashCount = rightMagnitude,
+                            AverageTemperature = averageTemperature,
+                            MinerNameVersion = minerNameVersion,
+                            Stratum = stratum
                         };
 
                         UserFriendlyBenchmarks.Insert(0, userFriendlyBenchmark);
@@ -109,7 +130,7 @@ namespace ccMonitor.Gui
                 HashChart hashChart = control as HashChart;
                 if (hashChart != null)
                 {
-                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs, Gpu.Info.AvailableTimeStamps);
+                    hashChart.UpdateCharts(Gpu.CurrentBenchmark.HashLogs, Gpu.CurrentBenchmark.AvailableTimeStamps);
                 }
             }
 
@@ -119,7 +140,7 @@ namespace ccMonitor.Gui
                 if (sensorChartChart != null)
                 {
                     sensorChartChart.UpdateCharts(Gpu.CurrentBenchmark.SensorLog, 
-                        Gpu.Info.AvailableTimeStamps, Gpu.CurrentBenchmark.MinerSetup.OperatingSystem);
+                        Gpu.CurrentBenchmark.AvailableTimeStamps, Gpu.CurrentBenchmark.MinerSetup.OperatingSystem);
                 }
             }
         }

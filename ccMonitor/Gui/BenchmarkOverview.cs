@@ -14,11 +14,11 @@ namespace ccMonitor.Gui
             tabDetails.Controls.Add(benchmarkDetails);
 
             HashChart hashChart = new HashChart(9001) {Dock = DockStyle.Fill};
-            hashChart.UpdateCharts(benchmark.HashLogs, gpuInfo.AvailableTimeStamps);
+            hashChart.UpdateCharts(benchmark.HashLogs, benchmark.AvailableTimeStamps);
             tabHashCharts.Controls.Add(hashChart);
 
             SensorChart sensorChart = new SensorChart(9001) {Dock = DockStyle.Fill};
-            sensorChart.UpdateCharts(benchmark.SensorLog, gpuInfo.AvailableTimeStamps, benchmark.MinerSetup.OperatingSystem);
+            sensorChart.UpdateCharts(benchmark.SensorLog, benchmark.AvailableTimeStamps, benchmark.MinerSetup.OperatingSystem);
             tabSensorCharts.Controls.Add(sensorChart);
 
         }

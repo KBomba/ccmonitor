@@ -19,10 +19,6 @@ namespace ccMonitor
 
             public uint ComputeCapability { get; set; }
 
-            public bool Available { get; set; }
-            public List<Tuple<long,bool,bool>> AvailableTimeStamps { get; set; } 
-            // long: unix timestamp, bool: availability, bool: requested by ccmonitor closing
-
             public override string ToString()
             {
                 return "GPU #" + MinerMap;
@@ -62,11 +58,21 @@ namespace ccMonitor
         public class Benchmark
         {
             public long TimeStamp { get; set; }
-            public long TimeHistoStart { get; set; }
-            public long TimeHistoLast { get; set; }
-
             public string Algorithm { get; set; }
-            public bool Active { get; set; }
+
+            public long TimeStarted { get; set; }
+            public long TimeUpdated { get; set; }
+
+            public uint TimeAvailable { get; set; }
+            //public bool Available { get; set; }
+            public List<Availability> AvailableTimeStamps { get; set; }
+            public class Availability
+            {
+                public long TimeStamp { get; set; }
+                public string Stratum { get; set; }
+                public bool Available { get; set; }
+                public bool RequestedByClose { get; set; }
+            }
 
             public HashSet<HashEntry> HashLogs { get; set; }
             public class HashEntry
@@ -166,8 +172,29 @@ namespace ccMonitor
                     return MinerName + " " + MinerVersion + " (APIv" + ApiVersion + ")";
                 }
             }
-            
-            public GpuStat CurrentStatistic { get; set; }
+
+            public GpuStat CurrentStatistic
+            {
+                get
+                {
+                    if(Statistics == null) Statistics = new List<GpuStat>{new GpuStat()};
+                    if (Statistics.Count == 0) Statistics.Add(new GpuStat());
+                    return Statistics.LastOrDefault();
+                }
+            }
+
+            public OrderedHashLog OrderedHashLogs { get; set; }
+            public class OrderedHashLog
+            {
+                public Tuple<List<decimal>, uint>[] GroupedRates { get; set; }
+                // An array of soon-to-be 100 groups for each hashrate according to their position
+                // The list will hold the exact rate values 
+                // The extra uint will hold the total hashcount for that range
+                // Very useful for plotting out afterwards and avoiding extra calc
+                public Dictionary<string, decimal> Percentiles { get; set; }
+                public HashSet<decimal> Outliers { get; set; }
+            }
+
             public List<GpuStat> Statistics { get; set; } 
             public class GpuStat
             {
@@ -186,23 +213,20 @@ namespace ccMonitor
                 public decimal MovingSpreadTop { get; set; }
                 public decimal MovingMedian { get; set; }
                 public decimal MovingSpreadBottom { get; set; }
-                // Keeps a track of the Q1-Q2-Q3 of the LAST hour, not all
+                // Keeps a track of the Q1-Q2-Q3 of the LAST hour/100 items, not all
 
                 public List<decimal> ModeHashRates { get; set; }
                 public decimal ModeQuantity { get; set; }
 
-                public Tuple<List<decimal>, uint>[] GroupedRates { get; set; }
-                // An array of soon-to-be 100 groups for each hashrate according to their position
-                // The list will hold the exact rate values 
-                // The extra uint will hold the total hashcount for that range
-                // Very useful for plotting out afterwards and avoiding extra calc
-                public Dictionary<string, decimal> Percentiles { get; set; }
-                public HashSet<decimal> Outliers { get; set; }
-                public decimal[] OuterWhiskers { get; set; }
                 public decimal InterquartileRange { get; set; }
-                public decimal InterRange { get; set; }
+                public decimal[] OuterWhiskers { get; set; } //0: lower whisker, 1: upper whisker
+                public decimal Range { get; set; }
                 public decimal LowestHashRate { get; set; }
                 public decimal HighestHashRate { get; set; }
+
+                public decimal MidRange { get; set; }
+                public decimal MidHinge { get; set; }
+                public decimal TriMean { get; set; }
 
                 public decimal Variance { get; set; }
                 public decimal StandardDeviation { get; set; }
@@ -216,6 +240,7 @@ namespace ccMonitor
                 public decimal DispersionCoefficient { get; set; }
                 public decimal VariationCoefficient { get; set; }
                 public decimal QuartileCoefficient { get; set; }
+                public decimal RangeCoefficient { get; set; }
 
                 public decimal Skewness { get; set; }
                 public decimal Kurtosis { get; set; }
@@ -243,6 +268,11 @@ namespace ccMonitor
             }
         }
 
+        public GpuLogger()
+        {
+           
+        }
+
         public void Update(Dictionary<string, string>[][] allApiResults, int[] pingTimes)
         {
             Dictionary<string, string>[] history = allApiResults[3];
@@ -260,18 +290,7 @@ namespace ccMonitor
             }
 
             string liveAlgo = PruvotApi.GetDictValue<string>(summary[0], "ALGO");
-            Benchmark currentBenchmark = null; 
-            // CurrentBenchmark is the one with the right live algo and is active
-            // If there's a new algo, etc, currentBenchmark will stay null
-            foreach (Benchmark benchmark in BenchLogs)
-            {
-                if (benchmark.Active && benchmark.Algorithm == liveAlgo)
-                {
-                    currentBenchmark = benchmark;
-                    break;
-                }
-            }
-
+            Benchmark currentBenchmark = GetCurrentBenchmark(liveAlgo);
             Benchmark.Setup liveSetup = GetLiveSetup(rightHwInfo, totalHwInfo[totalHwInfo.Length - 1], summary, poolInfo);
             
             // If currentBenchmark remained null because of an unknown algo,new install or change of setup,
@@ -294,6 +313,33 @@ namespace ccMonitor
                 CreateNewBenchMark(liveAlgo, liveSetup);
                 Update(allApiResults, pingTimes);
             }
+        }
+
+        public Benchmark GetCurrentBenchmark(string liveAlgo)
+        {
+            Benchmark currentBenchmark = null;
+            Benchmark plausibleBenchmark = null;
+            // CurrentBenchmark is the one with the right live algo and is active
+            // If there's a new algo, etc, currentBenchmark will stay null
+            foreach (Benchmark benchmark in BenchLogs)
+            {
+                if (benchmark.Algorithm == liveAlgo)
+                {
+                    Benchmark.Availability availability = benchmark.AvailableTimeStamps.LastOrDefault();
+                    if (availability != null && availability.Available)
+                    {
+                        currentBenchmark = benchmark;
+                        break;
+                    }
+
+                    if (plausibleBenchmark == null || benchmark.TimeUpdated > plausibleBenchmark.TimeUpdated)
+                    {
+                        plausibleBenchmark = benchmark;
+                    }
+                }
+            }
+
+            return currentBenchmark ?? plausibleBenchmark;
         }
 
         private static Benchmark.Setup GetLiveSetup(Dictionary<string, string> hwInfo, Dictionary<string, string> setupInfo,
@@ -335,6 +381,8 @@ namespace ccMonitor
 
         private void UpdateHashLog(Dictionary<string, string>[] history)
         {
+            if(history == null) return;
+
             foreach (Dictionary<string, string> hash in history)
             {
                 Benchmark.HashEntry hashEntry = new Benchmark.HashEntry
@@ -346,27 +394,33 @@ namespace ccMonitor
                     Height = PruvotApi.GetDictValue<uint>(hash, "H"),
                     Difficulty = PruvotApi.GetDictValue<decimal>(hash, "DIFF")
                 };
-
+                
                 if (CurrentBenchmark.HashLogs.Add(hashEntry))
                 {
-                    if (hashEntry.TimeStamp < CurrentBenchmark.TimeHistoStart 
-                        || CurrentBenchmark.TimeHistoStart == 0)
+                    if (CurrentBenchmark.TimeStarted == 0L || hashEntry.TimeStamp < CurrentBenchmark.TimeStarted)
                     {
-                        CurrentBenchmark.TimeHistoStart = hashEntry.TimeStamp;
-                    }
-                    else if (hashEntry.TimeStamp > CurrentBenchmark.TimeHistoLast)
-                    {
-                        CurrentBenchmark.TimeHistoLast = hashEntry.TimeStamp;
+                        CurrentBenchmark.TimeStarted = hashEntry.TimeStamp;
                     }
 
-                    Tuple<long, bool, bool> availabilityTimestamp = Info.AvailableTimeStamps.LastOrDefault();
-                    if (availabilityTimestamp != null && hashEntry.TimeStamp < availabilityTimestamp.Item1 
-                        && availabilityTimestamp.Item2 && availabilityTimestamp.Item3)
+                    if (CurrentBenchmark.TimeUpdated == 0L || hashEntry.TimeStamp > CurrentBenchmark.TimeUpdated)
+                    {
+                        CurrentBenchmark.TimeUpdated = hashEntry.TimeStamp;
+                    }
+
+                    Benchmark.Availability availabilityTimestamp = CurrentBenchmark.AvailableTimeStamps.LastOrDefault();
+                    if (availabilityTimestamp != null && hashEntry.TimeStamp < availabilityTimestamp.TimeStamp
+                        && availabilityTimestamp.Available && availabilityTimestamp.RequestedByClose)
                     {
                         // If the last off/on of the availability occurred later than this histo item,
                         // the on switch should be placed earlier
-                        Info.AvailableTimeStamps[Info.AvailableTimeStamps.Count - 1] =
-                            new Tuple<long, bool, bool>(hashEntry.TimeStamp, true, true);
+                        Benchmark.Availability availability = new Benchmark.Availability
+                        {
+                            TimeStamp = hashEntry.TimeStamp,
+                            Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
+                            Available = true,
+                            RequestedByClose = true
+                        };
+                        CurrentBenchmark.AvailableTimeStamps[CurrentBenchmark.AvailableTimeStamps.Count - 1] = availability;
                     }
                 }
             }
@@ -376,23 +430,24 @@ namespace ccMonitor
         {
             UpdateHashRateStats();
             UpdateSensorStats();
-            UpdateRunningTime();
+            //UpdateRunningTime();
         }
 
-        private void UpdateRunningTime()
+        /*private void UpdateRunningTime()
         {
             uint totalTime = (uint) (CurrentBenchmark.TimeHistoLast - CurrentBenchmark.TimeHistoStart);
             if (Info.AvailableTimeStamps.Count >= 2)
             {
                 for (int index = 0; index < Info.AvailableTimeStamps.Count; index++)
                 {
-                    Tuple<long, bool, bool> availableTimeStamp = Info.AvailableTimeStamps[index];
-                    if (!availableTimeStamp.Item2 && availableTimeStamp.Item1 > CurrentBenchmark.TimeHistoStart)
+                    GpuInfo.Availability availableTimeStamp = Info.AvailableTimeStamps[index];
+                    if (!availableTimeStamp.Available && availableTimeStamp.TimeStamp > CurrentBenchmark.TimeHistoStart
+                        && index + 1 < Info.AvailableTimeStamps.Count && availableTimeStamp.Stratum == CurrentBenchmark.MinerSetup.MiningUrl)
                     {
-                        Tuple<long, bool, bool> nextAvailableTimeStamp = Info.AvailableTimeStamps[index + 1];
-                        if (nextAvailableTimeStamp.Item2)
+                        GpuInfo.Availability nextAvailableTimeStamp = Info.AvailableTimeStamps[index + 1];
+                        if (nextAvailableTimeStamp.Available)
                         {
-                            long time = (nextAvailableTimeStamp.Item1 - availableTimeStamp.Item1);
+                            long time = (nextAvailableTimeStamp.TimeStamp - availableTimeStamp.TimeStamp);
                             if(time>0)totalTime -= (uint) time;
                         }
                     }
@@ -400,9 +455,12 @@ namespace ccMonitor
             }
 
             CurrentBenchmark.CurrentStatistic.TimeRunning = totalTime;
-            CurrentBenchmark.CurrentStatistic.HashCountedRate = CurrentBenchmark.CurrentStatistic.TotalHashCount/
-                                                                totalTime;
-        }
+            if(totalTime > 0)
+            {
+                CurrentBenchmark.CurrentStatistic.HashCountedRate = 
+                    CurrentBenchmark.CurrentStatistic.TotalHashCount/ totalTime;
+            }
+        }*/
 
         private void UpdateSensorStats()
         {
@@ -416,8 +474,9 @@ namespace ccMonitor
                 totalPing += sensorValue.ShareAnswerPing;
             }
 
-            CurrentBenchmark.CurrentStatistic.AverageTemperature = totalTemp / count;
-            CurrentBenchmark.CurrentStatistic.AverageShareAnswerPing = Math.Round(totalPing/ count, MidpointRounding.AwayFromZero);
+            Benchmark.GpuStat currentStat = CurrentBenchmark.CurrentStatistic;
+            currentStat.AverageTemperature = totalTemp / count;
+            currentStat.AverageShareAnswerPing = Math.Round(totalPing / count, MidpointRounding.AwayFromZero);
         }
 
         private void UpdateHashRateStats()
@@ -434,9 +493,11 @@ namespace ccMonitor
             uint[] weights = new uint[hashLogSize];
 
             uint minItemsMoving = 100; // Min amount of items in the moving average
-            uint minItemsLimit = (uint) (hashLogSize - minItemsMoving);
+            long lower = hashLogSize - minItemsMoving;
+            uint minItemsLimit = lower > 0 ? (uint) lower : 0;
             uint minTimeMoving = 3600; // Max amount of time in the moving average
-            uint minTimeLimit = (uint) (hashList[(hashLogSize - 1)].TimeStamp - minTimeMoving);
+            uint minTimeLimit = hashLogSize > 0 ? (uint) (hashList[(hashLogSize - 1)].TimeStamp - minTimeMoving) : 0;
+
             List<decimal> movingRates = new List<decimal>();
             List<uint> movingWeights = new List<uint>();
             ulong movingTotalWeight = 0;
@@ -477,245 +538,264 @@ namespace ccMonitor
 
                 decimal lowestRate = rates[0];
                 decimal highestRate = rates[rates.Length - 1];
-                decimal interRange = highestRate - lowestRate;
-                decimal step = interRange / 100;
-                decimal offset = Math.Truncate(lowestRate/step);
-
-                decimal arithmeticAverageHashRate = sumOfWeightedRates / totalWeight;
-                decimal geometricAverageHashRate = (decimal)Math.Exp(productOfWeightedLogRates / totalWeight);
-                decimal harmonicAverageHashRate = totalWeight / sumOfInverseWeightedRates;
-
-                decimal movingMedian = 0, movingSpreadTop = 0, movingSpreadBottom = 0, movingWeightCounter = 0;
-                decimal[] movingRatesArray = movingRates.ToArray();
-                uint[] movingWeightsArray = movingWeights.ToArray();
-                Array.Sort(movingRatesArray, movingWeightsArray);
-
-                for (int i = 0; i < hashLogSize; i++)
+                decimal range = highestRate - lowestRate;
+                if (range > 0)
                 {
-                    double difference = (double) (rates[i] - harmonicAverageHashRate);
-                    sumOfPow2OfDifferences += (difference * difference * weights[i]);
-                    sumOfPow3OfDifferences += (difference * difference * difference * weights[i]);
-                    sumOfPow4OfDifferences += (difference * difference * difference * difference * weights[i]);
+                    decimal step = range/100;
+                    decimal offset = Math.Truncate(lowestRate/step);
 
-                    if (!countModeList.ContainsKey(rates[i]))
-                    {
-                        countModeList.Add(rates[i], 1);
-                    }
-                    else
-                    {
-                        countModeList[rates[i]] += weights[i];
-                        if (countModeList[rates[i]] > maxModeCount) maxModeCount = countModeList[rates[i]];
-                    }
+                    decimal arithmeticAverageHashRate = sumOfWeightedRates/totalWeight;
+                    decimal geometricAverageHashRate = (decimal) Math.Exp(productOfWeightedLogRates/totalWeight);
+                    decimal harmonicAverageHashRate = totalWeight/sumOfInverseWeightedRates;
 
-                    int group = (int) (Math.Truncate(rates[i]/step) - offset);
-                    if (group >= 100) group = 99; // Sometimes, thx to rounding, it gets higher
-                    if (groupedRates[group] == null)
-                    {
-                        List<decimal> ratesList = new List<decimal> {rates[i]};
-                        groupedRates[group] = new Tuple<List<decimal>, uint>(ratesList, weights[i]);
-                    }
-                    else
-                    {
-                        List<decimal> ratesList = groupedRates[group].Item1;
-                        ratesList.Add(rates[i]);
-                        uint weight = groupedRates[group].Item2 + weights[i];
-                        groupedRates[group] = new Tuple<List<decimal>, uint>(ratesList, weight);
-                    }
+                    decimal movingMedian = 0, movingSpreadTop = 0, movingSpreadBottom = 0, movingWeightCounter = 0;
+                    decimal[] movingRatesArray = movingRates.ToArray();
+                    uint[] movingWeightsArray = movingWeights.ToArray();
+                    Array.Sort(movingRatesArray, movingWeightsArray);
 
-                    weightCounter += (weights[i] / (decimal)totalWeight);
-                    
-                    if (weightCounter >= 0.00269979606326M && !percentiles.ContainsKey("-3σ"))
+                    for (int i = 0; i < hashLogSize; i++)
                     {
-                        percentiles.Add("-3σ", rates[i]);
-                    }
+                        double difference = (double) (rates[i] - harmonicAverageHashRate);
+                        sumOfPow2OfDifferences += (difference*difference*weights[i]);
+                        sumOfPow3OfDifferences += (difference*difference*difference*weights[i]);
+                        sumOfPow4OfDifferences += (difference*difference*difference*difference*weights[i]);
 
-                    if (weightCounter >= 0.012419330651552M && !percentiles.ContainsKey("-2.5σ"))
-                    {
-                        percentiles.Add("-2.5σ", rates[i]);
-                    }
+                        if (!countModeList.ContainsKey(rates[i]))
+                        {
+                            countModeList.Add(rates[i], 1);
+                        }
+                        else
+                        {
+                            countModeList[rates[i]] += weights[i];
+                            if (countModeList[rates[i]] > maxModeCount) maxModeCount = countModeList[rates[i]];
+                        }
 
-                    if (weightCounter >= 0.045500263896358M && !percentiles.ContainsKey("-2σ"))
-                    {
-                        percentiles.Add("-2σ", rates[i]);
-                    }
+                        int group = (int) (Math.Truncate(rates[i]/step) - offset);
+                        if (group >= 100) group = 99; // Sometimes, thx to rounding, it gets higher
+                        if (groupedRates[group] == null)
+                        {
+                            List<decimal> ratesList = new List<decimal> {rates[i]};
+                            groupedRates[group] = new Tuple<List<decimal>, uint>(ratesList, weights[i]);
+                        }
+                        else
+                        {
+                            List<decimal> ratesList = groupedRates[group].Item1;
+                            ratesList.Add(rates[i]);
+                            uint weight = groupedRates[group].Item2 + weights[i];
+                            groupedRates[group] = new Tuple<List<decimal>, uint>(ratesList, weight);
+                        }
 
-                    if (weightCounter >= 0.133614402537716M && !percentiles.ContainsKey("-1.5σ"))
-                    {
-                        percentiles.Add("-1.5σ", rates[i]);
-                    }
+                        weightCounter += (weights[i]/(decimal) totalWeight);
 
-                    if (weightCounter >= 0.25M && !percentiles.ContainsKey("Q1"))
-                    {
-                        percentiles.Add("Q1", rates[i]);
-                    }
+                        if (weightCounter >= 0.00269979606326M && !percentiles.ContainsKey("-3σ"))
+                        {
+                            percentiles.Add("-3σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.317310507862914M && !percentiles.ContainsKey("-1σ"))
-                    {
-                        percentiles.Add("-1σ", rates[i]);
-                    }
+                        if (weightCounter >= 0.012419330651552M && !percentiles.ContainsKey("-2.5σ"))
+                        {
+                            percentiles.Add("-2.5σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.5M && !percentiles.ContainsKey("0σ"))
-                    {
-                        percentiles.Add("0σ", rates[i]);
-                    }
+                        if (weightCounter >= 0.045500263896358M && !percentiles.ContainsKey("-2σ"))
+                        {
+                            percentiles.Add("-2σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.682689492137086M && !percentiles.ContainsKey("+1σ"))
-                    {
-                        percentiles.Add("+1σ", rates[i]);
-                    }
+                        if (weightCounter >= 0.133614402537716M && !percentiles.ContainsKey("-1.5σ"))
+                        {
+                            percentiles.Add("-1.5σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.75M && !percentiles.ContainsKey("Q3"))
-                    {
-                        percentiles.Add("Q3", rates[i]);
-                    }
+                        if (weightCounter >= 0.25M && !percentiles.ContainsKey("Q1"))
+                        {
+                            percentiles.Add("Q1", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.866385597462284M && !percentiles.ContainsKey("+1.5σ"))
-                    {
-                        percentiles.Add("+1.5σ", rates[i]);
-                    }
+                        if (weightCounter >= 0.317310507862914M && !percentiles.ContainsKey("-1σ"))
+                        {
+                            percentiles.Add("-1σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.954499736103642M && !percentiles.ContainsKey("+2σ"))
-                    {
-                        percentiles.Add("+2σ", rates[i]);
-                    }
-                    
-                    if (weightCounter >= 0.987580669348448M && !percentiles.ContainsKey("+2.5σ"))
-                    {
-                        percentiles.Add("+2.5σ", rates[i]);
-                    }
+                        if (weightCounter >= 0.5M && !percentiles.ContainsKey("0σ"))
+                        {
+                            percentiles.Add("0σ", rates[i]);
+                        }
 
-                    if (weightCounter >= 0.997300203936740M)
-                    {
-                        if (!percentiles.ContainsKey("+3σ"))
+                        if (weightCounter >= 0.682689492137086M && !percentiles.ContainsKey("+1σ"))
+                        {
+                            percentiles.Add("+1σ", rates[i]);
+                        }
+
+                        if (weightCounter >= 0.75M && !percentiles.ContainsKey("Q3"))
+                        {
+                            percentiles.Add("Q3", rates[i]);
+                        }
+
+                        if (weightCounter >= 0.866385597462284M && !percentiles.ContainsKey("+1.5σ"))
+                        {
+                            percentiles.Add("+1.5σ", rates[i]);
+                        }
+
+                        if (weightCounter >= 0.954499736103642M && !percentiles.ContainsKey("+2σ"))
+                        {
+                            percentiles.Add("+2σ", rates[i]);
+                        }
+
+                        if (weightCounter >= 0.987580669348448M && !percentiles.ContainsKey("+2.5σ"))
+                        {
+                            percentiles.Add("+2.5σ", rates[i]);
+                        }
+
+                        if (weightCounter >= 0.997300203936740M && !percentiles.ContainsKey("+3σ"))
                         {
                             percentiles.Add("+3σ", rates[i]);
                         }
+
+                        if (i < movingRatesArray.Length)
+                        {
+                            movingWeightCounter += (movingWeightsArray[i]/(decimal) movingTotalWeight);
+                            if (movingWeightCounter >= 0.25M && movingSpreadBottom == 0)
+                            {
+                                movingSpreadBottom = movingRatesArray[i];
+                            }
+
+                            if (movingWeightCounter >= 0.50M && movingMedian == 0)
+                            {
+                                movingMedian = movingRatesArray[i];
+                            }
+
+                            if (movingWeightCounter >= 0.75M && movingSpreadTop == 0)
+                            {
+                                movingSpreadTop = movingRatesArray[i];
+                            }
+                        }
                     }
 
-                    if (i < movingRatesArray.Length)
+                    List<decimal> modes = new List<decimal>();
+                    foreach (decimal rate in countModeList.Keys)
                     {
-                        movingWeightCounter += (movingWeightsArray[i]/(decimal) movingTotalWeight);
-                        if (movingWeightCounter >= 0.25M && movingSpreadBottom == 0)
+                        if (countModeList[rate] >= maxModeCount)
                         {
-                            movingSpreadBottom = movingRatesArray[i];
+                            modes.Add(rate);
                         }
-
-                        if (movingWeightCounter >= 0.50M && movingMedian == 0)
-                        {
-                            movingMedian = movingRatesArray[i];
-                        }
-
-                        if (movingWeightCounter >= 0.75M && movingSpreadTop == 0)
-                        {
-                            movingSpreadTop = movingRatesArray[i];
-                        }
-                    } 
-                }
-
-                List<decimal> modes = new List<decimal>();
-                foreach (decimal rate in countModeList.Keys)
-                {
-                    if (countModeList[rate] >= maxModeCount)
-                    {
-                        modes.Add(rate);
-                    }
-                }
-
-                decimal interquartileRange = percentiles["Q3"] - percentiles["Q1"];
-                decimal[] outerWhiskers = new decimal[2];
-                outerWhiskers[0] = percentiles["Q1"] - 1.5M * interquartileRange <= 0
-                    ? 0
-                    : percentiles["Q1"] - 1.5M * interquartileRange;
-                outerWhiskers[1] = percentiles["Q3"] + 1.5M * interquartileRange >= highestRate
-                    ? highestRate
-                    : percentiles["Q3"] + 1.5M * interquartileRange;
-                HashSet<decimal> outliers = new HashSet<decimal>();
-
-                decimal[] madMedian = new decimal[hashLogSize];
-                decimal[] madAverage = new decimal[hashLogSize];
-                decimal sumOfWeightedMedian = 0, sumOfWeightedAverage = 0;
-                // Come on, let's loop again! https://www.youtube.com/watch?v=BqvUkmnDVkM 
-                for (int index = 0; index < hashLogSize; index++)
-                {
-                    if (rates[index] < outerWhiskers[0] || rates[index] > outerWhiskers[1])
-                    {
-                        outliers.Add(rates[index]);
                     }
 
-                    madMedian[index] = Math.Abs((rates[index] - percentiles["0σ"]));
-                    madAverage[index] = Math.Abs((rates[index] - harmonicAverageHashRate));
-                    
-                    sumOfWeightedMedian += (madMedian[index] * weights[index]);
-                    sumOfWeightedAverage += (madAverage[index] * weights[index]);
+                    decimal interquartileRange = percentiles["Q3"] - percentiles["Q1"];
+                    decimal[] outerWhiskers = new decimal[2];
+                    outerWhiskers[0] = percentiles["Q1"] - 1.5M*interquartileRange <= 0
+                        ? 0
+                        : percentiles["Q1"] - 1.5M*interquartileRange;
+                    outerWhiskers[1] = percentiles["Q3"] + 1.5M*interquartileRange >= highestRate
+                        ? highestRate
+                        : percentiles["Q3"] + 1.5M*interquartileRange;
+                    HashSet<decimal> outliers = new HashSet<decimal>();
+
+                    decimal[] madMedian = new decimal[hashLogSize];
+                    decimal[] madAverage = new decimal[hashLogSize];
+                    decimal sumOfWeightedMedian = 0, sumOfWeightedAverage = 0;
+                    // Come on, let's loop again! https://www.youtube.com/watch?v=BqvUkmnDVkM 
+                    for (int index = 0; index < hashLogSize; index++)
+                    {
+                        if (rates[index] < outerWhiskers[0] || rates[index] > outerWhiskers[1])
+                        {
+                            outliers.Add(rates[index]);
+                        }
+
+                        madMedian[index] = Math.Abs((rates[index] - percentiles["0σ"]));
+                        madAverage[index] = Math.Abs((rates[index] - harmonicAverageHashRate));
+
+                        sumOfWeightedMedian += (madMedian[index]*weights[index]);
+                        sumOfWeightedAverage += (madAverage[index]*weights[index]);
+                    }
+
+                    decimal madMedianMedian = GetMedian(madMedian);
+                    decimal madAverageMedian = GetMedian(madAverage);
+                    decimal madMedianAverage = sumOfWeightedMedian/totalWeight;
+                    decimal madAverageAverage = sumOfWeightedAverage/totalWeight;
+                    decimal madMedianMax = madMedian[hashLogSize - 1];
+                    decimal madAverageMax = madAverage[hashLogSize - 1];
+                    decimal[][] absoluteDeviations = new decimal[2][];
+                    absoluteDeviations[0] = new[] {madMedianMedian, madMedianAverage, madMedianMax};
+                    absoluteDeviations[1] = new[] {madAverageMedian, madAverageAverage, madAverageMax};
+                    decimal variance = (decimal) (sumOfPow2OfDifferences/totalWeight);
+                    decimal standardDeviation = (decimal) Math.Sqrt((double) variance);
+                    decimal stdMadFactor = madMedianMedian != 0 ? standardDeviation/madMedianMedian : 0;
+                    decimal dispersionCoefficient = variance/percentiles["0σ"];
+                    decimal variationCoefficient = (standardDeviation/harmonicAverageHashRate)*100;
+                    decimal interquartileSum = percentiles["Q3"] + percentiles["Q1"];
+                    decimal rangeSum = highestRate + lowestRate;
+                    decimal midRange = rangeSum/2;
+                    decimal midHinge = interquartileSum/2;
+                    decimal triMean = (percentiles["0σ"] + midHinge)/2;
+                    decimal quartileCoefficient = (interquartileRange/interquartileSum)*100;
+                    decimal rangeCoefficient = (range/rangeSum)*100;
+                    decimal rootMeanSquare = (decimal) Math.Sqrt((double)
+                        ((harmonicAverageHashRate*harmonicAverageHashRate) + (standardDeviation*standardDeviation)));
+                    decimal skewness = (decimal) (sumOfPow3OfDifferences/(Math.Pow(sumOfPow2OfDifferences, 1.5d)));
+                    decimal kurtosis =
+                        (decimal) (sumOfPow4OfDifferences/(sumOfPow2OfDifferences*sumOfPow2OfDifferences)) - 3;
+                    decimal nonParametricSkew = (harmonicAverageHashRate - percentiles["0σ"])/standardDeviation;
+
+                    Benchmark.GpuStat stat = new Benchmark.GpuStat
+                    {
+                        TimeStamp = UnixTimeStamp(),
+
+                        TotalHashCount = totalWeight,
+                        TotalHashEntries = hashLogSize,
+
+                        ArithmeticAverageHashRate = arithmeticAverageHashRate,
+                        GeometricAverageHashrate = geometricAverageHashRate,
+                        HarmonicAverageHashRate = harmonicAverageHashRate,
+                        RootMeanSquare = rootMeanSquare,
+
+                        MovingSpreadBottom = movingSpreadBottom,
+                        MovingMedian = movingMedian,
+                        MovingSpreadTop = movingSpreadTop,
+
+                        ModeHashRates = modes,
+                        ModeQuantity = maxModeCount,
+
+                        OuterWhiskers = outerWhiskers,
+                        InterquartileRange = interquartileRange,
+                        Range = range,
+                        LowestHashRate = lowestRate,
+                        HighestHashRate = highestRate,
+
+                        MidRange = midRange,
+                        MidHinge = midHinge,
+                        TriMean = triMean,
+
+                        Variance = variance,
+                        StandardDeviation = standardDeviation,
+                        AbsoluteDeviations = absoluteDeviations,
+                        StdMadFactor = stdMadFactor,
+                        DispersionCoefficient = dispersionCoefficient,
+                        VariationCoefficient = variationCoefficient,
+                        QuartileCoefficient = quartileCoefficient,
+                        RangeCoefficient = rangeCoefficient,
+
+                        Skewness = skewness,
+                        Kurtosis = kurtosis,
+                        NonParametricSkew = nonParametricSkew,
+
+                        Founds = found
+                    };
+
+                    if (CurrentBenchmark.Statistics == null)
+                    {
+                        CurrentBenchmark.Statistics = new List<Benchmark.GpuStat>();
+                    }
+                    CurrentBenchmark.Statistics.Add(stat);
+
+                    CurrentBenchmark.OrderedHashLogs = new Benchmark.OrderedHashLog()
+                    {
+                        GroupedRates = groupedRates,
+                        Percentiles = percentiles,
+                        Outliers = outliers
+                    };
+
                 }
-
-                decimal madMedianMedian = GetMedian(madMedian);
-                decimal madAverageMedian = GetMedian(madAverage);
-                decimal madMedianAverage = sumOfWeightedMedian/totalWeight;
-                decimal madAverageAverage = sumOfWeightedAverage/totalWeight;
-                decimal madMedianMax = madMedian[hashLogSize - 1];
-                decimal madAverageMax = madAverage[hashLogSize - 1];
-                decimal[][] absoluteDeviations = new decimal[2][];
-                absoluteDeviations[0] = new[] {madMedianMedian, madMedianAverage, madMedianMax};
-                absoluteDeviations[1] = new[] {madAverageMedian, madAverageAverage, madAverageMax};
-                decimal variance = (decimal) (sumOfPow2OfDifferences/totalWeight);
-                decimal standardDeviation = (decimal) Math.Sqrt((double)variance);
-                decimal dispersionCoefficient = variance/percentiles["0σ"];
-                decimal variationCoefficient = (standardDeviation / harmonicAverageHashRate) * 100;
-                decimal interquartileSum = percentiles["Q3"] + percentiles["Q1"];
-                decimal quartileCoefficient = interquartileRange / interquartileSum;
-                decimal rootMeanSquare = (decimal) Math.Sqrt((double)
-                        ((harmonicAverageHashRate * harmonicAverageHashRate) + (standardDeviation * standardDeviation)));
-                decimal skewness = (decimal)(sumOfPow3OfDifferences / (Math.Pow(sumOfPow2OfDifferences, 1.5d)));
-                decimal kurtosis = (decimal)(sumOfPow4OfDifferences / (sumOfPow2OfDifferences * sumOfPow2OfDifferences)) - 3;
-                decimal nonParametricSkew = (harmonicAverageHashRate - percentiles["0σ"]) / standardDeviation;
-                
-                Benchmark.GpuStat stat = new Benchmark.GpuStat
-                {
-                    TimeStamp = UnixTimeStamp(),
-
-                    TotalHashCount = totalWeight,
-                    TotalHashEntries = hashLogSize,
-
-                    ArithmeticAverageHashRate = arithmeticAverageHashRate,
-                    GeometricAverageHashrate = geometricAverageHashRate,
-                    HarmonicAverageHashRate = harmonicAverageHashRate,
-                    RootMeanSquare = rootMeanSquare,
-
-                    MovingSpreadBottom = movingSpreadBottom,
-                    MovingMedian = movingMedian,
-                    MovingSpreadTop = movingSpreadTop,
-
-                    ModeHashRates = modes,
-                    ModeQuantity = maxModeCount,
-
-                    GroupedRates = groupedRates,
-                    Percentiles = percentiles,
-                    Outliers = outliers,
-                    OuterWhiskers = outerWhiskers,
-                    InterquartileRange = interquartileRange,
-                    InterRange = interRange,
-                    LowestHashRate = lowestRate,
-                    HighestHashRate = highestRate,
-
-                    Variance = variance,
-                    StandardDeviation = standardDeviation,
-                    AbsoluteDeviations = absoluteDeviations,
-                    StdMadFactor = standardDeviation/madMedianMedian,
-                    DispersionCoefficient = dispersionCoefficient,
-                    VariationCoefficient = variationCoefficient,
-                    QuartileCoefficient = quartileCoefficient,
-
-                    Skewness = skewness,
-                    Kurtosis = kurtosis,
-                    NonParametricSkew = nonParametricSkew,
-
-                    Founds = found
-                };
-
-                if (CurrentBenchmark.Statistics == null) CurrentBenchmark.Statistics = new List<Benchmark.GpuStat>();
-                CurrentBenchmark.Statistics.Add(stat);
-                CurrentBenchmark.CurrentStatistic = stat;
             }
         }
 
@@ -744,20 +824,21 @@ namespace ccMonitor
             Benchmark benchmark = new Benchmark
             {
                 TimeStamp = unixTimeStamp,
-                TimeHistoStart = unixTimeStamp,
                 Algorithm = liveAlgo,
                 MinerSetup = liveSetup,
-                Active = true,
                 HashLogs = new HashSet<Benchmark.HashEntry>(),
                 SensorLog = new List<Benchmark.SensorValue>(),
-                CurrentStatistic = new Benchmark.GpuStat()
+                Statistics = new List<Benchmark.GpuStat>(),
+                AvailableTimeStamps = new List<Benchmark.Availability>()
             };
 
             // Makes all the old benchmarks with the same algo inactive
             foreach (Benchmark benchLog in BenchLogs)
             {
-                if (benchLog.Algorithm != liveAlgo) continue;
-                benchLog.Active = false;
+                if (benchLog.Algorithm == liveAlgo)
+                {
+                    ChangeAvailability(false, benchmark: benchLog);
+                }
             }
 
             BenchLogs.Add(benchmark);
@@ -768,40 +849,64 @@ namespace ccMonitor
             CreateNewBenchMark(CurrentBenchmark.Algorithm, CurrentBenchmark.MinerSetup);
         }
 
-        public void ChangeAvailability(bool available, bool monitorClosing = false)
+        public void ChangeAvailability(bool available, bool monitorClosing = false, Benchmark benchmark = null)
         {
-            long unixTimeStamp = UnixTimeStamp();
-            if (Info.AvailableTimeStamps == null)
+            if (benchmark == null)
             {
-                Info.AvailableTimeStamps = new List<Tuple<long, bool, bool>>
-                        {
-                            new Tuple<long, bool, bool>(unixTimeStamp, available, monitorClosing )
-                        };
+                if (BenchLogs == null || BenchLogs.Count == 0) return;
+                benchmark = BenchLogs.Last();
             }
-            else
+
+            long unixTimeStamp = UnixTimeStamp();
+
+            if (benchmark.AvailableTimeStamps.Count > 0)
             {
-                Tuple<long, bool, bool> prevAvailableTimeStamp =
-                    Info.AvailableTimeStamps[Info.AvailableTimeStamps.Count - 1];
-                if (prevAvailableTimeStamp.Item1 != unixTimeStamp && prevAvailableTimeStamp.Item2 != available)
+                Benchmark.Availability prevAvailableTimeStamp =
+                    benchmark.AvailableTimeStamps[benchmark.AvailableTimeStamps.Count - 1];
+                if (prevAvailableTimeStamp.TimeStamp != unixTimeStamp && prevAvailableTimeStamp.Available != available)
                 {
                     if (available)
                     {
-                        Info.AvailableTimeStamps.Add(new Tuple<long, bool, bool>(unixTimeStamp, true,
-                                                     Info.AvailableTimeStamps.Last().Item3));
+                        benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
+                        {
+                            TimeStamp = unixTimeStamp,
+                            Stratum = prevAvailableTimeStamp.Stratum,
+                            Available = true,
+                            RequestedByClose = prevAvailableTimeStamp.RequestedByClose
+                        });
                     }
                     else
                     {
-                        Info.AvailableTimeStamps.Add(new Tuple<long, bool, bool>(unixTimeStamp, false, monitorClosing));
+                        benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
+                        {
+                            TimeStamp = unixTimeStamp,
+                            Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
+                            Available = false,
+                            RequestedByClose = monitorClosing
+                        });
                     }
                 }
             }
-
-            Info.Available = available;
+            else
+            {
+                benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
+                {
+                    TimeStamp = unixTimeStamp,
+                    Stratum = benchmark.MinerSetup == null ? string.Empty : benchmark.MinerSetup.MiningUrl,
+                    Available = true,
+                    RequestedByClose = monitorClosing
+                });
+            }
         }
         
         private static long UnixTimeStamp()
         {
             return (long) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+        }
+
+        public void FindCurrentBenchmark(string liveAlgo)
+        {
+            CurrentBenchmark = GetCurrentBenchmark(liveAlgo);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace ccMonitor.Gui
         public void UpdateStats(GpuLogger.Benchmark benchmark)
         {
             if (benchmark == null) return;
-            UpdateSpread(benchmark.CurrentStatistic);
+            UpdateSpread(benchmark);
             UpdateLogs(benchmark);
             UpdateTextBoxes(benchmark);
         }
@@ -46,12 +46,15 @@ namespace ccMonitor.Gui
             if (!txtComputeCapability.Focused) txtComputeCapability.Text = 
                                             GpuInfo.ComputeCapability.ToString(CultureInfo.InvariantCulture);
 
-            if (!txtFounds.Focused) txtFounds.Text = benchmark.CurrentStatistic.Founds.ToString(CultureInfo.InvariantCulture);
-            if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount);
-            if (!txtAverageTemperature.Focused) txtAverageTemperature.Text = 
-                                            String.Format("{0:0.##}{1}", benchmark.CurrentStatistic.AverageTemperature, "°C");
-            if (!txtAveragePing.Focused) txtAveragePing.Text = 
-                                            String.Format("{0:0.##} {1}", benchmark.CurrentStatistic.AverageShareAnswerPing, "ms");
+            if (benchmark.CurrentStatistic != null)
+            {
+                if (!txtFounds.Focused) txtFounds.Text = benchmark.CurrentStatistic.Founds.ToString(CultureInfo.InvariantCulture);
+                if (!txtHashCount.Focused) txtHashCount.Text = GuiHelper.GetRightMagnitude(benchmark.CurrentStatistic.TotalHashCount);
+                if (!txtAverageTemperature.Focused)
+                    txtAverageTemperature.Text = String.Format("{0:0.##}{1}", benchmark.CurrentStatistic.AverageTemperature, "°C");
+                if (!txtAveragePing.Focused)
+                    txtAveragePing.Text = String.Format("{0:0.##} {1}", benchmark.CurrentStatistic.AverageShareAnswerPing, "ms");
+            }
 
             if (!txtAlgorithm.Focused) txtAlgorithm.Text = benchmark.Algorithm;
             if (!txtMinerName.Focused) txtMinerName.Text = benchmark.MinerSetup.ToString();
@@ -78,43 +81,48 @@ namespace ccMonitor.Gui
             }
         }
 
-        private void UpdateSpread(GpuLogger.Benchmark.GpuStat statistic)
+        private void UpdateSpread(GpuLogger.Benchmark benchmark)
         {
+            if (benchmark.CurrentStatistic == null) return;
+            GpuLogger.Benchmark.GpuStat statistic = benchmark.CurrentStatistic;
+            GpuLogger.Benchmark.OrderedHashLog orderedHashLog = benchmark.OrderedHashLogs;
+
             dgvSpread.Rows.Clear();
             dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
             dgvSpread.Rows.Add("Standard deviation", GuiHelper.GetRightMagnitude(statistic.StandardDeviation, "H"));
-            dgvSpread.Rows.Add("MAD", GuiHelper.GetRightMagnitude(statistic.AbsoluteDeviations[0][0], "H"));
+            if (statistic.AbsoluteDeviations != null)
+                dgvSpread.Rows.Add("MAD", GuiHelper.GetRightMagnitude(statistic.AbsoluteDeviations[0][0], "H"));
             dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));
             dgvSpread.Rows.Add("Highest hashrate", GuiHelper.GetRightMagnitude(statistic.HighestHashRate, "H"));
-            if (statistic.Percentiles != null)
+            if (orderedHashLog.Percentiles != null)
             {
-                dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+2σ"], "H"));
-                dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+1σ"], "H"));
-                dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(statistic.Percentiles["0σ"], "H"));
-                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-1σ"], "H"));
-                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-2σ"], "H"));
+                dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["+2σ"], "H"));
+                dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["+1σ"], "H"));
+                dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["0σ"], "H"));
+                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["-1σ"], "H"));
+                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["-2σ"], "H"));
                 
                 chartSpread.Series["BoxPlotSeries"].Points.Clear();
-                chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic));
+                chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic, orderedHashLog));
             }
             dgvSpread.Rows.Add("Lowest hashrate", GuiHelper.GetRightMagnitude(statistic.LowestHashRate, "H"));
         }
 
-        private double[] GetBoxPlotValues(GpuLogger.Benchmark.GpuStat statistic)
+        private double[] GetBoxPlotValues(GpuLogger.Benchmark.GpuStat statistic, GpuLogger.Benchmark.OrderedHashLog orderedHashLog)
         {
-            if (statistic.Percentiles != null)
+            if (orderedHashLog.Percentiles != null)
             {
                 List<double> boxPlotValues = new List<double>
                 {
                     (double)(statistic.OuterWhiskers[0]),
                     (double)(statistic.OuterWhiskers[1]),
-                    (double)(statistic.Percentiles["Q1"]),
-                    (double)(statistic.Percentiles["Q3"]),
-                    (double)(statistic.Percentiles["0σ"]),
+                    (double)(orderedHashLog.Percentiles["Q1"]),
+                    (double)(orderedHashLog.Percentiles["Q3"]),
+                    (double)(orderedHashLog.Percentiles["0σ"]),
                     (double)(statistic.HarmonicAverageHashRate)
                 };
 
-                foreach (decimal outlier in statistic.Outliers)
+                foreach (decimal outlier in orderedHashLog.Outliers)
                 {
                     boxPlotValues.Add((double) outlier);
                 }

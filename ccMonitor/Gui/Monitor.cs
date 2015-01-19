@@ -17,6 +17,7 @@ namespace ccMonitor.Gui
     {
         private RigController _controller;
 
+        private int _timerTime = 10000;
         private System.Threading.Timer _updateTimer; // Different thread
         private System.Windows.Forms.Timer _guiTimer; // Same thread
 
@@ -42,7 +43,7 @@ namespace ccMonitor.Gui
         {
             _updateTimer = new System.Threading.Timer(UpdateController, null, 0, Timeout.Infinite);
 
-            _guiTimer = new System.Windows.Forms.Timer {Interval = 5000};
+            _guiTimer = new System.Windows.Forms.Timer { Interval = _timerTime/2 };
             _guiTimer.Tick += GuiTimerTick;
             _guiTimer.Start();
 
@@ -142,10 +143,11 @@ namespace ccMonitor.Gui
                 foreach (GpuLogger gpu in rig.GpuLogs)
                 {
                     lvi = new ListViewItem(gpu.Info.MinerMap.ToString(CultureInfo.InvariantCulture), lvg);
-                    if (gpu.Info.Available == false) lvi.BackColor = Color.FromArgb(100, Color.Red);
+                    if (gpu.CurrentBenchmark.AvailableTimeStamps.Count == 0 || gpu.CurrentBenchmark.AvailableTimeStamps.Last().Available == false) 
+                        lvi.BackColor = Color.FromArgb(100, Color.Red);
                     lvi.SubItems.Add(gpu.Info.Name);
                     lvi.SubItems.Add(string.Empty);
-                    if (gpu.CurrentBenchmark == null)
+                    if (gpu.CurrentBenchmark == null || gpu.CurrentBenchmark.CurrentStatistic == null)
                     {
                         lvi.SubItems.Add(string.Empty);
                         lvi.SubItems.Add(string.Empty);
@@ -215,7 +217,7 @@ namespace ccMonitor.Gui
         private void UpdateController(object o)
         {
             _controller.Update();
-            _updateTimer.Change(5000, Timeout.Infinite);
+            _updateTimer.Change(_timerTime, Timeout.Infinite);
         }
 
         private void LoadSettings()
@@ -225,7 +227,7 @@ namespace ccMonitor.Gui
 
         private void LoadLogs()
         {
-            _controller = File.Exists("logs.gz") 
+            _controller = File.Exists("logs.gz")
                 ? new RigController(JsonControl.GetSerializedGzipFile<BindingList<RigController.Rig>>("logs.gz"))
                 : new RigController();
         }
@@ -233,6 +235,8 @@ namespace ccMonitor.Gui
 
         private void Monitor_FormClosing(object sender, FormClosingEventArgs e)
         {
+            _updateTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            _guiTimer.Stop();
             _controller.DisableAllRigs(true);
             SaveLogs();
             SaveSettings();
@@ -319,7 +323,7 @@ namespace ccMonitor.Gui
                     Multiline = true,
                     ScrollBars = ScrollBars.Both,
                     Dock = DockStyle.Fill,
-                    ReadOnly = true
+                    ReadOnly = true,
                 };
 
                 form.Controls.Add(textBox);

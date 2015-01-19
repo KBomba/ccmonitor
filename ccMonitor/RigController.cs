@@ -33,9 +33,6 @@ namespace ccMonitor
                 public decimal AverageHashRate { get; set; }
                 public decimal TotalStandardDeviation { get; set; }
                 public decimal AverageStandardDeviation { get; set; }
-                public decimal AverageVariationCoefficient { get; set; }
-                //public decimal[] AveragePercentiles { get; set; }
-                public Dictionary<string, decimal> AveragePercentiles { get; set; }
                 public decimal LowestHashRate { get; set; }
                 public decimal HighestHashRate { get; set; }
                 public decimal Accepts { get; set; }
@@ -135,11 +132,9 @@ namespace ccMonitor
                         totalAverageHashRate = 0,
                         totalStandardDeviation = 0,
                         totalAverageStandardDeviation = 0,
-                        totalVariationCoefficient = 0,
                         lowestHashRate = decimal.MaxValue,
                         highestHashRate = 0,
                         totalAverageTemperature = 0;
-                    Dictionary<string, decimal> totalPercentiles = new Dictionary<string, decimal>();
 
                     foreach (GpuLogger gpu in rig.GpuLogs)
                     {
@@ -148,7 +143,11 @@ namespace ccMonitor
                             : new Dictionary<string, string>[0];
                         
                         gpu.ChangeAvailability(allApiResults[3] != null);
-                        if (gpu.Info.Available)
+                        string liveAlgo = PruvotApi.GetDictValue<string>(allApiResults[0][0], "ALGO");
+                        gpu.FindCurrentBenchmark(liveAlgo);
+                        if (gpu.CurrentBenchmark == null ||
+                            gpu.CurrentBenchmark.AvailableTimeStamps.Count == 0 ||
+                            gpu.CurrentBenchmark.AvailableTimeStamps.Last().Available)
                         {
                             gpu.Update(allApiResults, pingTimes);
 
@@ -166,28 +165,7 @@ namespace ccMonitor
                             totalStandardDeviation += gpu.CurrentBenchmark.CurrentStatistic.StandardDeviation;
                             totalAverageStandardDeviation += gpu.CurrentBenchmark.CurrentStatistic.StandardDeviation *
                                                       gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
-                            totalVariationCoefficient += gpu.CurrentBenchmark.CurrentStatistic.VariationCoefficient*
-                                                     gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
                             totalAverageTemperature += gpu.CurrentBenchmark.CurrentStatistic.AverageTemperature;
-
-                            if (gpu.CurrentBenchmark.CurrentStatistic.Percentiles != null)
-                            {
-                                foreach (string percentileName in gpu.CurrentBenchmark.CurrentStatistic.Percentiles.Keys)
-                                {
-                                    if (totalPercentiles.ContainsKey(percentileName))
-                                    {
-                                        totalPercentiles[percentileName] +=
-                                            gpu.CurrentBenchmark.CurrentStatistic.Percentiles[percentileName]*
-                                            gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount;
-                                    }
-                                    else
-                                    {
-                                        totalPercentiles.Add(percentileName,
-                                            gpu.CurrentBenchmark.CurrentStatistic.Percentiles[percentileName]*
-                                            gpu.CurrentBenchmark.CurrentStatistic.TotalHashCount);
-                                    }
-                                }
-                            }
 
                             if (totalHashRate > 0) rig.Available = true;
                         }
@@ -203,29 +181,13 @@ namespace ccMonitor
                             AverageHashRate = totalAverageHashRate / totalHashCount,
                             TotalStandardDeviation = totalStandardDeviation,
                             AverageStandardDeviation = totalAverageStandardDeviation / totalHashCount,
-                            AverageVariationCoefficient = totalVariationCoefficient / totalHashCount,
                             LowestHashRate = lowestHashRate,
                             HighestHashRate = highestHashRate,
                             Accepts = PruvotApi.GetDictValue<int>(allApiResults[0][0], "ACC"),
                             Rejects = PruvotApi.GetDictValue<int>(allApiResults[0][0], "REJ"),
                             AverageTemperature = totalAverageTemperature/rig.GpuLogs.Count,
                             ShareAnswerPing = pingTimes[0],
-                            AveragePercentiles = new Dictionary<string, decimal>()
                         };
-
-                        foreach (string percentileName in totalPercentiles.Keys)
-                        {
-                            if (rig.CurrentStatistic.AveragePercentiles.ContainsKey(percentileName))
-                            {
-                                rig.CurrentStatistic.AveragePercentiles[percentileName] = 
-                                    totalPercentiles[percentileName] / totalHashCount;
-                            }
-                            else
-                            {
-                                rig.CurrentStatistic.AveragePercentiles.Add(percentileName,
-                                    totalPercentiles[percentileName]/totalHashCount);
-                            }
-                        }
                     }
                 }
                 else
@@ -259,6 +221,14 @@ namespace ccMonitor
             {
                 foreach (Dictionary<string, string> hwInfo in allApiResults[2])
                 {
+                    GpuLogger.Benchmark benchmark = new GpuLogger.Benchmark
+                    {
+                        AvailableTimeStamps = new List<GpuLogger.Benchmark.Availability>(),
+                        Statistics = new List<GpuLogger.Benchmark.GpuStat>(),
+                        HashLogs = new HashSet<GpuLogger.Benchmark.HashEntry>(),
+                        SensorLog = new List<GpuLogger.Benchmark.SensorValue>()
+                    };
+
                     GpuLogger newGpu = new GpuLogger
                     {
                         Info = new GpuLogger.GpuInfo
@@ -270,7 +240,8 @@ namespace ccMonitor
                             NvmlId = PruvotApi.GetDictValue<int>(hwInfo, "NVML"),
                             ComputeCapability = PruvotApi.GetDictValue<uint>(hwInfo, "SM"),
                         },
-                        BenchLogs = new List<GpuLogger.Benchmark>()
+                        BenchLogs = new List<GpuLogger.Benchmark> {},
+                        CurrentBenchmark = benchmark
                     };
                     newGpu.ChangeAvailability(true);
                     
@@ -281,7 +252,7 @@ namespace ccMonitor
 
                         foreach (GpuLogger gpu in rig.GpuLogs)
                         {
-                            if (gpu.Info.Equals(newGpu.Info) && gpu.Info.Available)
+                            if (gpu.Info.Equals(newGpu.Info) && gpu.CurrentBenchmark.AvailableTimeStamps.Last().Available)
                             {
                                 found = true;
                             }
@@ -332,19 +303,27 @@ namespace ccMonitor
 
             int[] pingTimes = new int[3];
             Ping pinger = new Ping();
-            PingReply miningUrlPing = stratumUrlPort[0] != "-1" ? pinger.Send(stratumUrlPort[0], 333) : null;
-            PingReply networkRigPing = pinger.Send(rig.IpAddress, 333);
-
-            // Will try to just ping the URL without subdomain if it failed, 
-            // May give bad results but it's just a small stat for fun ^^
-            // Ping by Pruvotapi is more accurate
-            // PS: Let's hope it's not a .co.uk :D
-            if (miningUrlPing != null && miningUrlPing.Status != IPStatus.Success)
+            PingReply miningUrlPing = null;
+            PingReply networkRigPing = null;
+            try
             {
-                string[] stratumDomains = stratumUrlPort[0].Split('.');
-                string lastParts = stratumDomains[stratumDomains.Length - 2] + '.' +
-                                   stratumDomains[stratumDomains.Length - 1];
-                miningUrlPing = pinger.Send(lastParts, 333);
+                miningUrlPing = stratumUrlPort[0] != "-1" ? pinger.Send(stratumUrlPort[0], 333) : null;
+                networkRigPing = pinger.Send(rig.IpAddress, 333);
+
+                // Will try to just ping the URL without subdomain if it failed, 
+                // May give bad results but it's just a small stat for fun ^^
+                // Ping by Pruvotapi is more accurate
+                // PS: Let's hope it's not a .co.uk :D
+                if (miningUrlPing != null && miningUrlPing.Status != IPStatus.Success)
+                {
+                    string[] stratumDomains = stratumUrlPort[0].Split('.');
+                    string lastParts = stratumDomains[stratumDomains.Length - 2] + '.' +
+                                       stratumDomains[stratumDomains.Length - 1];
+                    miningUrlPing = pinger.Send(lastParts, 333);
+                }
+            }
+            catch
+            {
             }
 
             pingTimes[0] = PruvotApi.GetDictValue<int>(poolInfo[0], "PING");

@@ -1,7 +1,5 @@
-﻿using System.Drawing;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace ccMonitor.Api
@@ -23,12 +21,9 @@ namespace ccMonitor.Api
         {
             try
             {
-                using (JsonReader reader =
-                    new JsonTextReader(new StreamReader(
-                        new GZipStream(new BufferedStream(
-                            File.Open(location, FileMode.Open), 
-                            (int) new FileInfo(location).Length), 
-                            CompressionMode.Decompress))))
+                using (JsonReader reader =new JsonTextReader(new StreamReader(
+                        new GZipStream(new BufferedStream(File.Open(location, FileMode.Open), 
+                            (int) new FileInfo(location).Length), CompressionMode.Decompress))))
                 {
                     return new JsonSerializer().Deserialize<T>(reader);
                 }
@@ -41,13 +36,16 @@ namespace ccMonitor.Api
 
         public static void WriteSerializedGzipFile(string location, object o)
         {
-            using (StreamWriter streamWriter =
-                new StreamWriter(new GZipStream(
-                    File.Create(location), CompressionLevel.Optimal)))
+            using (JsonWriter jw = new JsonTextWriter(new StreamWriter(
+                new GZipStream(File.Open(location, FileMode.Create), CompressionLevel.Fastest))))
             {
-                streamWriter.Write(JsonConvert.SerializeObject(o, Formatting.None));
+                jw.Formatting = Formatting.None;
+                
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Serialize(jw, o);
             }
         }
+
 
         public static T DeepCopyTrick<T>(T obj)
         {
