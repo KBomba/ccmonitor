@@ -28,6 +28,7 @@ namespace ccMonitor.Gui
             InitializeComponent();
             
             chartHash.MouseWheel += chart_MouseWheel;
+            chartHash.LostFocus += chart_Focus;
             chartHash.Series["AvailabilityFoundSeries"].Color = Color.FromArgb(50, Color.Red);
             chartHash.Series["AvailabilityDifficultySeries"].Color = Color.FromArgb(50, Color.Red);
         }
@@ -160,7 +161,7 @@ namespace ccMonitor.Gui
             }
         }
 
-        private void chart_MouseEnter(object sender, EventArgs e)
+        private void chart_Focus(object sender, EventArgs e)
         {
             Chart chart = sender as Chart;
             if (chart != null) chart.Focus();

@@ -85,7 +85,7 @@ namespace ccMonitor.Gui
         {
             if (benchmark.CurrentStatistic == null) return;
             GpuLogger.Benchmark.GpuStat statistic = benchmark.CurrentStatistic;
-            GpuLogger.Benchmark.OrderedHashLog orderedHashLog = benchmark.OrderedHashLogs;
+            GpuLogger.Benchmark.OrderedHashLog orderedHashLog = benchmark.OrderedHashLogs ?? new GpuLogger.Benchmark.OrderedHashLog();
 
             dgvSpread.Rows.Clear();
             dgvSpread.Rows.Add("Average hashrate", GuiHelper.GetRightMagnitude(statistic.HarmonicAverageHashRate, "H"));
@@ -94,13 +94,13 @@ namespace ccMonitor.Gui
                 dgvSpread.Rows.Add("MAD", GuiHelper.GetRightMagnitude(statistic.AbsoluteDeviations[0][0], "H"));
             dgvSpread.Rows.Add("Interquartile range", GuiHelper.GetRightMagnitude(statistic.InterquartileRange, "H"));
             dgvSpread.Rows.Add("Highest hashrate", GuiHelper.GetRightMagnitude(statistic.HighestHashRate, "H"));
-            if (orderedHashLog.Percentiles != null)
+            if (statistic.Percentiles != null)
             {
-                dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["+2σ"], "H"));
-                dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["+1σ"], "H"));
-                dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["0σ"], "H"));
-                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["-1σ"], "H"));
-                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(orderedHashLog.Percentiles["-2σ"], "H"));
+                dgvSpread.Rows.Add("Real +2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+2σ"], "H"));
+                dgvSpread.Rows.Add("Real +1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["+1σ"], "H"));
+                dgvSpread.Rows.Add("Real 0σ (median)", GuiHelper.GetRightMagnitude(statistic.Percentiles["0σ"], "H"));
+                dgvSpread.Rows.Add("Real -1σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-1σ"], "H"));
+                dgvSpread.Rows.Add("Real -2σ", GuiHelper.GetRightMagnitude(statistic.Percentiles["-2σ"], "H"));
                 
                 chartSpread.Series["BoxPlotSeries"].Points.Clear();
                 chartSpread.Series["BoxPlotSeries"].Points.Add(GetBoxPlotValues(statistic, orderedHashLog));
@@ -110,15 +110,15 @@ namespace ccMonitor.Gui
 
         private double[] GetBoxPlotValues(GpuLogger.Benchmark.GpuStat statistic, GpuLogger.Benchmark.OrderedHashLog orderedHashLog)
         {
-            if (orderedHashLog.Percentiles != null)
+            if (statistic.Percentiles != null)
             {
                 List<double> boxPlotValues = new List<double>
                 {
                     (double)(statistic.OuterWhiskers[0]),
                     (double)(statistic.OuterWhiskers[1]),
-                    (double)(orderedHashLog.Percentiles["Q1"]),
-                    (double)(orderedHashLog.Percentiles["Q3"]),
-                    (double)(orderedHashLog.Percentiles["0σ"]),
+                    (double)(statistic.Percentiles["Q1"]),
+                    (double)(statistic.Percentiles["Q3"]),
+                    (double)(statistic.Percentiles["0σ"]),
                     (double)(statistic.HarmonicAverageHashRate)
                 };
 

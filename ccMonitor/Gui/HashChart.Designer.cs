@@ -195,7 +195,7 @@
             this.chartHash.TabIndex = 0;
             this.chartHash.Text = "chartHash";
             this.chartHash.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chartHash_AxisViewChanged);
-            this.chartHash.MouseEnter += new System.EventHandler(this.chart_MouseEnter);
+            this.chartHash.MouseEnter += new System.EventHandler(this.chart_Focus);
             this.chartHash.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
             // 
             // HashChart

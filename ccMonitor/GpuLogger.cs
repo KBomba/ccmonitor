@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms.DataVisualization.Charting;
 using ccMonitor.Api;
 
 namespace ccMonitor
@@ -59,17 +60,26 @@ namespace ccMonitor
         {
             public long TimeStamp { get; set; }
             public string Algorithm { get; set; }
-
-            public long TimeStarted { get; set; }
+            private long _timeStarted;
+            public long TimeStarted
+            {
+                get { return _timeStarted; }
+                set
+                {
+                    Availability availability = null;
+                    if (AvailableTimeStamps != null)
+                        availability = AvailableTimeStamps.OrderBy(ts => ts.TimeStamp).FirstOrDefault();
+                    if (availability != null) availability.TimeStamp = value;
+                    _timeStarted = value;
+                }
+            }
             public long TimeUpdated { get; set; }
 
-            public uint TimeAvailable { get; set; }
-            //public bool Available { get; set; }
             public List<Availability> AvailableTimeStamps { get; set; }
             public class Availability
             {
                 public long TimeStamp { get; set; }
-                public string Stratum { get; set; }
+                //public string Stratum { get; set; }
                 public bool Available { get; set; }
                 public bool RequestedByClose { get; set; }
             }
@@ -191,8 +201,10 @@ namespace ccMonitor
                 // The list will hold the exact rate values 
                 // The extra uint will hold the total hashcount for that range
                 // Very useful for plotting out afterwards and avoiding extra calc
-                public Dictionary<string, decimal> Percentiles { get; set; }
                 public HashSet<decimal> Outliers { get; set; }
+
+                public List<decimal> ModeHashRates { get; set; }
+                public decimal ModeQuantity { get; set; }
             }
 
             public List<GpuStat> Statistics { get; set; } 
@@ -215,9 +227,7 @@ namespace ccMonitor
                 public decimal MovingSpreadBottom { get; set; }
                 // Keeps a track of the Q1-Q2-Q3 of the LAST hour/100 items, not all
 
-                public List<decimal> ModeHashRates { get; set; }
-                public decimal ModeQuantity { get; set; }
-
+                public Dictionary<string, decimal> Percentiles { get; set; }
                 public decimal InterquartileRange { get; set; }
                 public decimal[] OuterWhiskers { get; set; } //0: lower whisker, 1: upper whisker
                 public decimal Range { get; set; }
@@ -297,6 +307,12 @@ namespace ccMonitor
             // It will create a new benchmark and update again
             if (currentBenchmark != null && liveSetup.Equals(currentBenchmark.MinerSetup))
             {
+                Benchmark.Availability availability = currentBenchmark.AvailableTimeStamps.LastOrDefault();
+                if (availability != null && availability.Available == false)
+                {
+                    ChangeAvailability(true, availability.RequestedByClose, CurrentBenchmark);
+                }
+
                 CurrentBenchmark = currentBenchmark;
                 CurrentBenchmark.MinerSetup.ApiVersion = liveSetup.ApiVersion;
 
@@ -416,7 +432,7 @@ namespace ccMonitor
                         Benchmark.Availability availability = new Benchmark.Availability
                         {
                             TimeStamp = hashEntry.TimeStamp,
-                            Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
+                            //Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
                             Available = true,
                             RequestedByClose = true
                         };
@@ -430,37 +446,42 @@ namespace ccMonitor
         {
             UpdateHashRateStats();
             UpdateSensorStats();
-            //UpdateRunningTime();
+            UpdateRunningTime();
         }
 
-        /*private void UpdateRunningTime()
+        private void UpdateRunningTime()
         {
-            uint totalTime = (uint) (CurrentBenchmark.TimeHistoLast - CurrentBenchmark.TimeHistoStart);
-            if (Info.AvailableTimeStamps.Count >= 2)
+            long totalTime = CurrentBenchmark.TimeUpdated - CurrentBenchmark.TimeStarted;
+            CurrentBenchmark.AvailableTimeStamps = CurrentBenchmark.AvailableTimeStamps.OrderBy(ts => ts.TimeStamp).ToList();
+            if (totalTime > 0)
             {
-                for (int index = 0; index < Info.AvailableTimeStamps.Count; index++)
+                for (int index = 0; index < CurrentBenchmark.AvailableTimeStamps.Count; index++)
                 {
-                    GpuInfo.Availability availableTimeStamp = Info.AvailableTimeStamps[index];
-                    if (!availableTimeStamp.Available && availableTimeStamp.TimeStamp > CurrentBenchmark.TimeHistoStart
-                        && index + 1 < Info.AvailableTimeStamps.Count && availableTimeStamp.Stratum == CurrentBenchmark.MinerSetup.MiningUrl)
+                    Benchmark.Availability availableTimeStamp = CurrentBenchmark.AvailableTimeStamps[index];
+                    if (!availableTimeStamp.Available && index + 1 < CurrentBenchmark.AvailableTimeStamps.Count)
                     {
-                        GpuInfo.Availability nextAvailableTimeStamp = Info.AvailableTimeStamps[index + 1];
+                        Benchmark.Availability nextAvailableTimeStamp = CurrentBenchmark.AvailableTimeStamps[index + 1];
                         if (nextAvailableTimeStamp.Available)
                         {
-                            long time = (nextAvailableTimeStamp.TimeStamp - availableTimeStamp.TimeStamp);
-                            if(time>0)totalTime -= (uint) time;
+                            totalTime -= (uint) (nextAvailableTimeStamp.TimeStamp - availableTimeStamp.TimeStamp);
                         }
                     }
                 }
-            }
 
-            CurrentBenchmark.CurrentStatistic.TimeRunning = totalTime;
-            if(totalTime > 0)
-            {
-                CurrentBenchmark.CurrentStatistic.HashCountedRate = 
-                    CurrentBenchmark.CurrentStatistic.TotalHashCount/ totalTime;
+                CurrentBenchmark.CurrentStatistic.TimeRunning = (uint) totalTime;
+                if (totalTime > 0)
+                {
+                    CurrentBenchmark.CurrentStatistic.HashCountedRate =
+                        CurrentBenchmark.CurrentStatistic.TotalHashCount / totalTime;
+
+                    if (CurrentBenchmark.Algorithm == "quark" || CurrentBenchmark.Algorithm == "anime")
+                    {
+                        CurrentBenchmark.CurrentStatistic.HashCountedRate =
+                            CurrentBenchmark.CurrentStatistic.HashCountedRate/2;
+                    }
+                }
             }
-        }*/
+        }
 
         private void UpdateSensorStats()
         {
@@ -753,8 +774,7 @@ namespace ccMonitor
                         MovingMedian = movingMedian,
                         MovingSpreadTop = movingSpreadTop,
 
-                        ModeHashRates = modes,
-                        ModeQuantity = maxModeCount,
+                        Percentiles = percentiles,
 
                         OuterWhiskers = outerWhiskers,
                         InterquartileRange = interquartileRange,
@@ -791,8 +811,10 @@ namespace ccMonitor
                     CurrentBenchmark.OrderedHashLogs = new Benchmark.OrderedHashLog()
                     {
                         GroupedRates = groupedRates,
-                        Percentiles = percentiles,
-                        Outliers = outliers
+                        Outliers = outliers,
+
+                        ModeHashRates = modes,
+                        ModeQuantity = maxModeCount,
                     };
 
                 }
@@ -870,7 +892,7 @@ namespace ccMonitor
                         benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                         {
                             TimeStamp = unixTimeStamp,
-                            Stratum = prevAvailableTimeStamp.Stratum,
+                            //Stratum = prevAvailableTimeStamp.Stratum,
                             Available = true,
                             RequestedByClose = prevAvailableTimeStamp.RequestedByClose
                         });
@@ -880,7 +902,7 @@ namespace ccMonitor
                         benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                         {
                             TimeStamp = unixTimeStamp,
-                            Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
+                            //Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
                             Available = false,
                             RequestedByClose = monitorClosing
                         });
@@ -892,7 +914,7 @@ namespace ccMonitor
                 benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                 {
                     TimeStamp = unixTimeStamp,
-                    Stratum = benchmark.MinerSetup == null ? string.Empty : benchmark.MinerSetup.MiningUrl,
+                    //Stratum = benchmark.MinerSetup == null ? string.Empty : benchmark.MinerSetup.MiningUrl,
                     Available = true,
                     RequestedByClose = monitorClosing
                 });

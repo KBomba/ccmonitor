@@ -30,6 +30,7 @@ namespace ccMonitor.Gui
             InitializeComponent();
 
             chartSensor.MouseWheel += chart_MouseWheel;
+            chartSensor.LostFocus += chart_Focus;
             chartSensor.Series["AvailabilityTemperatureSeries"].Color = Color.FromArgb(50, Color.Red);
             chartSensor.Series["AvailabilityPingSeries"].Color = Color.FromArgb(50, Color.Red);
         }
@@ -171,7 +172,7 @@ namespace ccMonitor.Gui
             }
         }
 
-        private void chart_MouseEnter(object sender, EventArgs e)
+        private void chart_Focus(object sender, EventArgs e)
         {
             Chart chart = sender as Chart;
             if (chart != null) chart.Focus();

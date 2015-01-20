@@ -233,7 +233,7 @@
             this.chartSensor.TabIndex = 0;
             this.chartSensor.Text = "chartSensor";
             this.chartSensor.AxisViewChanged += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ViewEventArgs>(this.chartSensor_AxisViewChanged);
-            this.chartSensor.MouseEnter += new System.EventHandler(this.chart_MouseEnter);
+            this.chartSensor.MouseEnter += new System.EventHandler(this.chart_Focus);
             this.chartSensor.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
             // 
             // SensorChart

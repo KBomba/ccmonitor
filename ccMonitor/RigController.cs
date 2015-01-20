@@ -145,10 +145,6 @@ namespace ccMonitor
                         gpu.ChangeAvailability(allApiResults[3] != null);
                         string liveAlgo = PruvotApi.GetDictValue<string>(allApiResults[0][0], "ALGO");
                         gpu.FindCurrentBenchmark(liveAlgo);
-                        if (gpu.CurrentBenchmark == null ||
-                            gpu.CurrentBenchmark.AvailableTimeStamps.Count == 0 ||
-                            gpu.CurrentBenchmark.AvailableTimeStamps.Last().Available)
-                        {
                             gpu.Update(allApiResults, pingTimes);
 
                             // While we're at it, calculate the total stats for the rig
@@ -168,7 +164,7 @@ namespace ccMonitor
                             totalAverageTemperature += gpu.CurrentBenchmark.CurrentStatistic.AverageTemperature;
 
                             if (totalHashRate > 0) rig.Available = true;
-                        }
+                        
                     }
 
                     if (rig.GpuLogs.Count > 0 && totalHashCount > 0)
