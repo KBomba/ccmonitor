@@ -43,6 +43,7 @@
             this.clmHashRate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmStandardDeviation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmHashCount = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.clmFounds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmAccepts = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmRejects = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.clmTemperature = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -57,7 +58,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.readMeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clmFounds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.refreshRateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tbcMonitor.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.scGeneral)).BeginInit();
@@ -199,6 +200,11 @@
             this.clmHashCount.Text = "Hash Count";
             this.clmHashCount.Width = 100;
             // 
+            // clmFounds
+            // 
+            this.clmFounds.Text = "Found";
+            this.clmFounds.Width = 50;
+            // 
             // clmAccepts
             // 
             this.clmAccepts.Text = "Accepts";
@@ -271,6 +277,8 @@
             // 
             // settingsToolStripMenuItem
             // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshRateToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.settingsToolStripMenuItem.Text = "Settings";
@@ -298,10 +306,11 @@
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
-            // clmFounds
+            // refreshRateToolStripMenuItem
             // 
-            this.clmFounds.Text = "Found";
-            this.clmFounds.Width = 50;
+            this.refreshRateToolStripMenuItem.Name = "refreshRateToolStripMenuItem";
+            this.refreshRateToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.refreshRateToolStripMenuItem.Text = "Refresh rate";
             // 
             // Monitor
             // 
@@ -359,5 +368,6 @@
         private System.Windows.Forms.ToolStripMenuItem showRawLogsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem takeScreenshotToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader clmFounds;
+        private System.Windows.Forms.ToolStripMenuItem refreshRateToolStripMenuItem;
     }
 }

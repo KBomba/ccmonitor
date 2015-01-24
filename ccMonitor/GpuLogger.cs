@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms.DataVisualization.Charting;
 using ccMonitor.Api;
 
 namespace ccMonitor
@@ -313,11 +312,13 @@ namespace ccMonitor
                     ChangeAvailability(true, availability.RequestedByClose, CurrentBenchmark);
                 }
 
-                CurrentBenchmark = currentBenchmark;
-                CurrentBenchmark.MinerSetup.ApiVersion = liveSetup.ApiVersion;
+                if (currentBenchmark != CurrentBenchmark)
+                {
+                    ChangeAvailability(false, false, CurrentBenchmark);
+                    CurrentBenchmark = currentBenchmark;
+                }
 
                 UpdateSensors(rightHwInfo, pingTimes);
-                // Updates the hardware sensors + "network sensors"
 
                 UpdateHashLog(history);
 
@@ -334,28 +335,18 @@ namespace ccMonitor
         public Benchmark GetCurrentBenchmark(string liveAlgo)
         {
             Benchmark currentBenchmark = null;
-            Benchmark plausibleBenchmark = null;
             // CurrentBenchmark is the one with the right live algo and is active
             // If there's a new algo, etc, currentBenchmark will stay null
             foreach (Benchmark benchmark in BenchLogs)
             {
-                if (benchmark.Algorithm == liveAlgo)
+                if (benchmark.Algorithm == liveAlgo &&
+                    (currentBenchmark == null || benchmark.TimeStarted > currentBenchmark.TimeStarted))
                 {
-                    Benchmark.Availability availability = benchmark.AvailableTimeStamps.LastOrDefault();
-                    if (availability != null && availability.Available)
-                    {
-                        currentBenchmark = benchmark;
-                        break;
-                    }
-
-                    if (plausibleBenchmark == null || benchmark.TimeUpdated > plausibleBenchmark.TimeUpdated)
-                    {
-                        plausibleBenchmark = benchmark;
-                    }
+                    currentBenchmark = benchmark;
                 }
             }
 
-            return currentBenchmark ?? plausibleBenchmark;
+            return currentBenchmark;
         }
 
         private static Benchmark.Setup GetLiveSetup(Dictionary<string, string> hwInfo, Dictionary<string, string> setupInfo,
@@ -848,6 +839,7 @@ namespace ccMonitor
                 TimeStamp = unixTimeStamp,
                 Algorithm = liveAlgo,
                 MinerSetup = liveSetup,
+                TimeStarted = UnixTimeStamp(),
                 HashLogs = new HashSet<Benchmark.HashEntry>(),
                 SensorLog = new List<Benchmark.SensorValue>(),
                 Statistics = new List<Benchmark.GpuStat>(),
@@ -876,7 +868,7 @@ namespace ccMonitor
             if (benchmark == null)
             {
                 if (BenchLogs == null || BenchLogs.Count == 0) return;
-                benchmark = BenchLogs.Last();
+                benchmark = CurrentBenchmark ?? BenchLogs.Last();
             }
 
             long unixTimeStamp = UnixTimeStamp();
@@ -892,7 +884,6 @@ namespace ccMonitor
                         benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                         {
                             TimeStamp = unixTimeStamp,
-                            //Stratum = prevAvailableTimeStamp.Stratum,
                             Available = true,
                             RequestedByClose = prevAvailableTimeStamp.RequestedByClose
                         });
@@ -902,7 +893,6 @@ namespace ccMonitor
                         benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                         {
                             TimeStamp = unixTimeStamp,
-                            //Stratum = CurrentBenchmark == null ? string.Empty : CurrentBenchmark.MinerSetup.MiningUrl,
                             Available = false,
                             RequestedByClose = monitorClosing
                         });
@@ -914,7 +904,6 @@ namespace ccMonitor
                 benchmark.AvailableTimeStamps.Add(new Benchmark.Availability()
                 {
                     TimeStamp = unixTimeStamp,
-                    //Stratum = benchmark.MinerSetup == null ? string.Empty : benchmark.MinerSetup.MiningUrl,
                     Available = true,
                     RequestedByClose = monitorClosing
                 });

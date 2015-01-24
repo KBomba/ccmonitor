@@ -47,7 +47,7 @@ namespace ccMonitor.Gui
                 HashCount = hashEntry.HashCount
             }).Where(chartFriendlyHashEntry => _hours > 9000 || chartFriendlyHashEntry.TimeStamp > (now - start));
 
-            IList<ChartFriendlyHashEntry> values = friendlyHashEntries as IList<ChartFriendlyHashEntry> ?? friendlyHashEntries.ToList();
+            List<ChartFriendlyHashEntry> values = friendlyHashEntries as List<ChartFriendlyHashEntry> ?? friendlyHashEntries.ToList();
             if (values.Count > 0)
             {
                 chartFriendlyHashEntries.AddRange(values);
